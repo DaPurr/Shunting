@@ -1,6 +1,6 @@
 package shunting.models;
 
-public abstract class Event {
+public abstract class Event implements Comparable<Event> {
 	private double time;
 	private Composition comp;
 	
@@ -19,4 +19,13 @@ public abstract class Event {
 	
 	@Override
 	public abstract String toString();
+	
+	@Override
+	public int compareTo(Event other) {
+		if (time < other.getTime())
+			return -1;
+		else if (time > other.getTime())
+			return 1;
+		return 0;
+	}
 }
