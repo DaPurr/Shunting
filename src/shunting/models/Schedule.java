@@ -34,6 +34,19 @@ public class Schedule {
 		return events.iterator();
 	}
 	
+	@Override
+	public String toString() {
+		String s = "[";
+		Iterator<Event> itEvents = events();
+		while (itEvents.hasNext()) {
+			Event ev = itEvents.next();
+			s += ev.toString() + ", ";
+		}
+		s.substring(0, s.length()-2);
+		s += "]";
+		return s;
+	}
+	
 //	public int getNextArrival(double time) {
 //		return searchNext(arrivals, time, 0, arrivals.size()-1);
 //	}
