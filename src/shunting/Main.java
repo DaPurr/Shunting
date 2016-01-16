@@ -20,6 +20,7 @@ public class Main {
 		List<Departure> departures = new ArrayList<>();
 		
 		Schedule schedule = new Schedule(arrivals, departures);
+		System.out.println(schedule.toString());
 	}
 
 }
