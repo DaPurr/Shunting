@@ -43,7 +43,7 @@ public class Schedule {
 			s += ev.toString() + ", ";
 		}
 		if (s.length() > 1)
-			s.substring(0, s.length()-2);
+			s = s.substring(0, s.length()-2);
 		s += "]";
 		return s;
 	}
