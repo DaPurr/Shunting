@@ -1,5 +1,7 @@
 package shunting.models;
 
+import org.jgrapht.DirectedGraph;
+
 public class Train {
 
 	private String ID;
@@ -49,6 +51,11 @@ public class Train {
 
 	public TrainType getTrainType() {
 		return traintype;
+	}
+	
+	@Override
+	public String toString() {
+		return ID;
 	}
 
 }
