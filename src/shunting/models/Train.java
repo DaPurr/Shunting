@@ -1,7 +1,5 @@
 package shunting.models;
 
-import org.jgrapht.DirectedGraph;
-
 public class Train {
 
 	private String ID;
@@ -11,7 +9,6 @@ public class Train {
 	private boolean cleaning;
 	private boolean washing;
 	private TrainType traintype;
-
 
 	public Train(String ID, boolean interchange, boolean inspection, boolean repair, 
 			boolean cleaning, boolean washing, TrainType traintype) {
@@ -56,6 +53,11 @@ public class Train {
 	@Override
 	public String toString() {
 		return ID;
+	}
+	
+	public static Train dummy() {
+		TrainType type = new TrainType("DUMMY", 0, 0, 0, 0, 0);
+		return new Train("DUMMY", true, false, false, false, false, type);
 	}
 
 }
