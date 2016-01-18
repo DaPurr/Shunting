@@ -42,24 +42,9 @@ public class Schedule {
 			Event ev = itEvents.next();
 			s += ev.toString() + ", ";
 		}
-		s.substring(0, s.length()-2);
+		if (s.length() > 1)
+			s.substring(0, s.length()-2);
 		s += "]";
 		return s;
 	}
-	
-//	public int getNextArrival(double time) {
-//		return searchNext(arrivals, time, 0, arrivals.size()-1);
-//	}
-//	
-//	public <E extends Event> int searchNext(List<E> events, double time, int lower, int higher) {
-//		if (higher == lower)
-//			return higher;
-//		int midpoint = (higher+lower)/2;
-//		if (events.get(midpoint).getTime() < time)
-//			return searchNext(events, time, midpoint+1, higher);
-//		else if (events.get(midpoint).getTime() > time)
-//			return searchNext(events, time, lower, midpoint-1);
-//		else
-//			return midpoint;
-//	}
 }
