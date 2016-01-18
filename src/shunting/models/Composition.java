@@ -20,19 +20,19 @@ public class Composition {
 	}
 
 	public void replace(int index, Train train){
-		
+		trains.set(index, train);
 	}
 
 	public void addTrain(Train train){
-		
+		trains.add(train);
 	}
 
 	public void addTrain(int index, Train train){
-		
+		trains.add(index, train);
 	}
 
 	public void deleteTrain(int index){
-		
+		trains.remove(index);
 	}
 
 	@Override
@@ -42,21 +42,11 @@ public class Composition {
 		for(int i=0;i<k;i++){
 			Train tr = getTrain(i);
 			String id = tr.toString();
-			s += id + ", ";
+			if (i < k-1)
+				s += id + ", ";
 		}
-		s = s.substring(0, s.length()-2);
 		s += "]";
 		return s;
-	}
-	
-	public int[]  getNodes() {
-		int n = size();
-		int[] nodes = new int[n+1];
-		for(int i=0;i<=n;i++)
-		{
-			nodes[i] = i;	
-		}
-		return nodes;
 	}
 
 }
