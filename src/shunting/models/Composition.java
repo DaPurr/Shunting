@@ -48,4 +48,15 @@ public class Composition {
 		s += "]";
 		return s;
 	}
+	
+	public int[]  getNodes() {
+		int n = size();
+		int[] nodes = new int[n+1];
+		for(int i=0;i<=n;i++)
+		{
+			nodes[i] = i;	
+		}
+		return nodes;
+	}
+
 }
