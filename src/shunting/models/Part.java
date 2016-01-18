@@ -1,12 +1,13 @@
 package shunting.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class Part {
 	private List<Train> units;
 	
 	public Part() {
-		
+		units = new ArrayList<>();
 	}
 	
 	public Part(List<Train> units) {
