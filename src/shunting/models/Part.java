@@ -26,6 +26,21 @@ public class Part {
 		return units.get(index);
 	}
 	
+	public boolean compatible(Part p) {
+		if (units.size() != p.units.size())
+			return false;
+		for (int i = 0; i < units.size(); i++) {
+			Train s = units.get(i);
+			Train t = p.units.get(i);
+			
+			if (!s.getTrainType().getType().equals(t.getTrainType().getType()))
+				return false;
+			if (!s.getInterchange() && !s.getID().equals(t.getID()))
+				return false;
+		}
+		return true;
+	}
+	
 	@Override
 	public String toString() {
 		return units.toString();
