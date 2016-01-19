@@ -19,12 +19,12 @@ public class Schedule {
 		this.arrivals = arrivals;
 	}
 	
-	public Iterator<Arrival> arrivals() {
-		return arrivals.iterator();
+	public List<Arrival> arrivals() {
+		return arrivals;
 	}
 	
-	public Iterator<Departure> departures() {
-		return departures.iterator();
+	public List<Departure> departures() {
+		return departures;
 	}
 	
 	public Iterator<Event> events() {
