@@ -55,6 +55,14 @@ public class Train {
 		return ID;
 	}
 	
+//	@Override
+//	public boolean equals(Object other) {
+//		if (other == null || !(other instanceof Train))
+//			return false;
+//		Train t = (Train) other;
+//		return ID.equals(t.getID());
+//	}
+	
 	public static Train dummy() {
 		TrainType type = new TrainType("DUMMY", 0, 0, 0, 0, 0);
 		return new Train("DUMMY", true, false, false, false, false, type);

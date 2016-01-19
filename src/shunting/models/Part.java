@@ -42,6 +42,20 @@ public class Part {
 	}
 	
 	@Override
+	public boolean equals(Object o) {
+		if (o==null || !(o instanceof Part))
+			return false;
+		Part other = (Part) o;
+		if (units.size() != other.units.size())
+			return false;
+		for (int i = 0; i < units.size(); i++) {
+			if (units.get(i) != other.getUnit(i))
+				return false;
+		}
+		return true;
+	}
+	
+	@Override
 	public String toString() {
 		return units.toString();
 	}

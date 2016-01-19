@@ -20,6 +20,14 @@ public class MatchBlock {
 	
 	@Override
 	public String toString() {
-		return "[" + p1.toString() + ", " + p2.toString() + "]";
+		return "[" + p1.toString() + "," + p2.toString() + "]";
+	}
+	
+	@Override
+	public boolean equals(Object other) {
+		if (other == null || !(other instanceof MatchBlock))
+			return false;
+		MatchBlock mb = (MatchBlock) other;
+		return (p1.equals(mb.getPart1()) && p2.equals(mb.getPart2()));
 	}
 }
