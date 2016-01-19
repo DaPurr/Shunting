@@ -2,5 +2,11 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/Jeroen/Documents/EUR Jeroen/NS Case/Shunting/lib/jgrapht-core-0.9.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Jeroen/Documents/EUR Jeroen/NS Case/Shunting/lib/cplex.jar">
+		<attributes>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="C:/Program Files/IBM/ILOG/CPLEX_Studio1263/cplex/bin/x64_win64"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
