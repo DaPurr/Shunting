@@ -27,8 +27,10 @@ import shunting.models.TrainFactory;
 
 public class ScheduleReader {
 	
+	private Map<String, Train> trainCache;
+	
 	public ScheduleReader() {
-		
+		trainCache = new HashMap<>();
 	}
 	
 	public Schedule parseXML(File f) {
@@ -82,6 +84,9 @@ public class ScheduleReader {
 	private Train xmlToTrain(Node n) {
 		NamedNodeMap attr = n.getAttributes();
 		String ID = attr.getNamedItem("ID").getNodeValue();
+		if (trainCache.containsKey(ID)) {
+			return trainCache.get(ID);
+		}
 		TrainFactory tf = new TrainFactory();
 		boolean interchangeable = Boolean.parseBoolean(attr.getNamedItem("interchangeable").getNodeValue());
 		boolean inspection = Boolean.parseBoolean(attr.getNamedItem("inspection").getNodeValue());
@@ -91,8 +96,11 @@ public class ScheduleReader {
 		String type = attr.getNamedItem("type").getNodeValue();
 		String subtype = attr.getNamedItem("subtype").getNodeValue();
 		
-		return tf.createTrainByType(ID, type+"_"+subtype, interchangeable, 
+		Train t = tf.createTrainByType(ID, type+"_"+subtype, interchangeable, 
 				inspection, repair, cleaning, washing);
+		trainCache.put(ID, t);
+		
+		return t;
 	}
 	
 	private Composition xmlToComposition(Node n) {
