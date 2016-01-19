@@ -4,7 +4,6 @@ import shunting.models.*;
 import java.util.*;
 
 import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultDirectedGraph;
 
 import ilog.concert.*;
 import ilog.cplex.*;
@@ -26,7 +25,9 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 		try {
 			IloCplex cplex = new IloCplex();
 
-			Map<Part,IloNumVar> arrivalParts = new HashMap<Part,IloNumVar>();
+			// create variables
+			// u_i
+			Map<Part,IloIntVar> arrivalParts = new HashMap<Part,IloIntVar>();
 			for (Arrival a : arrivals) {
 
 				Composition c = a.getComposition();
@@ -34,11 +35,13 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				Set<Part> edges= directGraph.edgeSet();
 
 				for (Part p : edges) {
-					IloNumVar u = cplex.numVar(0,1);
+					IloIntVar u = cplex.boolVar("u_" + p.toString());
 					arrivalParts.put(p, u);
 				}
 			}
-			Map<Part,IloNumVar> departureParts = new HashMap<Part,IloNumVar>();
+
+			// v_i
+			Map<Part,IloIntVar> departureParts = new HashMap<Part,IloIntVar>();
 			for (Departure d : departures) {
 
 				Composition c = d.getComposition();
@@ -46,57 +49,135 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				Set<Part> edges= directGraph.edgeSet();
 
 				for (Part p : edges) {
-					IloNumVar v = cplex.numVar(0,1);
+					IloIntVar v = cplex.boolVar("v_" + p.toString());
 					departureParts.put(p, v);
 				}
 
 			}
 
-			Map<MatchBlock,IloNumVar> matchingBlocks = new HashMap<MatchBlock,IloNumVar>();
+			// z_ij
+			Map<MatchBlock,IloIntVar> matchingBlocks = new HashMap<MatchBlock,IloIntVar>();
 			for (Part keyArrivals : arrivalParts.keySet()) {
 				for (Part keyDepartures : departureParts.keySet()){
-					if (keyArrivals.equals(keyDepartures)){
+					if (keyArrivals.compatible(keyDepartures)){
 						MatchBlock matchBlock = new MatchBlock(keyArrivals,keyDepartures);
-						IloNumVar z = cplex.numVar(0,1);
+						IloIntVar z = cplex.boolVar("z_" + keyArrivals.toString() + "," + keyDepartures.toString());
 						matchingBlocks.put(matchBlock, z);
 					}
 				}
 			}
 
+			// TODO: Determine parameters Q (cost per matching) and w_ij (cost of matching i and j)
+			// objective function
 			IloNumExpr totalU = cplex.numExpr();
 			IloNumExpr totalZ = cplex.numExpr();
-			IloLinearNumExpr objective = cplex.linearNumExpr();
+			IloNumExpr objective = cplex.numExpr();
 			for (Part keyArrivals : arrivalParts.keySet()) {
-				IloNumVar n=arrivalParts.get(keyArrivals);
-				objective.addTerm(totalU, n);
+				IloIntVar n=arrivalParts.get(keyArrivals);
+				objective = cplex.sum(totalU, n);
 			}
 			for (MatchBlock matchBlock: matchingBlocks.keySet()) {
-				IloNumVar n=matchingBlocks.get(matchBlock);
-				objective.addTerm(totalZ, n);
+				IloIntVar n=matchingBlocks.get(matchBlock);
+				objective = cplex.sum(totalZ, n);
 			}
-			IloLinearNumExpr firstConstraint = cplex.linearNumExpr();
-			Map<Part,IloNumVar> firstConstraintMap = new HashMap<Part,IloNumVar>();
-			for (Arrival a: arrivals) {	
+			cplex.addMinimize(objective);
+
+			// Arriving parts coverage constraint
+			for (Arrival a : arrivals) {	
 				Composition c = a.getComposition();
 				DirectedGraph<Train, Part> directGraph = c.getGraph();
 				Train dummy = c.getDummy();
-				Set<Part> dummyArcs = directGraph.edgesOf(dummy);
+				Set<Part> dummyArcs = directGraph.outgoingEdgesOf(dummy);
 				IloNumExpr sumU = cplex.numExpr();
 				for (Part p : dummyArcs) {
-					IloNumVar u = cplex.numVar(0,1);
-					firstConstraintMap.put(p, u);
+					IloIntVar u = arrivalParts.get(p);
 					sumU = cplex.sum(sumU,u);
 				}
-				cplex.addEq(sumU, 1);	
+				cplex.addEq(sumU, 1);
 			}
+
+			// Arriving parts flow path constraints
+			for (Arrival a : arrivals) {
+				Composition c = a.getComposition();
+				DirectedGraph<Train, Part> directedGraph = c.getGraph();
+				Set<Train> nodes = directedGraph.vertexSet();
+				for (Train h : nodes) {
+					if (h == c.getDummy())
+						continue;
+					// left sum - outgoing edges
+					IloNumExpr leftSum = cplex.numExpr();
+					Set<Part> outgoingEdges = directedGraph.outgoingEdgesOf(h);
+					for (Part e : outgoingEdges) {
+						IloIntVar u = arrivalParts.get(e);
+						leftSum = cplex.sum(leftSum, u);
+					}
+
+					// right sum - incoming edges
+					IloNumExpr rightSum = cplex.numExpr();
+					Set<Part> incomingEdges = directedGraph.incomingEdgesOf(h);
+					for (Part e : incomingEdges) {
+						IloIntVar u = arrivalParts.get(e);
+						rightSum = cplex.sum(rightSum, u);
+					}
+
+					// resulting constraint
+					IloNumExpr leftHandSide = cplex.sum(leftSum, cplex.prod(-1, rightSum));
+					cplex.addEq(leftHandSide, 0);
+				}
+			}
+
+			// Departing parts coverage constraint
+			for (Departure d : departures) {	
+				Composition c = d.getComposition();
+				DirectedGraph<Train, Part> directGraph = c.getGraph();
+				Train dummy = c.getDummy();
+				Set<Part> dummyArcs = directGraph.outgoingEdgesOf(dummy);
+				IloNumExpr sumV = cplex.numExpr();
+				for (Part p : dummyArcs) {
+					IloIntVar v = departureParts.get(p);
+					sumV = cplex.sum(sumV,v);
+				}
+				cplex.addEq(sumV, 1);
+			}
+
+			// Departing parts flow path constraints
+			for (Departure a : departures) {
+				Composition c = a.getComposition();
+				DirectedGraph<Train, Part> directedGraph = c.getGraph();
+				Set<Train> nodes = directedGraph.vertexSet();
+				for (Train h : nodes) {
+					if (h == c.getDummy())
+						continue;
+					// left sum - outgoing edges
+					IloNumExpr leftSum = cplex.numExpr();
+					Set<Part> outgoingEdges = directedGraph.outgoingEdgesOf(h);
+					for (Part e : outgoingEdges) {
+						IloIntVar v = departureParts.get(e);
+						leftSum = cplex.sum(leftSum, v);
+					}
+
+					// right sum - incoming edges
+					IloNumExpr rightSum = cplex.numExpr();
+					Set<Part> incomingEdges = directedGraph.incomingEdgesOf(h);
+					for (Part e : incomingEdges) {
+						IloIntVar v = departureParts.get(e);
+						rightSum = cplex.sum(rightSum, v);
+					}
+
+					// resulting constraint
+					IloNumExpr leftHandSide = cplex.sum(leftSum, cplex.prod(-1, rightSum));
+					cplex.addEq(leftHandSide, 0);
+				}
+			}
+			
+			// Compatibility constraints - match parts only if they're compatible
+			
+			
+		} catch (IloException exc){
+			exc.printStackTrace();
 		}
 
-	} catch (IloException exc){
-		exc.printStackTrace();
+		return null;
 	}
-
-	return null;
-}
-
 
 }
