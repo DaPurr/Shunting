@@ -1,11 +1,11 @@
 package shunting.algorithms;
 
-import shunting.models.MatchBlock;
+import shunting.models.MatchSolution;
 
 public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
 	@Override
-	public MatchBlock solve() {
+	public MatchSolution solve() {
 		// TODO Auto-generated method stub
 		return null;
 	}
