@@ -34,6 +34,10 @@ public class TrainType {
 		return repair;
 	}
 	
+	public String getType() {
+		return type;
+	}
+	
 	public int getWashingTime() {
 		return wash;
 	}
