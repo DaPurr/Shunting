@@ -17,14 +17,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import shunting.models.Arrival;
 import shunting.models.Composition;
+import shunting.models.Departure;
+import shunting.models.Event;
 import shunting.models.Schedule;
 import shunting.models.Train;
 import shunting.models.TrainFactory;
 
 public class ScheduleReader {
-
-	private Schedule schedule;
 	
 	public ScheduleReader() {
 		
@@ -47,6 +48,7 @@ public class ScheduleReader {
 			throw new IllegalStateException("Something went horribly wrong!");
 		
 		// real code begins here
+		// read compositions
 		Map<String, Composition> compMap = new HashMap<>();
 		NodeList trains = doc.getElementsByTagName("composition");
 		int n = trains.getLength();
@@ -56,7 +58,25 @@ public class ScheduleReader {
 			compMap.put(comp.getID(), comp);
 		}
 		
-		return new Schedule();
+		// read events
+		List<Arrival> arrivals = new ArrayList<>();
+		List<Departure> departures = new ArrayList<>();
+		NodeList events = doc.getElementsByTagName("events").item(0).getChildNodes();
+		int k = events.getLength();
+		for (int i = 0; i < k; i++) {
+			Node m = events.item(i);
+			if (m.getNodeType() != Node.ELEMENT_NODE)
+				continue;
+			if (m.getNodeName().equals("arrival"))
+				arrivals.add((Arrival)xmlToEvent(m, compMap));
+			else if (m.getNodeName().equals("departure"))
+				departures.add((Departure)xmlToEvent(m, compMap));
+			else
+				throw new IllegalStateException("Event not defined: " + m.getNodeName());
+		}
+		
+		Schedule schedule = new Schedule(arrivals, departures);
+		return schedule;
 	}
 	
 	private Train xmlToTrain(Node n) {
@@ -89,5 +109,17 @@ public class ScheduleReader {
 			trainList.add(t);
 		}
 		return new Composition(ID, trainList);
+	}
+	
+	private Event xmlToEvent(Node n, Map<String, Composition> compMap) {
+		NamedNodeMap attr = n.getAttributes();
+		String type = n.getNodeName();
+		String compID = attr.getNamedItem("compID").getNodeValue();
+		double time = Double.parseDouble(attr.getNamedItem("time").getNodeValue());
+		if (type.equals("arrival"))
+			return new Arrival(time, compMap.get(compID));
+		else if (type.equals("departure"))
+			return new Departure(time, compMap.get(compID));
+		throw new IllegalStateException("Illegal event: " + type);
 	}
 }
