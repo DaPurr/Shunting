@@ -8,17 +8,24 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 
 public class Composition {
 
+	private String ID;
 	private List<Train> trains;
-	Train dummy;
+	private Train dummy;
 	
-	public Composition() {
+	public Composition(String ID) {
 		trains = new ArrayList<>();
 		dummy = Train.dummy();
+		this.ID = ID;
 	}
 	
-	public Composition(List<Train> trains) {
+	public String getID() {
+		return ID;
+	}
+	
+	public Composition(String ID, List<Train> trains) {
 		this.trains = trains;
 		dummy = Train.dummy();
+		this.ID = ID;
 	}
 
 	public int size(){
