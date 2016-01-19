@@ -1,10 +1,12 @@
 package shunting;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jgrapht.DirectedGraph;
 
+import shunting.data.ScheduleReader;
 import shunting.models.*;
 
 public class Main {
@@ -42,6 +44,11 @@ public class Main {
 		
 		Schedule schedule = new Schedule(arrivals, departures);
 		System.out.println(schedule.toString());
+		
+		// test XML parser
+		File f = new File("data/schedule_test.xml");
+		ScheduleReader sr = new ScheduleReader();
+		schedule = sr.parseXML(f);
 	}
 
 }
