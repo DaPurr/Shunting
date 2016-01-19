@@ -9,13 +9,16 @@ import org.jgrapht.graph.DefaultDirectedGraph;
 public class Composition {
 
 	private List<Train> trains;
+	Train dummy;
 	
 	public Composition() {
 		trains = new ArrayList<>();
+		dummy = Train.dummy();
 	}
 	
 	public Composition(List<Train> trains) {
 		this.trains = trains;
+		dummy = Train.dummy();
 	}
 
 	public int size(){
@@ -47,8 +50,6 @@ public class Composition {
 		DirectedGraph<Train, Part> dgraph = new DefaultDirectedGraph<>(Part.class);
 		
 		// add nodes
-		// dummy
-		Train dummy = Train.dummy();
 		dgraph.addVertex(dummy);
 		int n = size();
 		for (int i = 0; i < n; i++) {
@@ -83,6 +84,10 @@ public class Composition {
 		for (int k = i; k < j; k++)
 			p.addUnit(trains.get(k));
 		return p;
+	}
+	
+	public Train getDummy() {
+		return dummy;
 	}
 
 	@Override
