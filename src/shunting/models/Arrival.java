@@ -2,7 +2,7 @@ package shunting.models;
 
 public class Arrival extends Event {
 
-	public Arrival(double time, Composition comp) {
+	public Arrival(int time, Composition comp) {
 		super(time, comp);
 	}
 
