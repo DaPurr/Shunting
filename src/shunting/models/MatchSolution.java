@@ -18,4 +18,9 @@ public class MatchSolution {
 	public boolean contains(MatchBlock block) {
 		return solution.contains(block);
 	}
+	
+	@Override
+	public String toString() {
+		return solution.toString();
+	}
 }
