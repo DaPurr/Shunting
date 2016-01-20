@@ -68,7 +68,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			}
 
 			// TODO: Determine parameters Q (cost per matching) and w_ij (cost of matching i and j)
-			// objective function
+			// objective function (1)
 			IloNumExpr totalU = cplex.numExpr();
 			IloNumExpr totalZ = cplex.numExpr();
 			IloNumExpr objective = cplex.numExpr();
@@ -76,13 +76,18 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				IloIntVar n=arrivalParts.get(keyArrivals);
 				objective = cplex.sum(totalU, n);
 			}
+
 			for (MatchBlock matchBlock: matchingBlocks.keySet()) {
-				IloIntVar n=matchingBlocks.get(matchBlock);
-				objective = cplex.sum(totalZ, n);
+				Part part1 = matchBlock.getPart1();
+				Part part2 = matchBlock.getPart2();
+				if(part1.compatible(part2)){
+					IloIntVar n=matchingBlocks.get(matchBlock);
+					objective = cplex.sum(totalZ, n);
+				}
 			}
 			cplex.addMinimize(objective);
 
-			// Arriving parts coverage constraint
+			// Arriving parts coverage constraint (2)
 			for (Arrival a : arrivals) {	
 				Composition c = a.getComposition();
 				DirectedGraph<Train, Part> directGraph = c.getGraph();
@@ -96,7 +101,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				cplex.addEq(sumU, 1);
 			}
 
-			// Arriving parts flow path constraints
+			// Arriving parts flow path constraints (3)
 			for (Arrival a : arrivals) {
 				Composition c = a.getComposition();
 				DirectedGraph<Train, Part> directedGraph = c.getGraph();
@@ -126,7 +131,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				}
 			}
 
-			// Departing parts coverage constraint
+			// Departing parts coverage constraint (4)
 			for (Departure d : departures) {	
 				Composition c = d.getComposition();
 				DirectedGraph<Train, Part> directGraph = c.getGraph();
@@ -140,7 +145,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				cplex.addEq(sumV, 1);
 			}
 
-			// Departing parts flow path constraints
+			// Departing parts flow path constraints (5)
 			for (Departure a : departures) {
 				Composition c = a.getComposition();
 				DirectedGraph<Train, Part> directedGraph = c.getGraph();
@@ -169,10 +174,39 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					cplex.addEq(leftHandSide, 0);
 				}
 			}
-			
+
+
 			// Compatibility constraints - match parts only if they're compatible
+			//arrivals
+
+			for (Part keyArrivals : arrivalParts.keySet()) {
+				IloNumExpr totalZu = cplex.numExpr();
+				for(Part keyDepartures: departureParts.keySet()){
+					if(keyArrivals.compatible(keyDepartures)){
+						MatchBlock m = new MatchBlock(keyArrivals, keyDepartures); 
+						totalZu = cplex.sum(totalZu, matchingBlocks.get(m));	
+					}
+
+				}
+				cplex.addEq(totalZu,arrivalParts.get(keyArrivals));
+
+			}
 			
-			
+			//departures
+			for (Part keyDepartures : departureParts.keySet()) {
+				IloNumExpr totalZv = cplex.numExpr();
+				for(Part keyArrivals: arrivalParts.keySet()){
+					if(keyArrivals.compatible(keyDepartures)){
+						MatchBlock m = new MatchBlock(keyDepartures, keyArrivals);
+						totalZv = cplex.sum(totalZv, matchingBlocks.get(m));	
+					}
+
+				}
+				cplex.addEq(totalZv,arrivalParts.get(keyDepartures));
+
+			}
+	
+
 		} catch (IloException exc){
 			exc.printStackTrace();
 		}
