@@ -20,7 +20,7 @@ public class MatchBlock {
 	
 	@Override
 	public String toString() {
-		return "[" + p1.toString() + "," + p2.toString() + "]";
+		return "[" + p1.toString() + "-->" + p2.toString() + "]";
 	}
 	
 	@Override
@@ -29,5 +29,10 @@ public class MatchBlock {
 			return false;
 		MatchBlock mb = (MatchBlock) other;
 		return (p1.equals(mb.getPart1()) && p2.equals(mb.getPart2()));
+	}
+	
+	@Override
+	public int hashCode() {
+		return 5*p1.hashCode() + 7*p2.hashCode();
 	}
 }

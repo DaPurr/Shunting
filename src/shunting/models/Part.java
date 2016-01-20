@@ -59,4 +59,9 @@ public class Part {
 	public String toString() {
 		return units.toString();
 	}
+	
+	@Override
+	public int hashCode() {
+		return 13*units.hashCode();
+	}
 }
