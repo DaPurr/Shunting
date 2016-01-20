@@ -50,31 +50,19 @@ public class ScheduleReader {
 			throw new IllegalStateException("Something went horribly wrong!");
 		
 		// real code begins here
-		// read compositions
-		Map<String, Composition> compMap = new HashMap<>();
-		NodeList trains = doc.getElementsByTagName("composition");
-		int n = trains.getLength();
-		for (int i = 0; i < n; i++) {
-			Node m = trains.item(i);
-			Composition comp = xmlToComposition(m);
-			compMap.put(comp.getID(), comp);
-		}
-		
 		// read events
 		List<Arrival> arrivals = new ArrayList<>();
 		List<Departure> departures = new ArrayList<>();
-		NodeList events = doc.getElementsByTagName("events").item(0).getChildNodes();
-		int k = events.getLength();
-		for (int i = 0; i < k; i++) {
+		NodeList events = doc.getElementsByTagName("schedule").item(0).getChildNodes();
+		for (int i = 0; i < events.getLength(); i++) {
 			Node m = events.item(i);
 			if (m.getNodeType() != Node.ELEMENT_NODE)
 				continue;
-			if (m.getNodeName().equals("arrival"))
-				arrivals.add((Arrival)xmlToEvent(m, compMap));
-			else if (m.getNodeName().equals("departure"))
-				departures.add((Departure)xmlToEvent(m, compMap));
-			else
-				throw new IllegalStateException("Event not defined: " + m.getNodeName());
+			if (m.getNodeName().equals("arrival")) {
+				arrivals.add((Arrival) xmlToEvent(m));
+			} else if (m.getNodeName().equals("departure")) {
+				departures.add((Departure) xmlToEvent(m));
+			}
 		}
 		
 		Schedule schedule = new Schedule(arrivals, departures);
@@ -93,41 +81,51 @@ public class ScheduleReader {
 		boolean repair = Boolean.parseBoolean(attr.getNamedItem("repair").getNodeValue());
 		boolean cleaning = Boolean.parseBoolean(attr.getNamedItem("cleaning").getNodeValue());
 		boolean washing = Boolean.parseBoolean(attr.getNamedItem("inspection").getNodeValue());
-		String type = attr.getNamedItem("type").getNodeValue();
-		String subtype = attr.getNamedItem("subtype").getNodeValue();
+		String type = attr.getNamedItem("type").getNodeValue();		
 		
-		Train t = tf.createTrainByType(ID, type+"_"+subtype, interchangeable, 
+		Train t = tf.createTrainByType(ID, type, interchangeable, 
 				inspection, repair, cleaning, washing);
 		trainCache.put(ID, t);
 		
 		return t;
 	}
 	
-	private Composition xmlToComposition(Node n) {
-		NodeList trains = n.getChildNodes();
+//	private Composition xmlToComposition(Node n) {
+//		NodeList trains = n.getChildNodes();
+//		NamedNodeMap attr = n.getAttributes();
+//		String ID = attr.getNamedItem("ID").getNodeValue();
+//		List<Train> trainList = new ArrayList<>();
+//		int k = trains.getLength();
+//		for (int i = 0; i < k; i++) {
+//			Node m = trains.item(i);
+//			if (m.getNodeType() != Node.ELEMENT_NODE)
+//				continue;
+//			Train t = xmlToTrain(m);
+//			trainList.add(t);
+//		}
+//		return new Composition(ID, trainList);
+//	}
+	
+	private Event xmlToEvent(Node n) {
 		NamedNodeMap attr = n.getAttributes();
-		String ID = attr.getNamedItem("ID").getNodeValue();
-		List<Train> trainList = new ArrayList<>();
-		int k = trains.getLength();
-		for (int i = 0; i < k; i++) {
+		String type = n.getNodeName();
+//		String compID = attr.getNamedItem("compID").getNodeValue();
+		int time = Integer.parseInt(attr.getNamedItem("time").getNodeValue());
+		
+		Composition comp = new Composition(attr.getNamedItem("compID").getNodeValue());
+		NodeList trains = n.getChildNodes();
+		for (int i = 0; i < trains.getLength(); i++) {
 			Node m = trains.item(i);
 			if (m.getNodeType() != Node.ELEMENT_NODE)
 				continue;
 			Train t = xmlToTrain(m);
-			trainList.add(t);
+			comp.addTrain(t);
 		}
-		return new Composition(ID, trainList);
-	}
-	
-	private Event xmlToEvent(Node n, Map<String, Composition> compMap) {
-		NamedNodeMap attr = n.getAttributes();
-		String type = n.getNodeName();
-		String compID = attr.getNamedItem("compID").getNodeValue();
-		double time = Double.parseDouble(attr.getNamedItem("time").getNodeValue());
+		
 		if (type.equals("arrival"))
-			return new Arrival(time, compMap.get(compID));
+			return new Arrival(time, comp);
 		else if (type.equals("departure"))
-			return new Departure(time, compMap.get(compID));
+			return new Departure(time, comp);
 		throw new IllegalStateException("Illegal event: " + type);
 	}
 }
