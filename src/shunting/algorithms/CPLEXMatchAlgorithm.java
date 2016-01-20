@@ -13,14 +13,14 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
 	Schedule schedule = new Schedule();
 
-	public CPLEXMatchAlgorithm() {
-		// TODO Auto-generated constructor stub
+	public CPLEXMatchAlgorithm(Schedule schedule) {
+		this.schedule = schedule;
 	}
 
 	@Override
 	public MatchSolution solve() {
-		List<Arrival> arrivals = new ArrayList<Arrival>();
-		List<Departure> departures = new ArrayList<Departure>();
+		List<Arrival> arrivals = schedule.arrivals();
+		List<Departure> departures = schedule.departures();
 
 		try {
 			IloCplex cplex = new IloCplex();
@@ -32,7 +32,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
 				Composition c = a.getComposition();
 				DirectedGraph<Train, Part> directGraph = c.getGraph();
-				Set<Part> edges= directGraph.edgeSet();
+				Set<Part> edges = directGraph.edgeSet();
 
 				for (Part p : edges) {
 					IloIntVar u = cplex.boolVar("u_" + p.toString());
@@ -74,7 +74,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			IloNumExpr objective = cplex.numExpr();
 			for (Part keyArrivals : arrivalParts.keySet()) {
 				IloIntVar n=arrivalParts.get(keyArrivals);
-				objective = cplex.sum(totalU, n);
+				totalU = cplex.sum(totalU, n);
 			}
 
 			for (MatchBlock matchBlock: matchingBlocks.keySet()) {
@@ -82,9 +82,10 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				Part part2 = matchBlock.getPart2();
 				if(part1.compatible(part2)){
 					IloIntVar n=matchingBlocks.get(matchBlock);
-					objective = cplex.sum(totalZ, n);
+					totalZ = cplex.sum(totalZ, n);
 				}
 			}
+			objective = cplex.sum(totalU, totalZ);
 			cplex.addMinimize(objective);
 
 			// Arriving parts coverage constraint (2)
@@ -112,6 +113,10 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					// left sum - outgoing edges
 					IloNumExpr leftSum = cplex.numExpr();
 					Set<Part> outgoingEdges = directedGraph.outgoingEdgesOf(h);
+					// only add constraints for intermediate nodes, so no dummy and not last node,
+					// which doesn't have any outgoing edges
+					if (outgoingEdges.isEmpty())
+						continue;
 					for (Part e : outgoingEdges) {
 						IloIntVar u = arrivalParts.get(e);
 						leftSum = cplex.sum(leftSum, u);
@@ -156,6 +161,10 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					// left sum - outgoing edges
 					IloNumExpr leftSum = cplex.numExpr();
 					Set<Part> outgoingEdges = directedGraph.outgoingEdgesOf(h);
+					// only add constraints for intermediate nodes, so no dummy and not last node,
+					// which doesn't have any outgoing edges
+					if (outgoingEdges.isEmpty())
+						continue;
 					for (Part e : outgoingEdges) {
 						IloIntVar v = departureParts.get(e);
 						leftSum = cplex.sum(leftSum, v);
@@ -182,9 +191,10 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			for (Part keyArrivals : arrivalParts.keySet()) {
 				IloNumExpr totalZu = cplex.numExpr();
 				for(Part keyDepartures: departureParts.keySet()){
-					if(keyArrivals.compatible(keyDepartures)){
-						MatchBlock m = new MatchBlock(keyArrivals, keyDepartures); 
-						totalZu = cplex.sum(totalZu, matchingBlocks.get(m));	
+					if (keyArrivals.compatible(keyDepartures)){
+						MatchBlock m = new MatchBlock(keyArrivals, keyDepartures);
+						IloIntVar z = matchingBlocks.get(m);
+						totalZu = cplex.sum(totalZu, z);	
 					}
 
 				}
@@ -195,16 +205,30 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			//departures
 			for (Part keyDepartures : departureParts.keySet()) {
 				IloNumExpr totalZv = cplex.numExpr();
-				for(Part keyArrivals: arrivalParts.keySet()){
-					if(keyArrivals.compatible(keyDepartures)){
-						MatchBlock m = new MatchBlock(keyDepartures, keyArrivals);
-						totalZv = cplex.sum(totalZv, matchingBlocks.get(m));	
+				for (Part keyArrivals: arrivalParts.keySet()){
+					if (keyArrivals.compatible(keyDepartures)){
+						MatchBlock m = new MatchBlock(keyArrivals, keyDepartures);
+						IloIntVar z = matchingBlocks.get(m);
+						totalZv = cplex.sum(totalZv, z);	
 					}
 
 				}
 				cplex.addEq(totalZv,arrivalParts.get(keyDepartures));
 
 			}
+			
+			cplex.solve();
+			
+			// create MatchSolution
+			MatchSolution ms = new MatchSolution();
+			for (MatchBlock mb : matchingBlocks.keySet()) {
+				IloIntVar w = matchingBlocks.get(mb);
+				if (cplex.getValue(w) == 1.0)
+					ms.addBlock(mb);
+			}
+			
+			System.out.println("Objective value: " + cplex.getObjValue());
+			return ms;
 	
 
 		} catch (IloException exc){
