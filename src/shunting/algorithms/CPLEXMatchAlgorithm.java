@@ -218,7 +218,8 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					}
 
 				}
-				cplex.addEq(totalZv,arrivalParts.get(keyDepartures));
+				
+				cplex.addEq(totalZv,departureParts.get(keyDepartures));
 
 			}
 			
