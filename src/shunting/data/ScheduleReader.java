@@ -2,6 +2,8 @@ package shunting.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -54,14 +56,19 @@ public class ScheduleReader {
 		List<Arrival> arrivals = new ArrayList<>();
 		List<Departure> departures = new ArrayList<>();
 		NodeList events = doc.getElementsByTagName("schedule").item(0).getChildNodes();
+		int prevTime = 0;
 		for (int i = 0; i < events.getLength(); i++) {
 			Node m = events.item(i);
 			if (m.getNodeType() != Node.ELEMENT_NODE)
 				continue;
 			if (m.getNodeName().equals("arrival")) {
-				arrivals.add((Arrival) xmlToEvent(m));
+				Arrival a = (Arrival) xmlToEvent(m, prevTime);
+				prevTime = a.getTime();
+				arrivals.add(a);
 			} else if (m.getNodeName().equals("departure")) {
-				departures.add((Departure) xmlToEvent(m));
+				Departure d = (Departure) xmlToEvent(m, prevTime);
+				prevTime = d.getTime();
+				departures.add(d);
 			}
 		}
 		
@@ -106,11 +113,16 @@ public class ScheduleReader {
 //		return new Composition(ID, trainList);
 //	}
 	
-	private Event xmlToEvent(Node n) {
+	private Event xmlToEvent(Node n, int prevTime) {
 		NamedNodeMap attr = n.getAttributes();
 		String type = n.getNodeName();
-//		String compID = attr.getNamedItem("compID").getNodeValue();
-		int time = Integer.parseInt(attr.getNamedItem("time").getNodeValue());
+		String time = attr.getNamedItem("time").getNodeValue();
+		LocalTime base = LocalTime.parse("00:00:00");
+		LocalTime eventTime = LocalTime.parse(time);
+		Duration timeToInt = Duration.between(base, eventTime);
+		int intTime = (int) timeToInt.toMinutes();
+		if (intTime < prevTime)
+			intTime += 24*60;
 		
 		Composition comp = new Composition(attr.getNamedItem("compID").getNodeValue());
 		NodeList trains = n.getChildNodes();
@@ -123,9 +135,9 @@ public class ScheduleReader {
 		}
 		
 		if (type.equals("arrival"))
-			return new Arrival(time, comp);
+			return new Arrival(intTime, comp);
 		else if (type.equals("departure"))
-			return new Departure(time, comp);
+			return new Departure(intTime, comp);
 		throw new IllegalStateException("Illegal event: " + type);
 	}
 }
