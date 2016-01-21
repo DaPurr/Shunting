@@ -14,6 +14,10 @@ public class Part {
 		this.units = units;
 	}
 	
+	public int size() {
+		return units.size();
+	}
+	
 	public void addUnit(Train t) {
 		units.add(t);
 	}
@@ -24,21 +28,6 @@ public class Part {
 	
 	public Train getUnit(int index) {
 		return units.get(index);
-	}
-	
-	public boolean compatible(Part p) {
-		if (units.size() != p.units.size())
-			return false;
-		for (int i = 0; i < units.size(); i++) {
-			Train s = units.get(i);
-			Train t = p.units.get(i);
-			
-			if (!s.getTrainType().getType().equals(t.getTrainType().getType()))
-				return false;
-			if (!s.getInterchange() && !s.getID().equals(t.getID()))
-				return false;
-		}
-		return true;
 	}
 	
 	@Override

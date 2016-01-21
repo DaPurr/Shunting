@@ -7,14 +7,17 @@ import org.jgrapht.DirectedGraph;
 
 import ilog.concert.*;
 import ilog.cplex.*;
-import shunting.models.MatchSolution;
 
 public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
-	Schedule schedule = new Schedule();
+	private Schedule schedule = new Schedule();
+	private Map<Part, Integer> timeArrivingParts;
+	private Map<Part, Integer> timeDepartingParts;
 
 	public CPLEXMatchAlgorithm(Schedule schedule) {
 		this.schedule = schedule;
+		timeArrivingParts = new HashMap<>();
+		timeDepartingParts = new HashMap<>();
 	}
 
 	@Override
@@ -37,6 +40,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				for (Part p : edges) {
 					IloIntVar u = cplex.boolVar("u_" + p.toString());
 					arrivalParts.put(p, u);
+					timeArrivingParts.put(p, a.getTime());
 				}
 			}
 
@@ -51,6 +55,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				for (Part p : edges) {
 					IloIntVar v = cplex.boolVar("v_" + p.toString());
 					departureParts.put(p, v);
+					timeDepartingParts.put(p, d.getTime());
 				}
 
 			}
@@ -59,7 +64,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			Map<MatchBlock,IloIntVar> matchingBlocks = new HashMap<MatchBlock,IloIntVar>();
 			for (Part keyArrivals : arrivalParts.keySet()) {
 				for (Part keyDepartures : departureParts.keySet()){
-					if (keyArrivals.compatible(keyDepartures)){
+					if (compatible(keyArrivals,keyDepartures)){
 						MatchBlock matchBlock = new MatchBlock(keyArrivals,keyDepartures);
 						IloIntVar z = cplex.boolVar("z_" + keyArrivals.toString() + "," + keyDepartures.toString());
 						matchingBlocks.put(matchBlock, z);
@@ -80,7 +85,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			for (MatchBlock matchBlock: matchingBlocks.keySet()) {
 				Part part1 = matchBlock.getPart1();
 				Part part2 = matchBlock.getPart2();
-				if(part1.compatible(part2)){
+				if(compatible(part1,part2)){
 					IloIntVar n=matchingBlocks.get(matchBlock);
 					totalZ = cplex.sum(totalZ, n);
 				}
@@ -191,7 +196,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			for (Part keyArrivals : arrivalParts.keySet()) {
 				IloNumExpr totalZu = cplex.numExpr();
 				for(Part keyDepartures: departureParts.keySet()){
-					if (keyArrivals.compatible(keyDepartures)){
+					if (compatible(keyArrivals,keyDepartures)){
 						MatchBlock m = new MatchBlock(keyArrivals, keyDepartures);
 						IloIntVar z = matchingBlocks.get(m);
 						totalZu = cplex.sum(totalZu, z);	
@@ -206,7 +211,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			for (Part keyDepartures : departureParts.keySet()) {
 				IloNumExpr totalZv = cplex.numExpr();
 				for (Part keyArrivals: arrivalParts.keySet()){
-					if (keyArrivals.compatible(keyDepartures)){
+					if (compatible(keyArrivals,keyDepartures)){
 						MatchBlock m = new MatchBlock(keyArrivals, keyDepartures);
 						IloIntVar z = matchingBlocks.get(m);
 						totalZv = cplex.sum(totalZv, z);	
@@ -236,6 +241,23 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 		}
 
 		return null;
+	}
+	
+	private boolean compatible(Part p, Part q) {
+		if (p.size() != q.size())
+			return false;
+		for (int i = 0; i < p.size(); i++) {
+			Train s = p.getUnit(i);
+			Train t = q.getUnit(i);
+			
+			if (!s.getTrainType().getType().equals(t.getTrainType().getType()))
+				return false;
+			if (timeArrivingParts.get(p) >= timeDepartingParts.get(q))
+				return false;
+			if (!s.getInterchange() && !s.getID().equals(t.getID()))
+				return false;
+		}
+		return true;
 	}
 
 }
