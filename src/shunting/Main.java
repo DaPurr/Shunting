@@ -55,7 +55,7 @@ public class Main {
 		String q5=q.toString();
 
 		//test for schedule (no departures in example affects e.g. schedule.events)
-		File file = new File("data/schedule_test.xml");
+		File file = new File("data/schedule_toy.xml");
 		ScheduleReader sr = new ScheduleReader();
 		Schedule schedule = sr.parseXML(file);
 		List <Arrival> r1=schedule.arrivals();
