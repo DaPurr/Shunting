@@ -2,6 +2,7 @@ package shunting.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -11,6 +12,7 @@ public class Composition {
 	private String ID;
 	private List<Train> trains;
 	private Train dummy;
+	private DirectedGraph<Train, Part> dgraph = new DefaultDirectedGraph<>(Part.class);
 	
 	public Composition(String ID) {
 		trains = new ArrayList<>();
@@ -26,6 +28,7 @@ public class Composition {
 		this.trains = trains;
 		dummy = Train.dummy();
 		this.ID = ID;
+		dgraph = makeGraph();
 	}
 
 	public int size(){
@@ -38,22 +41,30 @@ public class Composition {
 	}
 
 	public void replace(int index, Train train){
+		dgraph = makeGraph();
 		trains.set(index, train);
 	}
 
 	public void addTrain(Train train){
 		trains.add(train);
+		dgraph = makeGraph();
 	}
 
 	public void addTrain(int index, Train train){
 		trains.add(index, train);
+		dgraph = makeGraph();
 	}
 
 	public void deleteTrain(int index){
 		trains.remove(index);
+		dgraph = makeGraph();
 	}
 	
 	public DirectedGraph<Train, Part> getGraph() {
+		return dgraph;
+	}
+	
+	private DirectedGraph<Train, Part> makeGraph() {
 		DirectedGraph<Train, Part> dgraph = new DefaultDirectedGraph<>(Part.class);
 		
 		// add nodes
