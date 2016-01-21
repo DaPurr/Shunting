@@ -17,6 +17,9 @@ public class Schedule {
 	public Schedule(List<Arrival> arrivals, List<Departure> departures) {
 		this.departures = departures;
 		this.arrivals = arrivals;
+		
+		Collections.sort(departures);
+		Collections.sort(arrivals);
 	}
 	
 	public List<Arrival> arrivals() {
