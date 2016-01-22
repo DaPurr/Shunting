@@ -1,6 +1,7 @@
 package shunting.algorithms;
 
 import shunting.models.*;
+
 import java.util.*;
 
 import org.jgrapht.DirectedGraph;
@@ -60,14 +61,18 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
 			}
 
-			// z_ij
+			// z_ij, w_ij
 			Map<MatchBlock,IloIntVar> matchingBlocks = new HashMap<MatchBlock,IloIntVar>();
+			Map<MatchBlock, Double> paramW = new HashMap<MatchBlock, Double>();
 			for (Part keyArrivals : arrivalParts.keySet()) {
 				for (Part keyDepartures : departureParts.keySet()){
 					if (compatible(keyArrivals,keyDepartures)){
 						MatchBlock matchBlock = new MatchBlock(keyArrivals,keyDepartures);
 						IloIntVar z = cplex.boolVar("z_" + keyArrivals.toString() + "," + keyDepartures.toString());
 						matchingBlocks.put(matchBlock, z);
+						int timeA = timeArrivingParts.get(keyArrivals);
+						int timeD = timeDepartingParts.get(keyDepartures);
+						paramW.put(matchBlock, (double)Math.abs(timeA - timeD));
 					}
 				}
 			}
@@ -86,8 +91,8 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				Part part1 = matchBlock.getPart1();
 				Part part2 = matchBlock.getPart2();
 				if(compatible(part1,part2)){
-					IloIntVar n=matchingBlocks.get(matchBlock);
-					totalZ = cplex.sum(totalZ, n);
+					IloIntVar n = matchingBlocks.get(matchBlock);
+					totalZ = cplex.sum(totalZ, cplex.prod(paramW.get(matchBlock), n));
 				}
 			}
 			objective = cplex.sum(totalU, totalZ);
