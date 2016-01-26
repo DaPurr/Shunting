@@ -2,9 +2,9 @@ package shunting.algorithms;
 
 import java.util.Map;
 
-import shunting.models.Job;
+import shunting.models.MaintenanceActivity;
 
 public interface MaintenanceAlgorithm {
 
-	public <T extends Job> Map<T, Integer> solve();
+	public <T extends MaintenanceActivity> Map<T, Integer> solve();
 }
