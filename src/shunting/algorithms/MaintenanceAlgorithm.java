@@ -1,10 +1,10 @@
 package shunting.algorithms;
 
-import java.util.Map;
+import java.util.Set;
 
 import shunting.models.MaintenanceActivity;
 
 public interface MaintenanceAlgorithm {
 
-	public <T extends MaintenanceActivity> Map<T, Integer> solve();
+	public Set<MaintenanceActivity> solve();
 }
