@@ -19,6 +19,10 @@ public class MatchSolution {
 		return solution.contains(block);
 	}
 	
+	public Set<MatchBlock> getMatchBlocks() {
+		return solution;
+	}
+	
 	@Override
 	public String toString() {
 		return solution.toString();
