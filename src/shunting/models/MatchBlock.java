@@ -42,11 +42,13 @@ public class MatchBlock {
 		if (other == null || !(other instanceof MatchBlock))
 			return false;
 		MatchBlock mb = (MatchBlock) other;
-		return (p1.equals(mb.getPart1()) && p2.equals(mb.getPart2()));
+		boolean first = (p1.equals(mb.getPart1()) && p2.equals(mb.getPart2()));
+		boolean second = (arrivalTime==mb.arrivalTime && departureTime==mb.departureTime);
+		return first & second;
 	}
 
 	@Override
 	public int hashCode() {
-		return 5*p1.hashCode() + 7*p2.hashCode();
+		return 5*p1.hashCode() + 7*p2.hashCode() + 3*arrivalTime + 11*departureTime;
 	}
 }
