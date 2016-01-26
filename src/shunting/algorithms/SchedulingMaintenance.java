@@ -2,7 +2,10 @@ package shunting.algorithms;
 import shunting.models.*;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -16,11 +19,11 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	Map<Job, Integer> timeDepartureWashingMachine;
 	PriorityQueue<Job> queuePlatform;
 	PriorityQueue<Job> queueWashingMachine;
-	int time;
+	public int time;
 	Set <MatchBlock> ms;
 	Set <JobPlatform> jobsPlatform;
 	Set <JobWashingMachine> jobsWashingMachine;
-
+	public int [] nextEvent;
 
 	public SchedulingMaintenance(Set<MatchBlock> ms) {
 
@@ -33,6 +36,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		timeDeparturePlatform = new HashMap<Job,Integer>();
 		timeDepartureWashingMachine = new HashMap<Job,Integer>();
 		this.ms = ms;
+
 
 		for(MatchBlock mb: ms)
 		{
@@ -61,25 +65,76 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	}
 
 	//function of time routine
-	public int[][] TimeRoute() {
-		
+	public int[] TimeRoutine() {
+		int [] nextEvent = new int[2];
 		int min = Integer.MAX_VALUE;
+		int eventType = 0;
 		int minArrivalPlatform = minimum(timeArrivalPlatform);
 		int minDeparturePlatform = minimum(timeDeparturePlatform);
 		int minArrivalWashingMachine = minimum(timeArrivalWashingMachine);
 		int minDepartureWashingMachine = minimum(timeDepartureWashingMachine);
-		
-		
-		return min;
 
+		if(minArrivalPlatform <=  minDeparturePlatform && minArrivalPlatform < 
+				minArrivalWashingMachine && minArrivalPlatform < minDepartureWashingMachine){
+			min = minArrivalPlatform;
+			eventType = 1;
+		}
+		else if(minDeparturePlatform < minArrivalPlatform && minDeparturePlatform < minArrivalWashingMachine 
+				&& minDeparturePlatform < minDepartureWashingMachine){
+			min = minDeparturePlatform;
+			eventType = 2;
+		}
+		else if(minArrivalWashingMachine < minArrivalPlatform && minArrivalWashingMachine < minDeparturePlatform
+				&& minArrivalWashingMachine < minDepartureWashingMachine){
+			min = minArrivalWashingMachine;
+			eventType = 3;
+		}
+		else if(minDepartureWashingMachine < minArrivalPlatform && minDepartureWashingMachine < minDeparturePlatform
+				&& minDepartureWashingMachine < minArrivalWashingMachine){
+			min = minDepartureWashingMachine;
+			eventType = 4;
+		}
+		nextEvent[0] = eventType;
+		nextEvent[1] = min;
+		return nextEvent;
 	}
 
+	private void platformArrival() {
+		if (nextEvent[0] == 1){
+			Set<Job> jobsOnPlatformArrival = getKeysByValue(timeArrivalPlatform,nextEvent[1]);
+			for (Job j : jobsOnPlatformArrival) { 
+				queuePlatform.add(j);
+			}
+			time = nextEvent[1]; 
+		}
+		// if (any platform is empty)
+		
+		queuePlatform.poll();
+	}
+
+	private void washingMachineArrival() {
+		if (nextEvent[0] == 3){
+			Set<Job> jobsOnWashingArrival = getKeysByValue(timeArrivalPlatform,nextEvent[1]);
+			for (Job j : jobsOnWashingArrival) { 
+				queueWashingMachine.add(j);
+			}
+			time = nextEvent[1]; 
+		}
+
+	}
+	
+	
 
 
-
-
-
-
+	public static <Job, Integer> Set<Job> getKeysByValue(Map<Job, Integer> map, Integer value) {
+		Set<Job> keys = new HashSet<Job>();
+		for (Entry<Job, Integer> entry : map.entrySet()) {
+			if (Objects.equals(value, entry.getValue())) {
+				keys.add(entry.getKey());
+			}
+		}
+		return keys;
+	}
 
 	private int minimum (Map<Job,Integer> jobs) {
 		int min = Integer.MAX_VALUE;
@@ -101,7 +156,6 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				return -1;
 			else return 0;
 		}
-
 	}
 
 
