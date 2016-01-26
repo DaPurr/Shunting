@@ -11,19 +11,24 @@ public abstract class Machine {
 	
 	List<Job> jobs;
 	Map<Job, Integer> startTimes;
+	int horizon;
 	
 	public Machine(int horizon) {
 		jobs = new ArrayList<>();
 		startTimes = new HashMap<>();
+		this.horizon = horizon;
 	}
 	
 	public boolean scheduleJob(Job j) {
 		if (!canScheduleJob(j))
 			return false;
-		jobs.add(j);
 		Job q = jobs.get(jobs.size()-1);
 		int start = getEndTime(q);
+		int end = start + j.getProcessingTime() - 1;
+		if (end > horizon)
+			return false;
 		startTimes.put(j, start);
+		jobs.add(j);
 		Collections.sort(jobs, new CompJobs());
 		return true;
 	}
@@ -37,13 +42,14 @@ public abstract class Machine {
 		return true;
 	}
 	
-	public boolean canScheduleJob(Job j, int time) {
+	public boolean canScheduleJob(Job j, int startJ) {
 		if (jobs.contains(j) || startTimes.containsKey(j))
+			return false;
+		if (!(1 <= startJ && startJ <= horizon))
 			return false;
 		for (Job q : jobs){
 			int startQ = startTimes.get(q);
 			int endQ = getEndTime(q);
-			int startJ = time;
 			int endJ = startJ + j.getProcessingTime() - 1;
 			if ( !(endQ < startJ || startQ > endJ) )
 				return false;
@@ -68,7 +74,7 @@ public abstract class Machine {
 	public int getEndTime(Job j) {
 		if (!startTimes.containsKey(j))
 			throw new IllegalStateException("Cannot have a job without a start time.");
-		return startTimes.get(j) + j.getProcessingTime();
+		return startTimes.get(j) + j.getProcessingTime() - 1;
 	}
 	
 	private class CompJobs implements Comparator<Job> {
