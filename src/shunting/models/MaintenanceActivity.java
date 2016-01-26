@@ -16,6 +16,12 @@ public class MaintenanceActivity {
 		this.washer = washer;
 	}
 	
-	
+	@Override
+	public String toString() {
+		String s = "[" + job.toString() + ", ";
+		s += "plat: " + start_platform + " " + platform.toString() + ", ";
+		s += "wash: " + start_wash + " " + washer.toString() +  "]";
+		return s;
+	}
 	
 }
