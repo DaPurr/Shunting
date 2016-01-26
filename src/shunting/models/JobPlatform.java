@@ -6,6 +6,12 @@ public class JobPlatform extends Job {
 		super(mb, r, p, d);
 	}
 	
+	// TODO: REMOVE!
+	// only for testing purposes!
+//	public JobPlatform(int r, int p, int d) {
+//		this(null, r, p, d);
+//	}
+	
 	
 
 //	private MatchBlock matchBlock;

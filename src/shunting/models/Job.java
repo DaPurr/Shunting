@@ -14,6 +14,12 @@ public abstract class Job {
 		this.d = d;
 	}
 	
+	// TODO: REMOVE!
+	// only for testing purposes!
+//	public Job(int r, int p, int d) {
+//		this(null, r, p, d);
+//	}
+	
 	public MatchBlock getMatchBlock() {
 		return mb;
 	}
@@ -28,6 +34,13 @@ public abstract class Job {
 	
 	public int getDeadline() {
 		return d;
+	}
+	
+	@Override
+	// TODO: CHANGE TO mb.toString()!
+	public String toString() {
+		String s = mb.toString() + "r=" + r + ", p=" + p + ", d=" + d;
+		return s;
 	}
 	
 }

@@ -109,16 +109,16 @@ public class Main {
 		
 		// test Machine
 		// create dummy constructors for Job and JobPlatform to run this
-		Platform plat = new Platform(10);
-		Job j1 = new JobPlatform(0, 3, 10);
-		Job j2 = new JobPlatform(0, 2, 10);
-		Job j3 = new JobPlatform(0, 2, 10);
-		boolean scheduled1 = plat.scheduleJob(j1, 3);
-		boolean scheduled2 = plat.scheduleJob(j2, 7);
-		boolean canSchedule31 = plat.canScheduleJob(j3, 1);
-		boolean canSchedule32 = plat.canScheduleJob(j3, 5);
-		boolean canSchedule33 = plat.canScheduleJob(j3, 0);
-		boolean canSchedule34 = plat.canScheduleJob(j3, 9);
+//		Platform plat = new Platform(10);
+//		Job j1 = new JobPlatform(0, 3, 10);
+//		Job j2 = new JobPlatform(0, 2, 10);
+//		Job j3 = new JobPlatform(0, 2, 10);
+//		boolean scheduled1 = plat.scheduleJob(j1, 3);
+//		boolean scheduled2 = plat.scheduleJob(j2, 7);
+//		boolean canSchedule31 = plat.canScheduleJob(j3, 1);
+//		boolean canSchedule32 = plat.canScheduleJob(j3, 5);
+//		boolean canSchedule33 = plat.canScheduleJob(j3, 0);
+//		boolean canSchedule34 = plat.canScheduleJob(j3, 9);
 	}
 
 }
