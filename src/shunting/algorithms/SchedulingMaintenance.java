@@ -196,7 +196,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 
 	@Override
-	public <T extends MaintenanceActivity> Map<T, Integer> solve() {
+	public Set<MaintenanceActivity> solve() {
 
 		while(!jobsToBeDone.isEmpty())
 		{
