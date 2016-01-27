@@ -5,12 +5,12 @@ import java.util.Random;
 public class TrainFactory {
 
 	private Random ran;
-	private final TrainType VIRM4 = new TrainType("VIRM_4", 109, 0, 0, 0, 0);
-	private final TrainType VIRM6 = new TrainType("VIRM_6", 162, 0, 0, 0, 0);
-	private final TrainType DDZ4 = new TrainType("DDZ_4", 101, 0, 0, 0, 0);
-	private final TrainType DDZ6 = new TrainType("DDZ_6", 154, 0, 0, 0, 0);
-	private final TrainType SLT4 = new TrainType("SLT_4", 70, 0, 0, 0, 0);
-	private final TrainType SLT6 = new TrainType("SLT_6", 101, 0, 0, 0, 0);
+	private final TrainType VIRM4 = new TrainType("VIRM_4", 109, 11, 37, 90, 24);
+	private final TrainType VIRM6 = new TrainType("VIRM_6", 162, 14, 56, 90, 26);
+	private final TrainType DDZ4 = new TrainType("DDZ_4", 101, 15, 49, 90, 24);
+	private final TrainType DDZ6 = new TrainType("DDZ_6", 154, 18, 56, 90, 26);
+	private final TrainType SLT4 = new TrainType("SLT_4", 70, 24, 15, 90, 23);
+	private final TrainType SLT6 = new TrainType("SLT_6", 101, 26, 20, 90, 24);
 
 	public TrainFactory() {
 		ran = new Random(0);
@@ -117,5 +117,12 @@ public class TrainFactory {
 
 	private String generateID() {
 		return String.valueOf(1 + ran.nextInt(10000));
+	}
+	
+	private boolean generateBoolean(double p) {
+		double r = ran.nextDouble();
+		if (r <= p)
+			return true;
+		return false;
 	}
 }
