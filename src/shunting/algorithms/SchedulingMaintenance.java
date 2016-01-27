@@ -26,17 +26,27 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	Set <JobWashingMachine> jobsWashingMachine;
 
 	public int [] nextEvent;
-
+	public Set <MaintenanceActivity> maintenanceActivities;
+	public Map<Job, Integer> startPlatform;
+	public Map<Job, Integer> startWasher;
+	public Map<Job, Platform> platformMap;
+	public Map<Job, Washer> washerMap;
+	
 	public SchedulingMaintenance(Set<MatchBlock> ms) {
 
-		queuePlatform = new PriorityQueue<Job>(100, new jobTimeComparator());
-		queueWashingMachine = new PriorityQueue<Job>(100,new jobTimeComparator());
+		queuePlatform = new PriorityQueue<Job>(100, new jobTimeComparatorPlatform());
+		queueWashingMachine = new PriorityQueue<Job>(100,new jobTimeComparatorWashingMachine());
 		time = 0;
 
 		timeArrivalPlatform = new HashMap<Job,Integer>();	
 		timeArrivalWashingMachine = new HashMap<Job,Integer>();
 		timeDeparturePlatform = new HashMap<Job,Integer>();
 		timeDepartureWashingMachine = new HashMap<Job,Integer>();
+		
+		startPlatform = new HashMap <Job, Integer>();
+		startWasher = new HashMap <Job, Integer>();
+		platformMap = new HashMap <Job,Platform>();
+		washerMap = new HashMap <Job, Washer>();
 		this.ms = ms;
 
 
@@ -118,6 +128,13 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		// if (any platform is empty) {
 		Job jobAtPlatform = queuePlatform.poll();
 		timeDeparturePlatform.put(jobAtPlatform, time + jobAtPlatform.getProcessingTime());
+		startPlatform.put(jobAtPlatform, time); //HashMap with jobs and starting times
+		//platformMap.put(jobAtPlatform, platform)
+
+			//infeasiable
+			// we have a list of jobs at platforms: job --> time of start
+			// if jobAtPlatform finishes later than Deadline than let's start time of JobAtPlatform 
+			//==start time of the job (if this time is after its arrival 
 
 
 		if(jobsWashingMachine.contains(jobAtPlatform)) {
@@ -143,6 +160,8 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		// if (a washing machine is empty) {
 		Job jobAtWashingMachine = queueWashingMachine.poll();
 		timeDepartureWashingMachine.put(jobAtWashingMachine, time + jobAtWashingMachine.getProcessingTime());
+		startWasher.put(jobAtWashingMachine, time);
+		//washerMap.put(jobAtWashingMachine, )
 		//}
 		Job firstJobInTheQueueWashing = queueWashingMachine.peek();
 		timeArrivalWashingMachine.put(firstJobInTheQueueWashing,time + jobAtWashingMachine.getProcessingTime()+1);
@@ -182,18 +201,45 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	}
 
 
-	private class jobTimeComparator implements Comparator<Job>  {
+	private class jobTimeComparatorPlatform implements Comparator<Job>  {
 
 		@Override
 		public int compare(Job j1, Job j2) {
-			if (j1.getDeadline() < j1.getDeadline())
+			
+			if (j1.getDeadline()-j1.getMatchBlock().getPart1().getWashingTime()-j1.getMatchBlock().getPart1().getPlatformTime() < 
+					j2.getDeadline()-j2.getMatchBlock().getPart1().getWashingTime()-j2.getMatchBlock().getPart1().getPlatformTime())
 				return 1;
-			else if (j1.getDeadline() > j1.getDeadline())
+			else if (j1.getDeadline()-j1.getMatchBlock().getPart1().getWashingTime()-j1.getProcessingTime()-j1.getMatchBlock().getPart1().getPlatformTime() >
+			j2.getDeadline()-j2.getMatchBlock().getPart1().getWashingTime()-j2.getMatchBlock().getPart1().getPlatformTime())
 				return -1;
 			else return 0;
 		}
 	}
 
+	private class jobTimeComparatorWashingMachine implements Comparator<Job>  {
+
+		@Override
+		public int compare(Job j1, Job j2) {
+			
+			if (j1.getDeadline()-j1.getMatchBlock().getPart1().getWashingTime() < 
+					j2.getDeadline()-j2.getMatchBlock().getPart1().getWashingTime())
+				return 1;
+			else if (j1.getDeadline()- j1.getMatchBlock().getPart1().getWashingTime() > 
+			j2.getDeadline()-j2.getMatchBlock().getPart1().getWashingTime())
+				return -1;
+			else return 0;
+		}
+	}
+	
+	
+	private Set<MaintenanceActivity> writeResults()
+	{
+		for (Job j:jobsToBeDone){
+			maintenanceActivities.add(j, startPlatform.get(j), startWasher.get(j), platformMap.get(j), washerMap.get(j));
+		}
+		return maintenanceActivities;	
+	}
+	
 
 	@Override
 	public Set<MaintenanceActivity> solve() {
