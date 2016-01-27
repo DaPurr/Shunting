@@ -77,6 +77,10 @@ public abstract class Machine {
 		return startTimes.get(j) + j.getProcessingTime() - 1;
 	}
 	
+	public boolean isEmpty() {
+		return jobs.isEmpty();
+	}
+	
 	private class CompJobs implements Comparator<Job> {
 
 		@Override
