@@ -122,7 +122,7 @@ public class Part {
 	}
 	
 	public int getPlatformTime () {
-		return getRepairTime() + getCleaningTime() +getInspectionTime(); 
+		return getRepairTime() + getCleaningTime(); 
 		}
 	
 
