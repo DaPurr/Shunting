@@ -55,9 +55,9 @@ public class Main {
 //		String q5=q.toString();
 //
 //		//test for schedule (no departures in example affects e.g. schedule.events)
-//		File file = new File("data/schedule_kleine_binckhorst.xml");
-//		ScheduleReader sr = new ScheduleReader();
-//		Schedule schedule = sr.parseXML(file);
+		File file = new File("data/schedule_kleine_binckhorst.xml");
+		ScheduleReader sr = new ScheduleReader();
+		Schedule schedule = sr.parseXML(file);
 //		List <Arrival> r1=schedule.arrivals();
 //		List <Departure> d1=schedule.departures();
 //		Iterator <Event> i1=schedule.events(); 
@@ -103,9 +103,9 @@ public class Main {
 //		System.out.println(schedule2.toString());
 //		
 //		// test Matching formulation
-//		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
-//		MatchSolution ms = cm.solve();
-//		System.out.println(ms.toString());
+		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
+		MatchSolution ms = cm.solve();
+		System.out.println(ms.toString());
 		
 		// test Machine
 		// create dummy constructors for Job and JobPlatform to run this
