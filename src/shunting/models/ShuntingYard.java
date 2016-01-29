@@ -7,8 +7,9 @@ public class ShuntingYard {
 	private List<Platform> platforms;
 	private List<Washer> washers;
 	
-	public ShuntingYard() {
-		// TODO Auto-generated constructor stub
+	public ShuntingYard(List<Platform> platforms, List<Washer> washers) {
+		this.platforms = platforms;
+		this.washers = washers;
 	}
 	
 	public List<Platform> getPlatforms() {
