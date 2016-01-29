@@ -3,12 +3,15 @@ package shunting;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.Iterator;
 
 import org.jgrapht.DirectedGraph;
 
 import shunting.algorithms.CPLEXMatchAlgorithm;
+import shunting.algorithms.MaintenanceAlgorithm;
 import shunting.algorithms.MatchAlgorithm;
+import shunting.algorithms.SchedulingMaintenance;
 import shunting.data.ScheduleReader;
 import shunting.models.*;
 
@@ -18,7 +21,36 @@ public class Main {
 		int seed = 0;
 
 		//	Test for class Train
+		//	test for schedule (no departures in example affects e.g. schedule.events)
+		File file = new File("data/schedule_kleine_binckhorst.xml");
+		ScheduleReader sr = new ScheduleReader();
+		Schedule schedule = sr.parseXML(file);
 
+		//		test Matching formulation
+		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
+		MatchSolution ms = cm.solve();
+		Set<MatchBlock> mb = ms.getMatchBlocks();
+		System.out.println(ms.toString());
+		List<Platform> platforms = new ArrayList<Platform>();
+		List<Washer> washers = new ArrayList<Washer>();
+		Platform platform1 = new Platform(1440);
+		Platform platform2 = new Platform(1440);
+		Washer washer1 = new Washer(1440);
+		platforms.add(platform1);
+		platforms.add(platform2);
+		washers.add(washer1);
+		
+		ShuntingYard shuntingYard = new ShuntingYard(platforms, washers);
+
+		// test Maintenance scheduling
+		MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingYard);
+		Set<MaintenanceActivity> activities = ma.solve(); 
+		for (MaintenanceActivity a : activities) {
+			System.out.println(a.toString());
+		}
+
+		
+		
 //		TrainFactory ct= new TrainFactory();
 //		Train ctrain=ct.typeDDZ4();
 //		boolean a=ctrain.getCleaning();
@@ -55,9 +87,6 @@ public class Main {
 //		String q5=q.toString();
 //
 //		//test for schedule (no departures in example affects e.g. schedule.events)
-		File file = new File("data/schedule_kleine_binckhorst.xml");
-		ScheduleReader sr = new ScheduleReader();
-		Schedule schedule = sr.parseXML(file);
 //		List <Arrival> r1=schedule.arrivals();
 //		List <Departure> d1=schedule.departures();
 //		Iterator <Event> i1=schedule.events(); 
@@ -102,11 +131,7 @@ public class Main {
 //		Schedule schedule2 = new Schedule(arrivals, departures);
 //		System.out.println(schedule2.toString());
 //		
-//		// test Matching formulation
-		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
-		MatchSolution ms = cm.solve();
-		System.out.println(ms.toString());
-		
+//		
 		// test Machine
 		// create dummy constructors for Job and JobPlatform to run this
 //		Platform plat = new Platform(10);

@@ -11,15 +11,15 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	Map<Job, Integer> timeArrivalWashingMachine;
 	Map<Job, Integer> timeDeparturePlatform;
 	Map<Job, Integer> timeDepartureWashingMachine;
-	Set<Job> jobsToBeDone;
+	public Set<Job> jobsToBeDone;
 	PriorityQueue<Job> queuePlatform;
 	PriorityQueue<Job> queueWashingMachine;
 
 	public int time;
 
 	Set <MatchBlock> ms;
-	Set <JobPlatform> jobsPlatform;
-	Set <JobWashingMachine> jobsWashingMachine;
+	public Set <JobPlatform> jobsPlatform;
+	public Set <JobWashingMachine> jobsWashingMachine;
 
 	public int [] nextEvent;
 	public Set <MaintenanceActivity> maintenanceActivities;
@@ -51,10 +51,13 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		platformMap = new HashMap <Job,Platform>();
 		washerMap = new HashMap <Job, Washer>();
 		this.ms = ms;
-		platforms = shuntingYard.getPlatforms();
-		washers = shuntingYard.getWashers();
+		platforms = yard.getPlatforms();
+		washers = yard.getWashers();
 		platformArrivalTimeKey = new HashMap <Integer, Set<Job>>();
 		washerArrivalTimeKey = new HashMap <Integer, Set<Job>>();
+		jobsPlatform = new HashSet <JobPlatform>();
+		jobsWashingMachine = new HashSet <JobWashingMachine>();
+		jobsToBeDone = new HashSet <Job>();
 		
 
 		for(MatchBlock mb: ms)
