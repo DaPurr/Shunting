@@ -35,7 +35,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	public Map <Integer, Set<Job>> washerArrivalTimeKey;
 
 
-	public SchedulingMaintenance(Set<MatchBlock> ms) {
+	public SchedulingMaintenance(Set<MatchBlock> ms, ShuntingYard yard) {
 
 		queuePlatform = new PriorityQueue<Job>(100, new jobTimeComparatorPlatform());
 		queueWashingMachine = new PriorityQueue<Job>(100,new jobTimeComparatorWashingMachine());
