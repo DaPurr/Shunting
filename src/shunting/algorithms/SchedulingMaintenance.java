@@ -56,11 +56,6 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		platformArrivalTimeKey = new HashMap <Integer, Set<Job>>();
 		washerArrivalTimeKey = new HashMap <Integer, Set<Job>>();
 		
-		
-
-		
-		
-
 
 		for(MatchBlock mb: ms)
 		{
@@ -94,11 +89,6 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 			Set <Job> set = platformArrivalTimeKey.get(r);
 			set.add(j);
 			}
-		
-			
-			
-			
-			
 			
 		}
 
