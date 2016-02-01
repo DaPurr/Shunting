@@ -152,13 +152,13 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 		for (Platform p: platforms) {
 			Job tempJob = queuePlatform.peek();
-			if (p.canScheduleJob(tempJob, time))
+			if (p.canScheduleJob(tempJob, time)) 
 			{
 				Job jobAtPlatform = queuePlatform.poll();
 				timeDeparturePlatform.put(jobAtPlatform, time + jobAtPlatform.getProcessingTime());
 				startPlatform.put(jobAtPlatform, time);
 				platformMap.put(jobAtPlatform, p);
-				p.scheduleJob(jobAtPlatform);
+				p.scheduleJob(jobAtPlatform, time);
 
 				if(jobsWashingMachine.contains(jobAtPlatform)) {
 					if(!washerArrivalTimeKey.containsKey(time+jobAtPlatform.getProcessingTime()+1))
@@ -180,6 +180,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				else {
 					jobsToBeDone.remove(jobAtPlatform);
 				}
+				break;
 			}
 		}
 	}
