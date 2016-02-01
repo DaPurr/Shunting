@@ -54,9 +54,7 @@ public class Main {
 		for (MaintenanceActivity a : activities) {
 			System.out.println(a.toString());
 		}
-
-		
-		
+		 
 //		TrainFactory ct= new TrainFactory();
 //		Train ctrain=ct.typeDDZ4();
 //		boolean a=ctrain.getCleaning();
