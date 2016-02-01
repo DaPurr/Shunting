@@ -79,11 +79,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 			if(mb.getPart1().getPartWashing())
 			{
-				if(mb.getPart1().getPartInspection()==false);
-				{
-				noInspect=0;	
-				}
-				JobWashingMachine jobWashingMachine = new JobWashingMachine(mb,mb.getArrivalTime()+mb.getPart1().getInspectionTime()*noInspect+4, mb.getDepartureTime(),mb.getPart1().getPlatformTime());
+				JobWashingMachine jobWashingMachine = new JobWashingMachine(mb,mb.getArrivalTime()+mb.getPart1().getInspectionTime()+4, mb.getDepartureTime(),mb.getPart1().getPlatformTime());
 				jobsWashingMachine.add(jobWashingMachine);	
 			}
 		}
