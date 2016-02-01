@@ -199,6 +199,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				break;
 			}
 		}
+		
 		if(!jobScheduledPlatform){
 			//int endTimePlatform = Integer.MAX_VALUE;
 			//for(Job j: timeDeparturePlatform.keySet())
