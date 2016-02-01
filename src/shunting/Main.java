@@ -19,6 +19,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		int seed = 0;
+		int horizon = 1440;
 
 		//	Test for class Train
 		//	test for schedule (no departures in example affects e.g. schedule.events)
@@ -33,14 +34,19 @@ public class Main {
 		System.out.println(ms.toString());
 		List<Platform> platforms = new ArrayList<Platform>();
 		List<Washer> washers = new ArrayList<Washer>();
-		Platform platform1 = new Platform(1440);
-		Platform platform2 = new Platform(1440);
-		Washer washer1 = new Washer(1440);
+		Platform platform1 = new Platform(horizon);
+		Platform platform2 = new Platform(horizon);
+		Washer washer1 = new Washer(horizon);
 		platforms.add(platform1);
 		platforms.add(platform2);
 		washers.add(washer1);
 		
 		ShuntingYard shuntingYard = new ShuntingYard(platforms, washers);
+		
+		for (MatchBlock block : mb) {
+			if (block.getArrivalTime() >= horizon || block.getDepartureTime() >= horizon) 
+				throw new IllegalStateException(mb.toString());
+		}
 
 		// test Maintenance scheduling
 		MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingYard);

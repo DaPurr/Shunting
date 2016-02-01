@@ -30,9 +30,11 @@ import shunting.models.TrainFactory;
 public class ScheduleReader {
 	
 	private Map<String, Train> trainCache;
+	private LocalTime base;
 	
 	public ScheduleReader() {
 		trainCache = new HashMap<>();
+		base = null;
 	}
 	
 	public Schedule parseXML(File f) {
@@ -97,28 +99,13 @@ public class ScheduleReader {
 		return t;
 	}
 	
-//	private Composition xmlToComposition(Node n) {
-//		NodeList trains = n.getChildNodes();
-//		NamedNodeMap attr = n.getAttributes();
-//		String ID = attr.getNamedItem("ID").getNodeValue();
-//		List<Train> trainList = new ArrayList<>();
-//		int k = trains.getLength();
-//		for (int i = 0; i < k; i++) {
-//			Node m = trains.item(i);
-//			if (m.getNodeType() != Node.ELEMENT_NODE)
-//				continue;
-//			Train t = xmlToTrain(m);
-//			trainList.add(t);
-//		}
-//		return new Composition(ID, trainList);
-//	}
-	
 	private Event xmlToEvent(Node n, int prevTime) {
 		NamedNodeMap attr = n.getAttributes();
 		String type = n.getNodeName();
 		String time = attr.getNamedItem("time").getNodeValue();
-		LocalTime base = LocalTime.parse("00:00:00");
 		LocalTime eventTime = LocalTime.parse(time);
+		if (base == null)
+			base = eventTime;
 		Duration timeToInt = Duration.between(base, eventTime);
 		int intTime = (int) timeToInt.toMinutes();
 		if (intTime < prevTime)
