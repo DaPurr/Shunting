@@ -34,9 +34,6 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	public Map <Integer, Set<Job>> platformArrivalTimeKey;
 	public Map <Integer, Set<Job>> washerArrivalTimeKey;
 	
-	private int noInspect=1;
-
-	private int welInspect=1;
 
 
 	public SchedulingMaintenance(Set<MatchBlock> ms, ShuntingYard yard) {
@@ -67,23 +64,26 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		for(MatchBlock mb: ms)
 		{
 			int noInspect=1;
+			int arrivaltime=mb.getArrivalTime();
+			int inspectiontime=mb.getPart1().getInspectionTime()*noInspect;
+			int platformtime=mb.getPart1().getPlatformTime();
+			int departuretime=mb.getDepartureTime();
+			int washingtime=mb.getPart1().getWashingTime();
+			
 			if(mb.getPart1().getPartRepair()||mb.getPart1().getPartInspection()||mb.getPart1().getPartWashing()||mb.getPart1().getPartCleaning())
 			{
 				if(mb.getPart1().getPartInspection()==false)
 				{
 				noInspect=0;	
 				}
-				JobPlatform jobPlatform  = new JobPlatform(mb,mb.getArrivalTime()+mb.getPart1().getInspectionTime()*noInspect+4,mb.getPart1().getPlatformTime(),mb.getDepartureTime()-6 - mb.getPart1().getWashingTime());
+
+				JobPlatform jobPlatform  = new JobPlatform(mb,arrivaltime+inspectiontime+4,platformtime,departuretime-6 -washingtime);
 				jobsPlatform.add(jobPlatform);
 			}
 
 			if(mb.getPart1().getPartWashing())
 			{
-				if(mb.getPart1().getPartInspection()==false);
-				{
-				noInspect=0;	
-				}
-				JobWashingMachine jobWashingMachine = new JobWashingMachine(mb,mb.getArrivalTime()+mb.getPart1().getInspectionTime()*noInspect+4, mb.getDepartureTime(),mb.getPart1().getPlatformTime());
+				JobWashingMachine jobWashingMachine = new JobWashingMachine(mb,arrivaltime+inspectiontime+platformtime+5,washingtime,departuretime-6);
 				jobsWashingMachine.add(jobWashingMachine);	
 			}
 		}
@@ -115,6 +115,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 
 	}
+	public int minDeparturePlatform;
 
 	//function of time routine
 	public int[] timeRoutine() {
@@ -123,7 +124,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		int min = Integer.MAX_VALUE;
 		int eventType = 0;
 		int minArrivalPlatform = minimum(timeArrivalPlatform);
-		int minDeparturePlatform = minimum(timeDeparturePlatform);
+		 minDeparturePlatform = minimum(timeDeparturePlatform);
 		int minArrivalWashingMachine = minimum(timeArrivalWashingMachine);
 		int minDepartureWashingMachine = minimum(timeDepartureWashingMachine);
 
@@ -163,9 +164,9 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		}
 		
 		time = nextEvent[1]; 
-
+		Job tempJob = queuePlatform.peek();
 		for (Platform p: platforms) {
-			Job tempJob = queuePlatform.peek();
+			
 			if (p.canScheduleJob(tempJob, time)) 
 			{
 				Job jobAtPlatform = queuePlatform.poll();
@@ -199,13 +200,24 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 			}
 		}
 		if(!jobScheduledPlatform){
-			int endTimePlatform = Integer.MAX_VALUE;
-			for(Job j: timeDeparturePlatform.keySet())
-			{
-				if(endTimePlatform > timeDeparturePlatform.get(j)) 
-				{
-					endTimePlatform = timeDeparturePlatform.get(j);	
-				}
+			//int endTimePlatform = Integer.MAX_VALUE;
+			//for(Job j: timeDeparturePlatform.keySet())
+			//{
+				//if(endTimePlatform > timeDeparturePlatform.get(j)) 
+				//{
+					//endTimePlatform = timeDeparturePlatform.get(j);	
+				//}
+			//}
+			timeArrivalPlatform.put(tempJob, minDeparturePlatform);
+			if(!platformArrivalTimeKey.containsKey(minDeparturePlatform)) {
+				Set<Job> set = new HashSet<Job>();
+				set.add(tempJob);
+				platformArrivalTimeKey.put(minDeparturePlatform, set);
+			}
+			else
+			{ 
+				Set <Job> set = platformArrivalTimeKey.get(minDeparturePlatform);
+				set.add(tempJob);
 			}
 		}
 	}
