@@ -64,13 +64,13 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		{
 			if(mb.getPart1().getPartRepair()||mb.getPart1().getPartInspection()||mb.getPart1().getPartWashing()||mb.getPart1().getPartCleaning())
 			{
-				JobPlatform jobPlatform  = new JobPlatform(mb,mb.getArrivalTime(), mb.getDepartureTime(),mb.getPart1().getPlatformTime());
+				JobPlatform jobPlatform  = new JobPlatform(mb,mb.getArrivalTime()+mb.getPart1().getInspectionTime()+4,mb.getPart1().getPlatformTime(),mb.getDepartureTime()-6 - mb.getPart1().getWashingTime());
 				jobsPlatform.add(jobPlatform);
 			}
 
 			if(mb.getPart1().getPartWashing())
 			{
-				JobWashingMachine jobWashingMachine = new JobWashingMachine(mb,mb.getArrivalTime(), mb.getDepartureTime(),mb.getPart1().getPlatformTime());
+				JobWashingMachine jobWashingMachine = new JobWashingMachine(mb,mb.getArrivalTime()+mb.getPart1().getInspectionTime()+4, mb.getDepartureTime(),mb.getPart1().getPlatformTime());
 				jobsWashingMachine.add(jobWashingMachine);	
 			}
 		}

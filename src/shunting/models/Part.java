@@ -104,8 +104,8 @@ public class Part {
 	
 	public int getRepairTime() {
 		for (Train t: units) {
-			if(t.getCleaning()){
-				cleaningTime += t.getTrainType().getCleaningTime();		
+			if(t.getRepair()){
+				repairTime += t.getTrainType().getRepairTime();		
 			}
 		}
 		return repairTime;

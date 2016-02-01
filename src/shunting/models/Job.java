@@ -6,8 +6,6 @@ public class Job {
 	private int r;
 	private int p;
 	private int d;
-	private int t_d = 4;
-	private int t_c = 6;
 	private int time_inspection;
 	
 	public Job(MatchBlock mb, int r, int p, int d) {
@@ -28,7 +26,7 @@ public class Job {
 	}
 	
 	public int getReleaseTime() {
-		return r + t_d + mb.getPart1().getInspectionTime();
+		return r;
 	}
 	
 	public int getProcessingTime() {
@@ -36,7 +34,7 @@ public class Job {
 	}
 	
 	public int getDeadline() {
-		return d-t_c;
+		return d;
 	}
 	
 	public boolean needsWashing() {
