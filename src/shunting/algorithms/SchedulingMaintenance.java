@@ -33,6 +33,8 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	
 	public Map <Integer, Set<Job>> platformArrivalTimeKey;
 	public Map <Integer, Set<Job>> washerArrivalTimeKey;
+	
+	private int noInspect=1;
 
 
 	public SchedulingMaintenance(Set<MatchBlock> ms, ShuntingYard yard) {
@@ -70,7 +72,11 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 			if(mb.getPart1().getPartWashing())
 			{
-				JobWashingMachine jobWashingMachine = new JobWashingMachine(mb,mb.getArrivalTime()+mb.getPart1().getInspectionTime()+4, mb.getDepartureTime(),mb.getPart1().getPlatformTime());
+				if(mb.getPart1().getPartInspection()==false);
+				{
+				noInspect=0;	
+				}
+				JobWashingMachine jobWashingMachine = new JobWashingMachine(mb,mb.getArrivalTime()+mb.getPart1().getInspectionTime()*noInspect+4, mb.getDepartureTime(),mb.getPart1().getPlatformTime());
 				jobsWashingMachine.add(jobWashingMachine);	
 			}
 		}
