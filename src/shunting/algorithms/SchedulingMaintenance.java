@@ -150,6 +150,8 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 		return nextEvent;
 	}
+	
+	public Job jobAtPlatform;
 
 	private void platformArrival() {
 
@@ -218,7 +220,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 			}
 		}
 	}
-
+	public Job jobAtWashingMachine;
 	private void washingMachineArrival() {
 		Set<Job> jobsOnWashingArrival = washerArrivalTimeKey.get(nextEvent[1]);
 		for (Job j : jobsOnWashingArrival) { 
@@ -227,7 +229,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		time = nextEvent[1]; 
 		Job tempJob = queueWashingMachine.peek();
 		for (Washer w: washers) {
-			Job jobAtWashingMachine = queueWashingMachine.poll();
+			jobAtWashingMachine = queueWashingMachine.poll();
 			if(w.canScheduleJob(tempJob, time))
 			{	
 				timeDepartureWashingMachine.put(jobAtWashingMachine, time + jobAtWashingMachine.getProcessingTime());
@@ -241,11 +243,24 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	}
 
 	private void platformDeparture() {
+		Job jobLeavingPlatform = jobAtPlatform;
+		for (Job j: timeDeparturePlatform.keySet()){
+			if(time == timeDeparturePlatform.get(j)) {jobLeavingPlatform = j;} 
+		}
+			
+		
+		timeDeparturePlatform.put(jobLeavingPlatform, Integer.MAX_VALUE);
 		time = nextEvent[1];
 	}
 
 	private void washingMachineDeparture() {
+		Job jobLeavingWashingMachine = jobAtWashingMachine;
+		for (Job j: timeDepartureWashingMachine.keySet()){
+			if(time == timeDeparturePlatform.get(j)) {jobLeavingWashingMachine = j;} 
+		}
+		timeDepartureWashingMachine.put(jobLeavingWashingMachine, Integer.MAX_VALUE);
 		time = nextEvent[1];
+		
 	}
 
 	/*	public static <Job, Integer> Set<Job> getKeysByValue(Map<Job, Integer> map, Integer value) {
