@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -31,10 +32,12 @@ public class ScheduleReader {
 	
 	private Map<String, Train> trainCache;
 	private LocalTime base;
+	private Random ran;
 	
 	public ScheduleReader() {
 		trainCache = new HashMap<>();
 		base = null;
+		ran = new Random(0);
 	}
 	
 	public Schedule parseXML(File f) {
@@ -90,7 +93,18 @@ public class ScheduleReader {
 		boolean repair = Boolean.parseBoolean(attr.getNamedItem("repair").getNodeValue());
 		boolean cleaning = Boolean.parseBoolean(attr.getNamedItem("cleaning").getNodeValue());
 		boolean washing = Boolean.parseBoolean(attr.getNamedItem("inspection").getNodeValue());
-		String type = attr.getNamedItem("type").getNodeValue();		
+		String type = attr.getNamedItem("type").getNodeValue();
+		
+		// TODO: REMOVE THIS CODE AND UNCOMMENT ABOVE
+//		boolean interchangeable = generateBoolean(0.90);
+//		boolean inspection = generateBoolean(0.80);
+//		boolean repair = generateBoolean(0.10);
+//		boolean cleaning = true;
+//		boolean washing = generateBoolean(0.10);
+//		String type = attr.getNamedItem("type").getNodeValue();
+//		if (type.startsWith("SLT")) {
+//			inspection = true;
+//		}
 		
 		Train t = tf.createTrainByType(ID, type, interchangeable, 
 				inspection, repair, cleaning, washing);
@@ -108,8 +122,9 @@ public class ScheduleReader {
 			base = eventTime;
 		Duration timeToInt = Duration.between(base, eventTime);
 		int intTime = (int) timeToInt.toMinutes();
+		intTime++;
 		if (intTime < prevTime)
-			intTime += 24*60;
+			intTime += 24*60 - prevTime;
 		
 		Composition comp = new Composition(attr.getNamedItem("compID").getNodeValue());
 		NodeList trains = n.getChildNodes();
@@ -126,5 +141,10 @@ public class ScheduleReader {
 		else if (type.equals("departure"))
 			return new Departure(intTime, comp);
 		throw new IllegalStateException("Illegal event: " + type);
+	}
+	
+	private boolean generateBoolean(double p) {
+		double r = ran.nextDouble();
+		return r <= p;
 	}
 }

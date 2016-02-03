@@ -5,15 +5,6 @@ import java.util.List;
 
 public class Part {
 	private List<Train> units;
-	private boolean partInspection = false;
-	private boolean partCleaning = false;
-	private boolean partWashing = false;
-	private boolean partRepair = false;
-	private int inspectionTime = 0;
-	private int cleaningTime = 0;
-	private int washingTime = 0;
-	private int repairTime = 0;
-	public  int platformTime = 0;
 
 
 	public Part() {
@@ -45,80 +36,84 @@ public class Part {
 
 		for (Train t: units) {
 			if(t.getInspection()) {
-				partInspection = true;
+				return true;
 			}
 		}
-		return partInspection;
+		return false;
 	}
 
 
 	public boolean getPartCleaning() {
 		for (Train t: units){
 			if(t.getCleaning()){
-				partCleaning = true;
+				return true;
 			}
 		}
-		return partCleaning;
+		return false;
 	}
 
 
 	public boolean getPartRepair() {
 		for (Train t: units){
 			if(t.getRepair()){
-				partRepair = true;
+				return true;
 			}
 		}
-		return partRepair;
+		return false;
 	}
 
 
 	public boolean getPartWashing() {
 		for (Train t: units){
 			if(t.getWashing()){
-				partWashing = true;
+				return true;
 			}
 		}
-		return partWashing;
+		return false;
 	}
 
 
 	public int getInspectionTime() {
+		int sum = 0;
 		for (Train t: units) {
 			if(t.getInspection()){
-				inspectionTime += t.getTrainType().getInspectionTime();		
+				sum += t.getTrainType().getInspectionTime();		
 			}
 		}
-		return inspectionTime;
+		return sum;
 	}
 	
 	
 	public int getCleaningTime() {
+		int sum = 0;
 		for (Train t: units) {
 			if(t.getCleaning()){
-				cleaningTime += t.getTrainType().getCleaningTime();		
+				sum += t.getTrainType().getCleaningTime();		
 			}
 		}
-		return cleaningTime;
+		return sum;
 	}
 	
 	
 	public int getRepairTime() {
+		int sum = 0;
 		for (Train t: units) {
 			if(t.getRepair()){
-				repairTime += t.getTrainType().getRepairTime();		
+				sum += t.getTrainType().getCleaningTime();		
 			}
 		}
-		return repairTime;
+		return sum;
 	}
 	
 	
 	public int getWashingTime() {
+		int sum = 0;
 		for (Train t: units) {
 			if(t.getWashing()){
-				washingTime += t.getTrainType().getWashingTime();		
+				sum += t.getTrainType().getWashingTime();		
 			}
 		}
-		return washingTime;
+		return sum;
 	}
 	
 	public int getPlatformTime () {

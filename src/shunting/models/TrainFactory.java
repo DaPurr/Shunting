@@ -118,11 +118,4 @@ public class TrainFactory {
 	private String generateID() {
 		return String.valueOf(1 + ran.nextInt(10000));
 	}
-	
-	private boolean generateBoolean(double p) {
-		double r = ran.nextDouble();
-		if (r <= p)
-			return true;
-		return false;
-	}
 }
