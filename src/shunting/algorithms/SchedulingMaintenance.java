@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.*;
 
-
 public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	Map<Job, Integer> timeArrivalPlatform;
 	Map<Job, Integer> timeArrivalWashingMachine;
@@ -30,12 +29,9 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	public List<Platform> platforms; 
 	public ShuntingYard shuntingYard;
 	public List <Washer> washers;
-
 	public Map <Integer, Set<Job>> platformArrivalTimeKey;
 	public Map <Integer, Set<Job>> washerArrivalTimeKey;
 	
-
-
 	public SchedulingMaintenance(Set<MatchBlock> ms, ShuntingYard yard) {
 
 		queuePlatform = new PriorityQueue<Job>(100, new jobTimeComparatorPlatform());
@@ -132,8 +128,8 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				minArrivalWashingMachine && minArrivalPlatform < minDepartureWashingMachine){
 			min = minArrivalPlatform;
 			eventType = 1;
-
 		}
+		
 		else if(minDeparturePlatform <= minArrivalPlatform && minDeparturePlatform <= minArrivalWashingMachine 
 				&& minDeparturePlatform < minDepartureWashingMachine){
 			min = minDeparturePlatform;
@@ -252,9 +248,6 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		time = nextEvent[1];
 	}
 
-
-
-
 	/*	public static <Job, Integer> Set<Job> getKeysByValue(Map<Job, Integer> map, Integer value) {
 		Set<Job> keys = new HashSet<Job>();
 		for (Entry<Job, Integer> entry : map.entrySet()) {
@@ -284,7 +277,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 			if (j1.getDeadline()-j1.getMatchBlock().getPart1().getWashingTime()-j1.getMatchBlock().getPart1().getPlatformTime() < 
 					j2.getDeadline()-j2.getMatchBlock().getPart1().getWashingTime()-j2.getMatchBlock().getPart1().getPlatformTime())
 				return 1;
-			else if (j1.getDeadline()-j1.getMatchBlock().getPart1().getWashingTime()-j1.getProcessingTime()-j1.getMatchBlock().getPart1().getPlatformTime() >
+			else if (j1.getDeadline()-j1.getMatchBlock().getPart1().getWashingTime()-j1.getMatchBlock().getPart1().getPlatformTime() >
 			j2.getDeadline()-j2.getMatchBlock().getPart1().getWashingTime()-j2.getMatchBlock().getPart1().getPlatformTime())
 				return -1;
 			else return 0;
@@ -306,7 +299,6 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		}
 	}
 
-
 	private Set<MaintenanceActivity> writeResults()
 	{
 		for (Job j:jobsToBeDone){
@@ -315,7 +307,6 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		}
 		return maintenanceActivities;	
 	}
-
 
 	@Override
 	public Set<MaintenanceActivity> solve() {
@@ -336,12 +327,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				washingMachineDeparture();
 			}
 			else System.out.print("Error in the time flow");
-
-
 		}
 		return null;
 	}
 }
-
-
-
