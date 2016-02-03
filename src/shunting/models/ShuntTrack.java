@@ -1,4 +1,4 @@
-package shunting;
+package shunting.models;
 
 public abstract class ShuntTrack {
 
