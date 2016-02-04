@@ -224,12 +224,12 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 			}
 		}
 		
+	
 		
 		if(!queuePlatform.isEmpty()){
-			PriorityQueue<Job> queueForItterations = queuePlatform;
-			while(!queueForItterations.isEmpty()) {
-				Job j = queueForItterations.poll(); 
-				timeArrivalPlatform.put(j, minDeparturePlatform);
+			for(Job j: queuePlatform){
+				Job job = queuePlatform.peek(); 
+				timeArrivalPlatform.put(job, minDeparturePlatform);
 			}
 		}
 	}
@@ -266,7 +266,9 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 			int trial = timeDeparturePlatform.get(j);
 			if(trial <= time ) {jobLeavingPlatform = j;} }
 		System.out.println("The job departures from platform "+jobLeavingPlatform);
+		
 		timeDeparturePlatform.put(jobLeavingPlatform, Integer.MAX_VALUE);
+		
 		Job tempJob = queuePlatform.peek();
 		for (Platform p: platforms) {
 			if (p.canScheduleJob(tempJob, time)) 
@@ -305,10 +307,11 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		}
 
 		if(!queuePlatform.isEmpty())
-		{
+		{ for(Job j: queuePlatform){
 			Job nextJob = queuePlatform.peek();
 			int a = minimum(timeDeparturePlatform);
 			timeArrivalPlatform.put(nextJob, a);
+			}
 		}
 
 	}
