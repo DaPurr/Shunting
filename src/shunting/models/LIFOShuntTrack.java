@@ -1,23 +1,18 @@
 package shunting.models;
 
-import java.util.Stack;
-
-import shunting.models.ShuntTrack;
+import java.util.*;
 
 public class LIFOShuntTrack extends ShuntTrack {
 
-	private int leftoverCapacity;
-	private Stack<MatchBlock> parked;
+	private List<BlockNode> parked;
 	
 	public LIFOShuntTrack(int length) {
 		super(length);
-		leftoverCapacity = length;
-		parked = new Stack<MatchBlock>();
+		this.parked = new ArrayList<>();
 	}
-
-	@Override
-	public int getRemainingCapacity() {
-		return leftoverCapacity;
+	
+	public void parkBlock(BlockNode block) {
+		parked.add(block);
 	}
 
 }
