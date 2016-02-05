@@ -41,7 +41,7 @@ public class Main {
 		platforms.add(platform2);
 		washers.add(washer1);
 		
-		ShuntingYard shuntingYard = new ShuntingYard(platforms, washers);
+		ShuntingYard shuntingYard = new ShuntingYard(platforms, washers, null);
 		
 		for (MatchBlock block : mb) {
 			if (block.getArrivalTime() >= horizon || block.getDepartureTime() >= horizon) 
