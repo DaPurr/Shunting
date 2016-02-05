@@ -91,22 +91,39 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	}
 	
 	private class Assignment {
-		public Assignment() {
-			// TODO Auto-generated constructor stub
+		
+		private List<BlockNode> nodes;
+		private ShuntTrack track;
+		
+		public Assignment(List<BlockNode> nodes, ShuntTrack track) {
+			this.nodes = nodes;
+			this.track = track;
 		}
 		
 		@Override
 		public boolean equals(Object other) {
-			return false;
+			if (other == null || !(other instanceof Assignment))
+				return false;
+			Assignment ass = (Assignment) other;
+			if (nodes.size() != ass.nodes.size())
+				return false;
+			for (int i = 0; i < nodes.size(); i++) {
+				BlockNode node1 = nodes.get(i);
+				BlockNode node2 = ass.nodes.get(i);
+				if (node1 != node2)
+					return false;
+			}
+			return true;
 		}
 		
 		@Override
 		public int hashCode() {
-			return 0;
+			return 3*nodes.hashCode() + 7*track.hashCode();
 		}
 	}
 	
 	private class PricingProblem {
+		
 		
 	}
 
