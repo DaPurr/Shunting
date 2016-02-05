@@ -2,15 +2,19 @@ package shunting;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Iterator;
 
 import org.jgrapht.DirectedGraph;
 
+import ilog.concert.IloException;
+import shunting.algorithms.CGParkingAlgorithm;
 import shunting.algorithms.CPLEXMatchAlgorithm;
 import shunting.algorithms.MaintenanceAlgorithm;
 import shunting.algorithms.MatchAlgorithm;
+import shunting.algorithms.ParkingAlgorithm;
 import shunting.algorithms.SchedulingMaintenance;
 import shunting.data.ScheduleReader;
 import shunting.models.*;
@@ -41,12 +45,44 @@ public class Main {
 		platforms.add(platform2);
 		washers.add(washer1);
 		
-		ShuntingYard shuntingYard = new ShuntingYard(platforms, washers, null);
+		// example page 80 thesis Lentink
+		ShuntTrack track = new FreeShuntTrack(275);
+		List<ShuntTrack> tracks = new ArrayList<>();
+		tracks.add(track);
+		TrainFactory tf = new TrainFactory();
+		Train t1 = tf.typeDDZ4("1", true, true, true, true, true);
+		Train t2 = tf.typeDDZ4("2", true, true, true, true, true);
+		Train t3 = tf.typeDDZ4("3", true, true, true, true, true);
+		Train t4 = tf.typeVIRM4("5", true, true, true, true, true);
+		Train t5 = tf.typeSLT4("6", true, true, true, true, true);
+		Part p1 = new Part(); p1.addUnit(t1);
+		Part p2 = new Part(); p2.addUnit(t4);
+		Part p3 = new Part(); p3.addUnit(t5);
+		Part p4 = new Part(); p4.addUnit(t2);
+		Part p5 = new Part(); p5.addUnit(t3);
+		MatchBlock mb1 = new MatchBlock(p1, p1, 0, 666);
+		MatchBlock mb2 = new MatchBlock(p2, p2, 83, 544);
+		MatchBlock mb3 = new MatchBlock(p3, p3, 146, 635);
+		MatchBlock mb4 = new MatchBlock(p4, p4, 152, 603);
+		Set<MatchBlock> matches = new HashSet<>();
+		matches.add(mb1); matches.add(mb2); 
+		matches.add(mb3); matches.add(mb4); 
+		
+		ShuntingYard shuntingYard = new ShuntingYard(platforms, washers, tracks);
 		
 		for (MatchBlock block : mb) {
 			if (block.getArrivalTime() >= horizon || block.getDepartureTime() >= horizon) 
 				throw new IllegalStateException(mb.toString());
 		}
+		
+		// test Parking Problem
+//		try {
+//			ParkingAlgorithm cg = new CGParkingAlgorithm(matches, shuntingYard);
+//			cg.solve();
+//		} catch (IloException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 
 		// test Maintenance scheduling
 		MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingYard);
