@@ -12,30 +12,52 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	private final int D_PARK = 100;
 	
 	private Set<MatchBlock> matches;
-	private List<ShuntTrack> tracks;
+	private Set<ShuntTrack> tracks;
 	
 	private IloCplex master;
 	private Map<MatchBlock, IloRange> coverageConstraints = new HashMap<>();
 	private Map<ShuntTrack, IloRange> capacityConstraints = new HashMap<>();
 	
-	private Map<MatchBlock, Double> lambda = new HashMap<>();
-	private Map<ShuntTrack, Double> mu = new HashMap<>();
 	private Map<MatchBlock, IloNumVar> notParked = new HashMap<>();
 	private Map<Assignment, IloNumVar> assignment = new HashMap<>();
 	private IloObjective objective;
 	
 	public CGParkingAlgorithm(Set<MatchBlock> matches, ShuntingYard yard) throws IloException {
 		this.matches = matches;
-		tracks = yard.getShuntTracks();
+		tracks = new HashSet<>(yard.getShuntTracks());
 		master = new IloCplex();
 	}
-	
+
 	@Override
 	public Set<ShuntTrack> solve() {
-		// TODO Auto-generated method stub
+
+		try {
+			runSolver();
+		} catch (IloException e) {
+			e.printStackTrace();
+		}
+
 		return null;
 	}
-	
+
+	private void runSolver() throws IloException {
+		
+		// create master problem
+		addObjective();
+		addCapacityConstraints();
+		addCoverageConstraints();
+		addParkedVariables();
+		
+		// create pricing problem
+		PricingProblem pricingProblem = new PricingProblem(tracks, matches);
+		
+		// perform column generation
+		while (true) {
+			master.solve();
+			break;
+		}
+	}
+
 	private void addParkedVariables() throws IloException {
 		for (MatchBlock mb : matches) {
 			addParkedVariable(mb);
@@ -44,9 +66,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	
 	private void addParkedVariable(MatchBlock match) throws IloException {
 		IloColumn column = master.column(objective, D_PARK);
-		for (MatchBlock m : matches) { 
-			column = column.and(master.column(coverageConstraints.get(m), 1));
-		}
+		column = column.and(master.column(coverageConstraints.get(match), 1));
 		IloNumVar isParked = master.numVar(column, 0, 1);
 		notParked.put(match, isParked);
 	}
@@ -65,13 +85,6 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		assignment.put(ass, assign);
 		
 		return assign;
-	}
-	
-	private void initDuals() {
-		for (MatchBlock block : matches)
-			lambda.put(block, 0.0);
-		for (ShuntTrack track : tracks)
-			mu.put(track, 0.0);
 	}
 	
 	private void addObjective() throws IloException {
@@ -120,11 +133,6 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		public int hashCode() {
 			return 3*nodes.hashCode() + 7*track.hashCode();
 		}
-	}
-	
-	private class PricingProblem {
-		
-		
 	}
 
 }
