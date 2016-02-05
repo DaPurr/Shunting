@@ -19,4 +19,9 @@ public class BlockNode extends PriceNode {
 		return approach;
 	}
 	
+	@Override
+	public String toString() {
+		return name();
+	}
+	
 }

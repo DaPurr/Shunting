@@ -7,8 +7,6 @@ public class MatchBlock {
 	private int arrivalTime;
 	private int departureTime;
 
-
-
 	public MatchBlock(Part p1, Part p2, int arrivalTime, int departureTime) {
 		this.p1 = p1;
 		this.p2 = p2;
