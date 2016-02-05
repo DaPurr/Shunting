@@ -2,5 +2,5 @@ package shunting.models;
 
 public enum Approach {
 
-	LL, LR, RL, RR;
+	LL, LR, RL, RR, NOT;
 }
