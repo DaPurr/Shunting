@@ -145,15 +145,15 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	}
 
 	private void platformArrival() {
-
-		Boolean jobScheduledPlatform = new Boolean(false);
-		Set<Job> jobsOnPlatformArrival = platformArrivalTimeKey.get(nextEvent[1]);
-		for (Job j : jobsOnPlatformArrival) { 
-			queuePlatform.add(j);
-			System.out.println("The arrival to the platform queue of job "+j);
-		}
-
 		time = nextEvent[1]; 
+		Boolean jobScheduledPlatform = new Boolean(false);
+		for (Job j: timeArrivalPlatform.keySet()) {
+			if(time == timeArrivalPlatform.get(j)) {
+				queuePlatform.add(j);
+				System.out.println("The arrival to the platform queue of job "+j);
+			}
+		}
+		
 		System.out.println("Time is " + time);
 
 		Job tempJob = queuePlatform.peek();
