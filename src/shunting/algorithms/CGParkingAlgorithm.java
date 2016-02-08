@@ -19,7 +19,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	private Map<ShuntTrack, IloRange> capacityConstraints = new HashMap<>();
 	
 	private Map<MatchBlock, IloNumVar> notParked = new HashMap<>();
-	private Map<Assignment, IloNumVar> assignment = new HashMap<>();
+	private Map<TrackAssignment, IloNumVar> assignment = new HashMap<>();
 	private IloObjective objective;
 	
 	public CGParkingAlgorithm(Set<MatchBlock> matches, ShuntingYard yard) throws IloException {
@@ -71,7 +71,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		notParked.put(match, isParked);
 	}
 	
-	private IloNumVar addAssignmentVariable(Assignment ass, double cost) throws IloException {
+	private IloNumVar addAssignmentVariable(TrackAssignment ass, double cost) throws IloException {
 		IloColumn column = master.column(objective, cost);
 		for (MatchBlock match : matches) {
 			IloRange constraint = coverageConstraints.get(match);
@@ -100,38 +100,6 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	private void addCapacityConstraints() throws IloException {
 		for (ShuntTrack track : tracks) {
 			capacityConstraints.put(track, master.addRange(0, 1));
-		}
-	}
-	
-	private class Assignment {
-		
-		private List<BlockNode> nodes;
-		private ShuntTrack track;
-		
-		public Assignment(List<BlockNode> nodes, ShuntTrack track) {
-			this.nodes = nodes;
-			this.track = track;
-		}
-		
-		@Override
-		public boolean equals(Object other) {
-			if (other == null || !(other instanceof Assignment))
-				return false;
-			Assignment ass = (Assignment) other;
-			if (nodes.size() != ass.nodes.size())
-				return false;
-			for (int i = 0; i < nodes.size(); i++) {
-				BlockNode node1 = nodes.get(i);
-				BlockNode node2 = ass.nodes.get(i);
-				if (node1 != node2)
-					return false;
-			}
-			return true;
-		}
-		
-		@Override
-		public int hashCode() {
-			return 3*nodes.hashCode() + 7*track.hashCode();
 		}
 	}
 
