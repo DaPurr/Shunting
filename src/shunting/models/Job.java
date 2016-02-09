@@ -7,12 +7,14 @@ public class Job {
 	private int p;
 	private int d;
 	private int time_inspection;
+	private int w;
 	
-	public Job(MatchBlock mb, int r, int p, int d) {
+	public Job(MatchBlock mb, int r, int p, int w, int d) {
 		this.mb = mb;
 		this.r = r;
 		this.p = p;
 		this.d = d;
+		this.w = w;
 	}
 	
 	// TODO: REMOVE!
@@ -31,6 +33,9 @@ public class Job {
 	
 	public int getProcessingTime() {
 		return p;
+	}
+	public int getWashingTime() {
+		return w;
 	}
 	
 	public int getDeadline() {
