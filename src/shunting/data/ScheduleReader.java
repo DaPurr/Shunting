@@ -31,6 +31,7 @@ public class ScheduleReader {
 	
 	private Map<String, Train> trainCache;
 	private LocalTime base;
+	private TrainFactory tf = new TrainFactory(0);
 	
 	public ScheduleReader() {
 		trainCache = new HashMap<>();
@@ -84,7 +85,6 @@ public class ScheduleReader {
 		if (trainCache.containsKey(ID)) {
 			return trainCache.get(ID);
 		}
-		TrainFactory tf = new TrainFactory();
 		boolean interchangeable = Boolean.parseBoolean(attr.getNamedItem("interchangeable").getNodeValue());
 		boolean inspection = Boolean.parseBoolean(attr.getNamedItem("inspection").getNodeValue());
 		boolean repair = Boolean.parseBoolean(attr.getNamedItem("repair").getNodeValue());
@@ -92,8 +92,9 @@ public class ScheduleReader {
 		boolean washing = Boolean.parseBoolean(attr.getNamedItem("inspection").getNodeValue());
 		String type = attr.getNamedItem("type").getNodeValue();		
 		
-		Train t = tf.createTrainByType(ID, type, interchangeable, 
-				inspection, repair, cleaning, washing);
+//		Train t = tf.createTrainByType(ID, type, interchangeable, 
+//				inspection, repair, cleaning, washing);
+		Train t = tf.createTrainByType(ID, type);
 		trainCache.put(ID, t);
 		
 		return t;
