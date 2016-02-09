@@ -42,7 +42,7 @@ public abstract class Machine {
 		return true;
 	}
 	
-	public boolean canScheduleJob(Job j, int startJ) {
+	public boolean canScheduleJobPlatform(Job j, int startJ) {
 		if (jobs.contains(j) || startTimes.containsKey(j))
 			return false;
 		if (!(1 <= startJ && startJ <= horizon))
@@ -51,6 +51,21 @@ public abstract class Machine {
 			int startQ = startTimes.get(q);
 			int endQ = getEndTime(q);
 			int endJ = startJ + j.getProcessingTime() - 1;
+			if ( !(endQ < startJ || startQ > endJ) )
+				return false;
+		}
+		return true;
+	}
+	
+	public boolean canScheduleJobWashing(Job j, int startJ) {
+		if (jobs.contains(j) || startTimes.containsKey(j))
+			return false;
+		if (!(1 <= startJ && startJ <= horizon))
+			return false;
+		for (Job q : jobs){
+			int startQ = startTimes.get(q);
+			int endQ = getEndTime(q);
+			int endJ = startJ + j.getWashTime() - 1;
 			if ( !(endQ < startJ || startQ > endJ) )
 				return false;
 		}
