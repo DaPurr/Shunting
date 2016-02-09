@@ -23,7 +23,7 @@ public class Main {
 
 	public static void main(String[] args) {
 		int seed = 0;
-		int horizon = 1440;
+		int horizon = 1600;
 
 		//	Test for class Train
 		//	test for schedule (no departures in example affects e.g. schedule.events)
