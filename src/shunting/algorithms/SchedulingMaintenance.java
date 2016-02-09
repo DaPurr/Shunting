@@ -294,10 +294,10 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	private void washingMachineDeparture() {
 		Job jobLeavingWashingMachine = jobAtWashingMachine;
 		time = nextEvent[1];
-		//System.out.println("Time is " + time);
+		System.out.println("Time is " + time);
 		for (Job j: timeDepartureWashingMachine.keySet()){
 			if(time == timeDepartureWashingMachine.get(j)) {jobLeavingWashingMachine = j;
-			//System.out.println("Job "+j+ " leaves Washing Machine at time" +time);
+			System.out.println("Job "+j+ " leaves Washing Machine at time" +time);
 			}
 		}
 		endTime.put(jobLeavingWashingMachine, time);
@@ -308,7 +308,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				Job jobAtWashingMachine = queueWashingMachine.poll();
 				if(w.canScheduleJobWashing(jobAtWashingMachine, time))
 				{	
-					timeDepartureWashingMachine.put(jobAtWashingMachine, time + jobAtWashingMachine.getProcessingTime());
+					timeDepartureWashingMachine.put(jobAtWashingMachine, time + jobAtWashingMachine.getMatchBlock().getPart1().getWashingTime());
 					w.scheduleJobWashing(jobAtWashingMachine,time);
 					startWasher.put(jobAtWashingMachine, time);
 					washerMap.put(jobAtWashingMachine, w);
@@ -319,6 +319,13 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				}
 				timeArrivalWashingMachine.put(jobAtWashingMachine, Integer.MAX_VALUE);
 				break;
+			}
+		}
+		
+		if(!queueWashingMachine.isEmpty()) {
+			for (Job j: queueWashingMachine) {
+				timeArrivalWashingMachine.put(j, minimum(timeDepartureWashingMachine));
+				System.out.println("There is a job in the washer queue "+j+" it's time is set to "+minimum(timeDepartureWashingMachine) );
 			}
 		}
 
@@ -367,6 +374,15 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	private Set<MaintenanceActivity> writeResults()
 	{
 		for (Job j:jobsToBeCompleted){
+			Job job = j;
+			System.out.println(job);
+			int a = startPlatform.get(j);
+			System.out.println(a);
+			int b  = startWasher.get(j);
+			System.out.println(b);
+			Platform c = platformMap.get(j);
+			Washer d = washerMap.get(j);
+			System.out.println(j +" "+ a +" "+b+ " "+ c +" "+ d);
 			MaintenanceActivity ma = new MaintenanceActivity(j,startPlatform.get(j),startWasher.get(j),platformMap.get(j),washerMap.get(j), endTime.get(j));
 			maintenanceActivities.add(ma);
 		}
@@ -398,6 +414,8 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				System.out.println(j);
 				System.out.println(timeArrivalPlatform.get(j));
 				System.out.println(timeDeparturePlatform.get(j));
+				System.out.println(timeArrivalWashingMachine.get(j));
+				System.out.println(timeDepartureWashingMachine.get(j));
 
 				}
 				break;
