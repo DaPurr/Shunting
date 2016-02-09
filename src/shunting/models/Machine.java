@@ -33,8 +33,17 @@ public abstract class Machine {
 		return true;
 	}
 	
-	public boolean scheduleJob(Job j, int startJ) {
-		if (!canScheduleJob(j, startJ))
+	public boolean scheduleJobPlatform(Job j, int startJ) {
+		if (!canScheduleJobPlatform(j, startJ))
+			return false;
+		jobs.add(j);
+		startTimes.put(j, startJ);
+		Collections.sort(jobs, new CompJobs());
+		return true;
+	}
+	
+	public boolean scheduleJobWashing(Job j, int startJ) {
+		if (!canScheduleJobWashing(j, startJ))
 			return false;
 		jobs.add(j);
 		startTimes.put(j, startJ);
