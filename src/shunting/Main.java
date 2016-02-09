@@ -27,7 +27,7 @@ public class Main {
 
 		//	Test for class Train
 		//	test for schedule (no departures in example affects e.g. schedule.events)
-		File file = new File("data/schedule_kleine_binckhorst.xml");
+		File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
 		ScheduleReader sr = new ScheduleReader();
 		Schedule schedule = sr.parseXML(file);
 
