@@ -19,11 +19,11 @@ public abstract class Machine {
 		this.horizon = horizon;
 	}
 	
-	public boolean scheduleJob(Job j) {
-		if (!canScheduleJob(j))
+	public boolean scheduleJobPlatform(Job j) {
+		if (!canScheduleJobPlatform(j))
 			return false;
 		Job q = jobs.get(jobs.size()-1);
-		int start = getEndTime(q);
+		int start = getEndTimePlatform(q);
 		int end = start + j.getProcessingTime() - 1;
 		if (end > horizon)
 			return false;
@@ -32,7 +32,7 @@ public abstract class Machine {
 		Collections.sort(jobs, new CompJobs());
 		return true;
 	}
-	
+
 	public boolean scheduleJobPlatform(Job j, int startJ) {
 		if (!canScheduleJobPlatform(j, startJ))
 			return false;
@@ -58,7 +58,7 @@ public abstract class Machine {
 			return false;
 		for (Job q : jobs){
 			int startQ = startTimes.get(q);
-			int endQ = getEndTime(q);
+			int endQ = getEndTimePlatform(q);
 			int endJ = startJ + j.getProcessingTime() - 1;
 			if ( !(endQ < startJ || startQ > endJ) )
 				return false;
@@ -73,21 +73,21 @@ public abstract class Machine {
 			return false;
 		for (Job q : jobs){
 			int startQ = startTimes.get(q);
-			int endQ = getEndTime(q);
-			int endJ = startJ + j.getWashTime() - 1;
+			int endQ = getEndTimeWashing(q);
+			int endJ = startJ + j.getWashingTime() - 1;
 			if ( !(endQ < startJ || startQ > endJ) )
 				return false;
 		}
 		return true;
 	}
 	
-	public boolean canScheduleJob(Job j) {
+	public boolean canScheduleJobPlatform(Job j) {
 		if (jobs.contains(j))
 			return false;
 		Job q = jobs.get(jobs.size()-1);
 		if (!startTimes.containsKey(q))
 			throw new IllegalStateException("Cannot have a job without a start time.");
-		int endTimeQ = getEndTime(q);
+		int endTimeQ = getEndTimePlatform(q);
 		int startTimeJ = endTimeQ+1;
 		int endTimeJ = startTimeJ + j.getProcessingTime() - 1;
 		if (endTimeJ > j.getDeadline())
@@ -95,10 +95,16 @@ public abstract class Machine {
 		return true;
 	}
 	
-	public int getEndTime(Job j) {
+	public int getEndTimePlatform(Job j) {
 		if (!startTimes.containsKey(j))
 			throw new IllegalStateException("Cannot have a job without a start time.");
 		return startTimes.get(j) + j.getProcessingTime() - 1;
+	}
+
+	public int getEndTimeWashing(Job j) {
+		if (!startTimes.containsKey(j))
+			throw new IllegalStateException("Cannot have a job without a start time.");
+		return startTimes.get(j) + j.getWashingTime() - 1;
 	}
 	
 	public boolean isEmpty() {

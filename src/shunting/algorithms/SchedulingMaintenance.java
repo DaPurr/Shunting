@@ -305,8 +305,8 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 		if(!queueWashingMachine.isEmpty()) {
 			for (Washer w: washers) {
-				Job temp = queueWashingMachine.poll();
-				if(w.canScheduleJobWashing(temp, time))
+				Job jobAtWashingMachine = queueWashingMachine.poll();
+				if(w.canScheduleJobWashing(jobAtWashingMachine, time))
 				{	
 					timeDepartureWashingMachine.put(jobAtWashingMachine, time + jobAtWashingMachine.getProcessingTime());
 					w.scheduleJobWashing(jobAtWashingMachine,time);
