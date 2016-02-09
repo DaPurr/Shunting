@@ -2,8 +2,8 @@ package shunting.models;
 
 public class JobPlatform extends Job {
 
-	public JobPlatform(MatchBlock mb, int r, int p, int d) {
-		super(mb, r, p, d);
+	public JobPlatform(MatchBlock mb, int r, int p, int w, int d) {
+		super(mb, r, p, w, d);
 	}
 	
 	// TODO: REMOVE!
