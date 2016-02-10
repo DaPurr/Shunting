@@ -6,12 +6,14 @@ public class MatchBlock {
 	private Part p2;
 	private int arrivalTime;
 	private int departureTime;
+	private int blockLength;
 
 	public MatchBlock(Part p1, Part p2, int arrivalTime, int departureTime) {
 		this.p1 = p1;
 		this.p2 = p2;
 		this.arrivalTime = arrivalTime;
 		this.departureTime = departureTime;
+		blockLength = blockLength(p1);
 	}
 
 	public Part getPart1() {
@@ -28,6 +30,18 @@ public class MatchBlock {
 
 	public int getDepartureTime() {
 		return departureTime;
+	}
+	
+	public int getBlockLength() {
+		return blockLength;
+	}
+	
+	private int blockLength(Part p) {
+		int sum = 0;
+		for (int i = 0; i < p.size(); i++) {
+			sum += p.getUnit(i).getTrainType().getTrainLength();
+		}
+		return sum;
 	}
 
 	@Override
