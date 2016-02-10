@@ -11,29 +11,14 @@ import shunting.models.*;
 
 public class PricingProblem {
 
-	private TreeMultimap<MatchBlock, BlockNode> layers;
 	private Map<ShuntTrack, PricingNetwork> networks;
 	private Map<MatchBlock, Double> lambda = new HashMap<>();
 	private Map<ShuntTrack, Double> mu = new HashMap<>();
+	private Set<MatchBlock> matches;
 
 	public PricingProblem(Set<ShuntTrack> tracks, Set<MatchBlock> matches) {
-		layers = TreeMultimap.create(new BlockComparator(), new NodeComparator());
 		networks = new HashMap<>();
-		for (MatchBlock block : matches) {
-			BlockNode n_LL = new BlockNode(block, Approach.LL, "n_"+block+"_LL");
-			BlockNode n_LR = new BlockNode(block, Approach.LR, "n_"+block+"_LR");
-			BlockNode n_RL = new BlockNode(block, Approach.RL, "n_"+block+"_RL");
-			BlockNode n_RR = new BlockNode(block, Approach.RR, "n_"+block+"_RR");
-			BlockNode n_NOT = new BlockNode(block, Approach.NOT, "n_"+block+"_NOT");
-
-			layers.put(block, n_LL);
-			layers.put(block, n_LR);
-			layers.put(block, n_RL);
-			layers.put(block, n_RR);
-			layers.put(block, n_NOT);
-//			System.out.println("Size of layers: " + layers.size());
-//			System.out.println("Set: " + layers.get(block));
-		}
+		this.matches = matches;
 
 		for (ShuntTrack track : tracks) {
 			PricingNetwork network = new PricingNetwork(track);
@@ -57,7 +42,7 @@ public class PricingProblem {
 	}
 
 	private void initDuals() {
-		for (MatchBlock block : layers.keySet())
+		for (MatchBlock block : matches)
 			lambda.put(block, 0.0);
 		for (ShuntTrack track : networks.keySet())
 			mu.put(track, 0.0);
@@ -68,10 +53,31 @@ public class PricingProblem {
 		private SourceNode source;
 		private SinkNode sink;
 		private ShuntTrack track;
+		private TreeMultimap<MatchBlock, BlockNode> layers;
 		private DirectedGraph<PriceNode, Object> graph = new DefaultDirectedGraph<>(Object.class);
 
 		// we need to specify track for routing costs
 		public PricingNetwork(ShuntTrack track) {
+			layers = TreeMultimap.create(new BlockComparator(), new NodeComparator());
+			
+			for (MatchBlock block : layers.keySet()) {
+				BlockNode n_LL = new BlockNode(block, Approach.LL, "n_"+block+"_LL");
+				// if free track...
+				if (track instanceof FreeShuntTrack) {
+					BlockNode n_LR = new BlockNode(block, Approach.LR, "n_"+block+"_LR");
+					BlockNode n_RL = new BlockNode(block, Approach.RL, "n_"+block+"_RL");
+					BlockNode n_RR = new BlockNode(block, Approach.RR, "n_"+block+"_RR");
+					
+					layers.put(block, n_LR);
+					layers.put(block, n_RL);
+					layers.put(block, n_RR);
+				}
+				BlockNode n_NOT = new BlockNode(block, Approach.NOT, "n_"+block+"_NOT");
+
+				layers.put(block, n_LL);
+				layers.put(block, n_NOT);
+			}
+			
 			source = new SourceNode("source");
 			sink = new SinkNode("sink");
 			this.track = track;
