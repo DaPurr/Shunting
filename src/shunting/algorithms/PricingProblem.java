@@ -54,7 +54,7 @@ public class PricingProblem {
 		private SinkNode sink;
 		private ShuntTrack track;
 		private TreeMultimap<MatchBlock, BlockNode> layers;
-		private DirectedGraph<PriceNode, Object> graph = new DefaultDirectedGraph<>(Object.class);
+		private DirectedGraph<PriceNode, Double> graph = new DefaultDirectedGraph<>(Double.class);
 
 		// we need to specify track for routing costs
 		public PricingNetwork(ShuntTrack track) {
@@ -93,17 +93,20 @@ public class PricingProblem {
 				}
 			}
 
+			// TODO: ROUTING COSTS!
+			double f_uv = 0.0; // MAKE FUNCTION (MAPPING) OUT OF IT!
+			
 			// add edges
 			// source
 			MatchBlock firstBlock = layers.keySet().first();
 			for (BlockNode bn : layers.get(firstBlock)) {
-				graph.addEdge(source, bn);
+				graph.addEdge(source, bn, f_uv);
 			}
 			
 			// sink
 			MatchBlock lastBlock = layers.keySet().last();
 			for (BlockNode bn : layers.get(lastBlock)) {
-				graph.addEdge(bn, sink);
+				graph.addEdge(bn, sink, f_uv);
 			}
 			
 			// intermediate blocks
@@ -114,12 +117,13 @@ public class PricingProblem {
 				for (BlockNode bn1 : layers.get(mb1)) {
 					for (BlockNode bn2 : layers.get(mb2)) {
 						if (isCompatible(bn1, bn2))
-							graph.addEdge(bn1, bn2);
+							graph.addEdge(bn1, bn2, f_uv);
 					}
 				}
 			}
 		}
 		
+		// TODO: REMOVE DUAL COSTS?!?!
 		public double getEdgeWeight(PriceNode pn1, PriceNode pn2) {
 			if (pn2 instanceof SourceNode)
 				throw new IllegalArgumentException("Right node cannot be source node!");
@@ -144,8 +148,7 @@ public class PricingProblem {
 			double weight = -lambda.get(bn2.getBlock());
 			
 			// TODO: REAL WEIGHTS! (ROUTING)
-			double routingCost = 1.0;
-			weight += routingCost;
+			weight += graph.getEdge(pn1, pn2);
 			
 			return weight;
 		}
