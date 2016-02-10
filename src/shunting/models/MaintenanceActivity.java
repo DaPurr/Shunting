@@ -17,12 +17,34 @@ public class MaintenanceActivity {
 		this.washer = washer;
 		this.endTime = endTime;
 	}
+	public Job getJob(){
+		return job;
+	}
+	
+	public int getStartPlatform() {
+		return start_platform;
+	}
+	
+	public int getStartWasher(){
+		return start_wash;
+	}
+	public Platform getPlatform() {
+		return platform;
+	}
+	public Washer getWasher() {
+		return washer;
+	}
+	public int getEndTime() {
+		return endTime;
+	}
+	
 	
 	@Override
 	public String toString() {
 		String s = "[" + job.toString() + ", ";
 		s += "plat: " + start_platform + " " + platform.toString() + ", ";
-		s += "wash: " + start_wash + " " + washer.toString() + " "+ endTime + "]";
+		s += "wash: " + start_wash + " " + washer.toString() + " , ";
+		s+="+ endTime + ]";
 		return s;
 	}
 	
