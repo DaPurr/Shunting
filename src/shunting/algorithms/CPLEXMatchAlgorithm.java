@@ -14,6 +14,8 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 	private Schedule schedule = new Schedule();
 	private Map<Part, Integer> timeArrivingParts;
 	private Map<Part, Integer> timeDepartingParts;
+	private Map<Part, Composition> partToComp = new HashMap<>();
+	private Map<Composition, Integer> compToFreq = new HashMap<>();
 
 	public CPLEXMatchAlgorithm(Schedule schedule) {
 		this.schedule = schedule;
@@ -42,6 +44,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					IloIntVar u = cplex.boolVar("u_" + p.toString());
 					arrivalParts.put(p, u);
 					timeArrivingParts.put(p, a.getTime());
+					partToComp.put(p, c);
 				}
 			}
 
@@ -57,6 +60,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					IloIntVar v = cplex.boolVar("v_" + p.toString());
 					departureParts.put(p, v);
 					timeDepartingParts.put(p, d.getTime());
+					partToComp.put(p, c);
 				}
 
 			}
@@ -236,8 +240,15 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			MatchSolution ms = new MatchSolution();
 			for (MatchBlock mb : matchingBlocks.keySet()) {
 				IloIntVar w = matchingBlocks.get(mb);
-				if (cplex.getValue(w) == 1.0)
+				if (cplex.getValue(w) == 1.0) {
 					ms.addBlock(mb);
+				}
+			}
+			
+			// compute stupid (de)coupling time
+			for (MatchBlock mb : ms.getMatchBlocks()) {
+				incrFreq(mb.getPart1());
+				incrFreq(mb.getPart2());
 			}
 			
 			System.out.println("Objective value: " + cplex.getObjValue());
@@ -249,6 +260,15 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 		}
 
 		return null;
+	}
+	
+	private void incrFreq(Part p) {
+		Composition comp = partToComp.get(p);
+		if (!compToFreq.containsKey(comp)) {
+			compToFreq.put(comp, 1);
+			return;
+		}
+		compToFreq.put(comp, compToFreq.get(comp) + 1);
 	}
 	
 	private boolean compatible(Part p, Part q) {
@@ -264,7 +284,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			int departureQ = timeDepartingParts.get(q);
 			int delay = p.getPlatformTime()+10;
 			if (p.getPartWashing())
-				delay += p.getWashingTime()+1;
+				delay += p.getWashingTime();
 			if(p.getPartInspection())
 				delay +=p.getInspectionTime();
 			if (!(arrivalP + delay < departureQ))
