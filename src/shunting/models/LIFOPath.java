@@ -1,7 +1,6 @@
 package shunting.models;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import org.jgrapht.DirectedGraph;
 
@@ -17,6 +16,7 @@ public class LIFOPath extends Path {
 		this.earliestDeparture = earliestDeparture;
 	}
 	
+	// TODO: NEEDS TESTING!
 	public Set<BlockNode> departBefore(BlockNode bn) {
 		Set<BlockNode> set = new HashSet<>();
 		if (lastNode == null)
@@ -47,7 +47,7 @@ public class LIFOPath extends Path {
 	public int compareTo(Path o) {
 		if (this.isDominatedBy(o))
 			return 1;
-		double totalCost = (this.pathCost-this.dualCost) - (o.pathCost - o.dualCost);
+		double totalCost = (this.getPathCost()-this.dualCost) - (o.getPathCost() - o.dualCost);
 		if ( totalCost > 0 )
 			return 1;
 		else if (totalCost < 0)
@@ -62,7 +62,7 @@ public class LIFOPath extends Path {
 
 	@Override
 	public boolean isDominatedBy(Path p) {
-		return (this.pathCost - this.dualCost >= p.pathCost - p.dualCost) &&
+		return (this.getPathCost() - this.dualCost >= p.getPathCost() - p.dualCost) &&
 				(this.remainingLength <= p.remainingLength) &&
 				(this.earliestDeparture <= p.earliestDeparture);
 	}
@@ -78,7 +78,51 @@ public class LIFOPath extends Path {
 		}
 		
 		// we are added to a non-empty (incomplete) path
-		// TODO: ADD STUFF ON PAGE 82 (97) OF LENTINK!
+		if (node instanceof SourceNode)
+			throw new IllegalArgumentException("Can't add source node to non-empty path.");
+		if (node instanceof BlockNode) {
+			if (!isSameType())
+				isOneType = false;
+			BlockNode bn = (BlockNode) node;
+			Set<BlockNode> departedBlocks = departBefore(bn);
+			int departedLength = getLengthBlocks(departedBlocks);
+			remainingLength += departedLength;
+			
+			if (bn.getApproach() == Approach.NOT) {
+				Set<BlockNode> retained = retainBlocks(nodes, departedBlocks);
+				int minDeparture = minDeparture(retained);
+				earliestDeparture = minDeparture;
+			} else {
+				remainingLength -= bn.getBlock().getBlockLength();
+				earliestDeparture = bn.getBlock().getDepartureTime();
+				addToPathCost(graph.getEdge(lastNode, bn));
+				dualCost -= dual;
+			}
+		} else if (node instanceof SinkNode) {
+			dualCost -= dual;
+			addToPathCost(TRACK_PREFERENCE);
+		}
+		throw new IllegalArgumentException("Node type not allowed: " + node.getClass());
+	}
+	
+	private boolean isSameType() {
+		if (!isOneType)
+			return false;
+		String type = "";
+		for (PriceNode node : nodes) {
+			if (node instanceof SourceNode || node instanceof SinkNode)
+				continue;
+			BlockNode bn = (BlockNode) node;
+			String blockType = bn.getBlock().getPart1().getUnit(0).getTrainType().getType();
+			blockType = blockType.substring(0, blockType.length()-2);
+			if (type.equals("")) {
+				type = blockType;
+				continue;
+			}
+			if (!type.equals(blockType))
+				return false;
+		}
+		return true;
 	}
 
 	@Override
@@ -95,9 +139,38 @@ public class LIFOPath extends Path {
 		if (bn.getApproach() == Approach.NOT)
 			return true;
 		Set<BlockNode> departsBetweenUV = departBefore(bn);
-		if ( bn.getBlock().getBlockLength() < remainingLength + getLengthBlocks(departsBetweenUV) ) {
-			
+		if ( bn.getBlock().getBlockLength() >= remainingLength + getLengthBlocks(departsBetweenUV) ) {
+			return false;
 		}
+		Set<BlockNode> crossingSet = retainBlocks(nodes, departsBetweenUV);
+		int departureV = bn.getBlock().getDepartureTime();
+		int minDeparture = minDeparture(crossingSet);
+		if (departureV >= minDeparture)
+			return false;
+		
+		return true;
+	}
+	
+	private Set<BlockNode> retainBlocks(List<PriceNode> path, Set<? extends PriceNode> blocks) {
+		Set<PriceNode> temp = new HashSet<>(path);
+		temp.retainAll(blocks);
+		Set<BlockNode> set = new HashSet<>();
+		for (PriceNode node : temp) {
+			if (!(node instanceof BlockNode))
+				throw new IllegalArgumentException("Nodes may only be BlockNodes!");
+			set.add((BlockNode) node);
+		}
+		return set;
+	}
+	
+	private int minDeparture(Collection<BlockNode> nodes) {
+		int best = Integer.MAX_VALUE;
+		for (BlockNode node : nodes) {
+			int departure = node.getBlock().getDepartureTime();
+			if (departure < best)
+				best = departure;
+		}
+		return best;
 	}
 
 }

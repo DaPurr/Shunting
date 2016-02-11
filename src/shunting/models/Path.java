@@ -10,11 +10,14 @@ public abstract class Path implements Comparable<Path> {
 	protected List<PriceNode> nodes;
 	protected PriceNode lastNode = null;
 	protected final double TRACK_PREFERENCE = 0.0;
+	protected final double SINGLE_TYPE_PENALTY = 100.0;
 	
 	protected int earliestDeparture = Integer.MAX_VALUE;
 	protected double dualCost = 0.0;
 	protected int remainingLength;
-	protected double pathCost;
+	private double pathCost;
+	
+	protected boolean isOneType = true;
 	
 	// TODO: ASK FOR TRACK PREFERENCE?
 	public Path(DirectedGraph<PriceNode, Double> graph,
@@ -24,15 +27,21 @@ public abstract class Path implements Comparable<Path> {
 		this.remainingLength = remainingLength;
 	}
 	
+	public double getPathCost() {
+		if (!isOneType)
+			return pathCost + SINGLE_TYPE_PENALTY;
+		return pathCost;
+	}
+	
+	protected void addToPathCost(double amount) {
+		pathCost += amount;
+	}
+	
 	protected int getLengthBlocks(Set<BlockNode> set) {
 		int sum = 0;
 		for (BlockNode node : set)
 			sum += node.getBlock().getBlockLength();
 		return sum;
-	}
-	
-	public double getPathCost() {
-		return pathCost;
 	}
 
 	public int getRemainingLength() {
