@@ -18,7 +18,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 	Set <MatchBlock> ms;
 	public Set <Job> jobs;
-	public Set <JobWashingMachine> jobsWashingMachine;
+//	public Set <JobWashingMachine> jobsWashingMachine;
 
 	public int [] nextEvent;
 	public Set <MaintenanceActivity> maintenanceActivities;
@@ -55,7 +55,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		platformArrivalTimeKey = new HashMap <Integer, Set<Job>>();
 		washerArrivalTimeKey = new HashMap <Integer, Set<Job>>();
 		jobs = new HashSet <Job>();
-		jobsWashingMachine = new HashSet <JobWashingMachine>();
+//		jobsWashingMachine = new HashSet <JobWashingMachine>();
 		jobsToBeDone = new HashSet <Job>();
 		jobsToBeCompleted = new HashSet <Job>();
 		maintenanceActivities = new HashSet <MaintenanceActivity>();
