@@ -11,11 +11,14 @@ import ilog.cplex.*;
 
 public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
+	// time in minutes
+	private static final int COUPLE_TIME = 3;
+	private static final int UNCOUPLE_TIME = 2;
+	
 	private Schedule schedule = new Schedule();
 	private Map<Part, Integer> timeArrivingParts;
 	private Map<Part, Integer> timeDepartingParts;
 	private Map<Part, Composition> partToComp = new HashMap<>();
-	private Map<Composition, Integer> compToFreq = new HashMap<>();
 
 	public CPLEXMatchAlgorithm(Schedule schedule) {
 		this.schedule = schedule;
@@ -245,12 +248,6 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				}
 			}
 			
-			// compute stupid (de)coupling time
-			for (MatchBlock mb : ms.getMatchBlocks()) {
-				incrFreq(mb.getPart1());
-				incrFreq(mb.getPart2());
-			}
-			
 			System.out.println("Objective value: " + cplex.getObjValue());
 			return ms;
 	
@@ -262,13 +259,9 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 		return null;
 	}
 	
-	private void incrFreq(Part p) {
+	private boolean doCouple(Part p) {
 		Composition comp = partToComp.get(p);
-		if (!compToFreq.containsKey(comp)) {
-			compToFreq.put(comp, 1);
-			return;
-		}
-		compToFreq.put(comp, compToFreq.get(comp) + 1);
+		return p.size() != comp.size();
 	}
 	
 	private boolean compatible(Part p, Part q) {
@@ -280,18 +273,24 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			
 			if (!s.getTrainType().getType().equals(t.getTrainType().getType()))
 				return false;
-			int arrivalP = timeArrivingParts.get(p);
-			int departureQ = timeDepartingParts.get(q);
-			int delay = p.getPlatformTime()+10;
-			if (p.getPartWashing())
-				delay += p.getWashingTime();
-			if(p.getPartInspection())
-				delay +=p.getInspectionTime();
-			if (!(arrivalP + delay < departureQ))
-				return false;
 			if (!s.getInterchange() && !s.getID().equals(t.getID()))
 				return false;
 		}
+		
+		int arrivalP = timeArrivingParts.get(p);
+		int departureQ = timeDepartingParts.get(q);
+		int delay = p.getPlatformTime();
+		if (doCouple(p))
+			delay += UNCOUPLE_TIME;
+		if (doCouple(q))
+			delay += COUPLE_TIME;
+		if (p.getPartWashing())
+			delay += p.getWashingTime();
+		if(p.getPartInspection())
+			delay +=p.getInspectionTime();
+		if (!(arrivalP + delay < departureQ))
+			return false;
+		
 		return true;
 	}
 
