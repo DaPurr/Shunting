@@ -61,10 +61,10 @@ public class Main {
 		Part p3 = new Part(); p3.addUnit(t5);
 		Part p4 = new Part(); p4.addUnit(t2);
 		Part p5 = new Part(); p5.addUnit(t3);
-		MatchBlock mb1 = new MatchBlock(p1, p1, 0, 666);
-		MatchBlock mb2 = new MatchBlock(p2, p2, 83, 544);
-		MatchBlock mb3 = new MatchBlock(p3, p3, 146, 635);
-		MatchBlock mb4 = new MatchBlock(p4, p4, 152, 603);
+		MatchBlock mb1 = new MatchBlock(p1, p1, 0, 666, 2, 3);
+		MatchBlock mb2 = new MatchBlock(p2, p2, 83, 544, 0, 3);
+		MatchBlock mb3 = new MatchBlock(p3, p3, 146, 635, 2, 0);
+		MatchBlock mb4 = new MatchBlock(p4, p4, 152, 603, 2, 3);
 		Set<MatchBlock> matches = new HashSet<>();
 		matches.add(mb1); matches.add(mb2); 
 		matches.add(mb3); matches.add(mb4); 

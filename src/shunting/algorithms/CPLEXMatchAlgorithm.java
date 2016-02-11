@@ -77,7 +77,14 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 						IloIntVar z = cplex.boolVar("z_" + keyArrivals.toString() + "," + keyDepartures.toString());
 						int timeA = timeArrivingParts.get(keyArrivals);
 						int timeD = timeDepartingParts.get(keyDepartures);
-						MatchBlock matchBlock = new MatchBlock(keyArrivals,keyDepartures, timeA, timeD);
+						int couplingTime = 0;
+						int decouplingTime = 0;
+						if (doCouple(keyArrivals))
+							decouplingTime = UNCOUPLE_TIME;
+						if (doCouple(keyDepartures))
+							couplingTime = COUPLE_TIME;
+						MatchBlock matchBlock = new MatchBlock(keyArrivals,keyDepartures, timeA, timeD,
+								couplingTime, decouplingTime);
 						matchingBlocks.put(matchBlock, z);
 						paramW.put(matchBlock, (double)Math.abs(timeA - timeD));
 					}
@@ -209,8 +216,15 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				IloNumExpr totalZu = cplex.numExpr();
 				for(Part keyDepartures: departureParts.keySet()){
 					if (compatible(keyArrivals,keyDepartures)){
+						int couplingTime = 0;
+						int decouplingTime = 0;
+						if (doCouple(keyArrivals))
+							decouplingTime = UNCOUPLE_TIME;
+						if (doCouple(keyDepartures))
+							couplingTime = COUPLE_TIME;
 						MatchBlock m = new MatchBlock(keyArrivals, keyDepartures, 
-								timeArrivingParts.get(keyArrivals), timeDepartingParts.get(keyDepartures));
+								timeArrivingParts.get(keyArrivals), timeDepartingParts.get(keyDepartures),
+								couplingTime, decouplingTime);
 						IloIntVar z = matchingBlocks.get(m);
 						totalZu = cplex.sum(totalZu, z);	
 					}
@@ -225,8 +239,15 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				IloNumExpr totalZv = cplex.numExpr();
 				for (Part keyArrivals: arrivalParts.keySet()){
 					if (compatible(keyArrivals,keyDepartures)){
+						int couplingTime = 0;
+						int decouplingTime = 0;
+						if (doCouple(keyArrivals))
+							decouplingTime = UNCOUPLE_TIME;
+						if (doCouple(keyDepartures))
+							couplingTime = COUPLE_TIME;
 						MatchBlock m = new MatchBlock(keyArrivals, keyDepartures, 
-								timeArrivingParts.get(keyArrivals), timeDepartingParts.get(keyDepartures));
+								timeArrivingParts.get(keyArrivals), timeDepartingParts.get(keyDepartures),
+								couplingTime, decouplingTime);
 						IloIntVar z = matchingBlocks.get(m);
 						totalZv = cplex.sum(totalZv, z);	
 					}

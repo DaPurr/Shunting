@@ -7,15 +7,26 @@ public class MatchBlock {
 	private int arrivalTime;
 	private int departureTime;
 	private int blockLength;
-	private int couplingTime = 0;
-	private int decouplingTime = 0;
+	private int couplingTime;
+	private int decouplingTime;
 
-	public MatchBlock(Part p1, Part p2, int arrivalTime, int departureTime) {
+	public MatchBlock(Part p1, Part p2, int arrivalTime, int departureTime,
+			int couplingTime, int decouplingTime) {
 		this.p1 = p1;
 		this.p2 = p2;
 		this.arrivalTime = arrivalTime;
 		this.departureTime = departureTime;
 		blockLength = blockLength(p1);
+		this.couplingTime = couplingTime;
+		this.decouplingTime = decouplingTime;
+	}
+	
+	public int getCouplingime() {
+		return couplingTime;
+	}
+	
+	public int getDecouplingTime() {
+		return decouplingTime;
 	}
 
 	public Part getPart1() {
