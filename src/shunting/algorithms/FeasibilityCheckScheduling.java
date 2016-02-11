@@ -15,7 +15,7 @@ public boolean FeasilibilityCheckScheduling (Set <MaintenanceActivity> maintenan
 	boolean result = true;
 	Set <MaintenanceActivity> tardyJobs = new HashSet<MaintenanceActivity>();
 	for (MaintenanceActivity ma: maintenanceActivities) {
-		if(ma.getEndTime() > ma.getJob().getDeadline()-6) {
+		if(ma.getEndTime() > ma.getJob().getDeadline()) {
 			result =false;	
 			tardyJobs.add(ma);
 		}

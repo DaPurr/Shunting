@@ -69,12 +69,12 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 			if(mb.getPart1().getPartRepair()||mb.getPart1().getPartCleaning()) {
 				if(mb.getPart1().getPartWashing()) {
-					Job job = new Job(mb, arrivaltime + 4 + inspectiontime, platformtime, washingtime, departuretime-6);
+					Job job = new Job(mb, arrivaltime + 2 + inspectiontime, platformtime, washingtime, departuretime-3);
 					jobs.add(job);
 				}
 
 				else {
-					Job job = new Job(mb, arrivaltime + 4 + inspectiontime, platformtime, 0, departuretime-6);
+					Job job = new Job(mb, arrivaltime + 2 + inspectiontime, platformtime, 0, departuretime-3);
 					jobs.add(job);
 				}
 
