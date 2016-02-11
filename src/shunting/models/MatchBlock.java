@@ -21,7 +21,7 @@ public class MatchBlock {
 		this.decouplingTime = decouplingTime;
 	}
 	
-	public int getCouplingime() {
+	public int getCouplingTime() {
 		return couplingTime;
 	}
 	
