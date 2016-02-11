@@ -89,7 +89,7 @@ public class ScheduleReader {
 		boolean inspection = Boolean.parseBoolean(attr.getNamedItem("inspection").getNodeValue());
 		boolean repair = Boolean.parseBoolean(attr.getNamedItem("repair").getNodeValue());
 		boolean cleaning = Boolean.parseBoolean(attr.getNamedItem("cleaning").getNodeValue());
-		boolean washing = Boolean.parseBoolean(attr.getNamedItem("inspection").getNodeValue());
+		boolean washing = Boolean.parseBoolean(attr.getNamedItem("washing").getNodeValue());
 		String type = attr.getNamedItem("type").getNodeValue();		
 		
 		Train t = tf.createTrainByType(ID, type, interchangeable, 
