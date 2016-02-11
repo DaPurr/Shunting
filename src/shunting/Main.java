@@ -72,6 +72,9 @@ public class Main {
 		ShuntingYard shuntingYard = new ShuntingYard(platforms, washers, tracks);
 		
 		for (MatchBlock block : mb) {
+			
+			System.out.println(block.toString()+ " "+block.getArrivalTime());
+			
 			if (block.getArrivalTime() >= horizon || block.getDepartureTime() >= horizon) 
 				throw new IllegalStateException(mb.toString());
 		}

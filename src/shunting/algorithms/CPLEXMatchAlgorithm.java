@@ -262,9 +262,11 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				return false;
 			int arrivalP = timeArrivingParts.get(p);
 			int departureQ = timeDepartingParts.get(q);
-			int delay = p.getPlatformTime();
+			int delay = p.getPlatformTime()+10;
 			if (p.getPartWashing())
-				delay += p.getWashingTime();
+				delay += p.getWashingTime()+1;
+			if(p.getPartInspection())
+				delay +=p.getInspectionTime();
 			if (!(arrivalP + delay < departureQ))
 				return false;
 			if (!s.getInterchange() && !s.getID().equals(t.getID()))
