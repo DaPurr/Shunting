@@ -7,6 +7,8 @@ public class MatchBlock {
 	private int arrivalTime;
 	private int departureTime;
 	private int blockLength;
+	private int couplingTime = 0;
+	private int decouplingTime = 0;
 
 	public MatchBlock(Part p1, Part p2, int arrivalTime, int departureTime) {
 		this.p1 = p1;
@@ -42,6 +44,14 @@ public class MatchBlock {
 			sum += p.getUnit(i).getTrainType().getTrainLength();
 		}
 		return sum;
+	}
+	
+	public void setCouplingTime(int time) {
+		couplingTime = time;
+	}
+	
+	public void setDecouplingTime(int time) {
+		decouplingTime = time;
 	}
 
 	@Override

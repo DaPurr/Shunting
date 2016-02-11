@@ -1,7 +1,6 @@
 package shunting.models;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import org.jgrapht.DirectedGraph;
 
@@ -25,6 +24,13 @@ public abstract class Path implements Comparable<Path> {
 		this.remainingLength = remainingLength;
 	}
 	
+	protected int getLengthBlocks(Set<BlockNode> set) {
+		int sum = 0;
+		for (BlockNode node : set)
+			sum += node.getBlock().getBlockLength();
+		return sum;
+	}
+	
 	public double getPathCost() {
 		return pathCost;
 	}
@@ -43,5 +49,5 @@ public abstract class Path implements Comparable<Path> {
 	
 	public abstract void addNode(PriceNode node, double dual);
 	public abstract boolean isDominatedBy(Path p);
-	public abstract boolean isFeasible();
+	public abstract boolean isFeasible(PriceNode node);
 }

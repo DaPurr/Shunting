@@ -1,5 +1,8 @@
 package shunting.models;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jgrapht.DirectedGraph;
 
 public class LIFOPath extends Path {
@@ -12,6 +15,32 @@ public class LIFOPath extends Path {
 			int earliestDeparture) {
 		super(graph, remainingLength);
 		this.earliestDeparture = earliestDeparture;
+	}
+	
+	public Set<BlockNode> departBefore(BlockNode bn) {
+		Set<BlockNode> set = new HashSet<>();
+		if (lastNode == null)
+			return set;
+		if (lastNode instanceof SourceNode)
+			return set;
+		if (lastNode instanceof SinkNode)
+			throw new IllegalStateException("Path is already complete.");
+		
+		BlockNode lastBlockNode = (BlockNode) lastNode;
+		for (PriceNode node : nodes) {
+			if (node instanceof SourceNode ||
+					node instanceof SinkNode)
+				continue;
+			
+			// we're a block node
+			BlockNode blockNode = (BlockNode) node;
+			int departureW =  blockNode.getBlock().getDepartureTime();
+			int arrivalU = lastBlockNode.getBlock().getArrivalTime();
+			int arrivalV = bn.getBlock().getArrivalTime();
+			if (arrivalU < departureW && departureW < arrivalV)
+				set.add(blockNode);
+		}
+		return set;
 	}
 
 	@Override
@@ -53,9 +82,22 @@ public class LIFOPath extends Path {
 	}
 
 	@Override
-	public boolean isFeasible() {
-		// TODO Auto-generated method stub
-		return false;
+	public boolean isFeasible(PriceNode node) {
+		if (node instanceof SinkNode)
+			return true;
+		if (node instanceof SourceNode || !nodes.isEmpty())
+			throw new IllegalStateException("Source node can only be added at the beginning of a path!");
+		if (!(node instanceof BlockNode))
+			throw new IllegalStateException("Another node type?!?!");
+		
+		// we have a blocknode
+		BlockNode bn = (BlockNode) node;
+		if (bn.getApproach() == Approach.NOT)
+			return true;
+		Set<BlockNode> departsBetweenUV = departBefore(bn);
+		if ( bn.getBlock().getBlockLength() < remainingLength + getLengthBlocks(departsBetweenUV) ) {
+			
+		}
 	}
 
 }
