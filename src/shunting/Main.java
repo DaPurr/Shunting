@@ -98,10 +98,10 @@ public class Main {
 		FeasibilityCheckScheduling feasibilityCheck= new FeasibilityCheckScheduling(); 
 		boolean feasible = feasibilityCheck.FeasilibilityCheckScheduling(activities);
 		if(feasible) { System.out.println("The schedule is feasible");}
-		else {System.out.println("The schedule is not feasible");}
+		else {System.out.println("The schedule is not feasible");
 		Set<MaintenanceActivity> tardyJobs = feasibilityCheck.getTardyJobs();
 		for(MaintenanceActivity ta: tardyJobs) { System.out.println(ta.getJob()+" , "+ta.getStartPlatform()+" , "+ta.getStartWasher()+
-				" , Platform: "+ta.getPlatform() + " , Washer: "+ta.getWasher()+" , "+ta.getEndTime()); }
+				" , Platform: "+ta.getPlatform() + " , Washer: "+ta.getWasher()+" , "+ta.getEndTime()); }}
 		
 //		TrainFactory ct= new TrainFactory();
 //		Train ctrain=ct.typeDDZ4();
