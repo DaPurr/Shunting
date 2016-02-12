@@ -9,6 +9,10 @@ public class CompositionFactory {
 	public CompositionFactory(int seed) {
 		ran = new Random(seed);
 	}
+	
+	public CompositionFactory(Random ran) {
+		this.ran = ran;
+	}
 
 	public Composition compVIRM() {
 		TrainFactory tf = new TrainFactory(ran);
