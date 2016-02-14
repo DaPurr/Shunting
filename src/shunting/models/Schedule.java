@@ -61,7 +61,7 @@ public class Schedule {
 
 			int arrivalTime=rn.nextInt(horizon)/2+1;
 
-			CompositionFactory p=new CompositionFactory(100);
+			CompositionFactory p=new CompositionFactory(rn);
 			Composition virm=p.compVIRM();
 			Composition ddz=p.compDDZ();
 			Composition slt=p.compSLT();
@@ -118,7 +118,7 @@ public class Schedule {
 			int compSize = rn.nextInt(3) + 1;
 			int departureTime=rn.nextInt(horizon+1)+horizon/2;
 
-			if(compSize==1){
+			if(compSize==1 || listVirm.size()==1){
 				Train depTrain=listVirm.get(0);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain);
@@ -127,32 +127,32 @@ public class Schedule {
 				departureVirm.add(depVIRM);
 				listVirm.remove(0);
 			}
-			if(compSize==2){
+			if(compSize==2 && listVirm.size()>1 || compSize==3 && listVirm.size()==2){
 				Train depTrain1=listVirm.get(0);
 				Train depTrain2=listVirm.get(1);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain1);
-				if(listVirm.get(1)!=null){trainComp.add(depTrain2);}
+				trainComp.add(depTrain2);
 				Composition comp1=new Composition("id",trainComp);
 				Departure depVIRM=new Departure(departureTime,comp1);
 				departureVirm.add(depVIRM);
 				listVirm.remove(0);
-				if(listVirm.get(1)!=null){listVirm.remove(1);}
+				listVirm.remove(0);
 			}
-			if(compSize==3){
+			if(compSize==3 && listVirm.size()>2){
 				Train depTrain1=listVirm.get(0);
 				Train depTrain2=listVirm.get(1);
 				Train depTrain3=listVirm.get(2);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain1);
-				if(listVirm.get(1)!=null){trainComp.add(depTrain2);}
-				if(listVirm.get(2)!=null){trainComp.add(depTrain3);}
+				trainComp.add(depTrain2);
+				trainComp.add(depTrain3);
 				Composition comp1=new Composition("id",trainComp);
 				Departure depVIRM=new Departure(departureTime,comp1);
 				departureVirm.add(depVIRM);
 				listVirm.remove(0);
-				if(listVirm.get(1)!=null){listVirm.remove(1);}
-				if(listVirm.get(2)!=null){listVirm.remove(2);}
+				listVirm.remove(0);
+				listVirm.remove(0);
 			}
 
 		}
@@ -161,7 +161,7 @@ public class Schedule {
 			int compSize = rn.nextInt(3) + 1;
 			int departureTime=rn.nextInt(horizon+1)+horizon/2;
 
-			if(compSize==1){
+			if(compSize==1 || listDdz.size()==1){
 				Train depTrain=listDdz.get(0);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain);
@@ -170,32 +170,32 @@ public class Schedule {
 				departureDdz.add(depDDZ);
 				listDdz.remove(0);
 			}
-			if(compSize==2){
+			if(compSize==2 && listDdz.size()>1 || compSize==3 && listDdz.size()==2){
 				Train depTrain1=listDdz.get(0);
 				Train depTrain2=listDdz.get(1);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain1);
-				if(listDdz.get(1)!=null){trainComp.add(depTrain2);}
+				trainComp.add(depTrain2);
 				Composition comp1=new Composition("id",trainComp);
 				Departure depDdz=new Departure(departureTime,comp1);
 				departureDdz.add(depDdz);
 				listDdz.remove(0);
-				if(listDdz.get(1)!=null){listDdz.remove(1);}
+				listDdz.remove(0);
 			}
-			if(compSize==3){
+			if(compSize==3 && listDdz.size()>2){
 				Train depTrain1=listDdz.get(0);
 				Train depTrain2=listDdz.get(1);
 				Train depTrain3=listDdz.get(2);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain1);
-				if(listDdz.get(1)!=null){trainComp.add(depTrain2);}
-				if(listDdz.get(2)!=null){trainComp.add(depTrain3);}
+				trainComp.add(depTrain2);
+				trainComp.add(depTrain3);
 				Composition comp1=new Composition("id",trainComp);
 				Departure depDdz=new Departure(departureTime,comp1);
 				departureDdz.add(depDdz);
 				listDdz.remove(0);
-				if(listDdz.get(1)!=null){listDdz.remove(1);}
-				if(listDdz.get(2)!=null){listDdz.remove(2);}
+				listDdz.remove(0);
+				listDdz.remove(0);
 			}
 
 		}
@@ -204,7 +204,7 @@ public class Schedule {
 			int compSize = rn.nextInt(3) + 1;
 			int departureTime=rn.nextInt(horizon+1)+horizon/2;
 
-			if(compSize==1){
+			if(compSize==1 || listSlt.size()==1){
 				Train depTrain=listSlt.get(0);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain);
@@ -213,32 +213,32 @@ public class Schedule {
 				departureSlt.add(depSlt);
 				listSlt.remove(0);
 			}
-			if(compSize==2){
+			if(compSize==2 && listSlt.size()>1 || compSize==3 && listSlt.size()==2){
 				Train depTrain1=listSlt.get(0);
 				Train depTrain2=listSlt.get(1);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain1);
-				if(listSlt.get(1)!=null){trainComp.add(depTrain2);}
+				trainComp.add(depTrain2);
 				Composition comp1=new Composition("id",trainComp);
 				Departure depSlt=new Departure(departureTime,comp1);
 				departureSlt.add(depSlt);
 				listSlt.remove(0);
-				if(listSlt.get(1)!=null){listSlt.remove(1);}
+				listSlt.remove(0);
 			}
-			if(compSize==3){
+			if(compSize==3 && listSlt.size()>2){
 				Train depTrain1=listSlt.get(0);
 				Train depTrain2=listSlt.get(1);
 				Train depTrain3=listSlt.get(2);
 				List <Train> trainComp= new ArrayList<>();
 				trainComp.add(depTrain1);
-				if(listSlt.get(1)!=null){trainComp.add(depTrain2);}
-				if(listSlt.get(2)!=null){trainComp.add(depTrain3);}
+				trainComp.add(depTrain2);
+				trainComp.add(depTrain3);
 				Composition comp1=new Composition("id",trainComp);
 				Departure depSlt=new Departure(departureTime,comp1);
 				departureSlt.add(depSlt);
 				listSlt.remove(0);
-				if(listSlt.get(1)!=null){listSlt.remove(1);}
-				if(listSlt.get(2)!=null){listSlt.remove(2);}
+				listSlt.remove(0);
+				listSlt.remove(0);
 			}
 
 

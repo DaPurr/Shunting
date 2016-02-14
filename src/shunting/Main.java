@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.Iterator;
 
@@ -25,12 +26,17 @@ public class Main {
 	public static void main(String[] args) {
 		int seed = 0;
 		int horizon = 1600;
+		int nrTrainUnits=5;
+		Random rn = new Random(seed);
+		
+		Schedule test= Schedule.randomSchedule(nrTrainUnits, horizon,rn);
+		
 
 		//	Test for class Train
 		//	test for schedule (no departures in example affects e.g. schedule.events)
-		File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
-		ScheduleReader sr = new ScheduleReader();
-		Schedule schedule = sr.parseXML(file);
+		 File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
+		 ScheduleReader sr = new ScheduleReader();
+		 Schedule schedule = sr.parseXML(file);
 
 		//		test Matching formulation
 		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
