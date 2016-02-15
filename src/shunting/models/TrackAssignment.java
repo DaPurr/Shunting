@@ -1,13 +1,11 @@
 package shunting.models;
 
-import java.util.List;
-
 public class TrackAssignment {
 		
-		private List<PriceNode> nodes;
+		private Path nodes;
 		private ShuntTrack track;
 		
-		public TrackAssignment(List<PriceNode> nodes, ShuntTrack track) {
+		public TrackAssignment(Path nodes, ShuntTrack track) {
 			this.nodes = nodes;
 			this.track = track;
 		}
