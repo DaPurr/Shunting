@@ -78,8 +78,8 @@ public class PricingProblem {
 		set.add(p);
 
 		// Begin iteration 1 - source to first layer
-		MatchBlock[] arrayLayers = new MatchBlock[matches.size()];
-		matches.toArray(arrayLayers);
+		MatchBlock[] arrayLayers = new MatchBlock[network.layers.keySet().size()];
+		network.layers.keySet().toArray(arrayLayers);
 //		Set<Object> nextNodes = graph.edgesOf(network.source);
 		for (BlockNode bn : network.layers.get(arrayLayers[0])) {
 			LIFOPath myPath = (LIFOPath) nodePaths.get(network.source).first();
@@ -170,7 +170,8 @@ public class PricingProblem {
 		private SinkNode sink;
 		private ShuntTrack track;
 		private TreeMultimap<MatchBlock, BlockNode> layers;
-		private DefaultDirectedWeightedGraph<PriceNode, DefaultWeightedEdge> graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
+		private DefaultDirectedWeightedGraph<PriceNode, DefaultWeightedEdge> graph = 
+				new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
 
 		// we need to specify track for routing costs
 		public PricingNetwork(ShuntTrack track) {
