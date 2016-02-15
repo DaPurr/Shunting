@@ -2,11 +2,8 @@ package shunting.models;
 
 import java.util.*;
 
-import org.jgrapht.DirectedGraph;
-
 public abstract class Path implements Comparable<Path> {
 
-	protected DirectedGraph<PriceNode, Double> graph;
 	protected List<PriceNode> nodes;
 	protected PriceNode lastNode = null;
 	protected final double TRACK_PREFERENCE = 0.0;
@@ -15,16 +12,19 @@ public abstract class Path implements Comparable<Path> {
 	protected int earliestDeparture = Integer.MAX_VALUE;
 	protected double dualCost = 0.0;
 	protected int remainingLength;
-	private double pathCost;
+	protected double pathCost;
 	
 	protected boolean isOneType = true;
 	
 	// TODO: ASK FOR TRACK PREFERENCE?
-	public Path(DirectedGraph<PriceNode, Double> graph,
-			int remainingLength) {
-		this.graph = graph;
+	public Path(int remainingLength) {
+//		this.graph = graph;
 		nodes = new ArrayList<>();
 		this.remainingLength = remainingLength;
+	}
+	
+	public double getReducedCost() {
+		return getPathCost() - dualCost;
 	}
 	
 	public double getPathCost() {
@@ -56,7 +56,24 @@ public abstract class Path implements Comparable<Path> {
 		return dualCost;
 	}
 	
-	public abstract void addNode(PriceNode node, double dual);
+	public Set<MatchBlock> coveredBlocks() {
+		Set<MatchBlock> covered = new HashSet<>();
+		for (PriceNode node : nodes) {
+			if (node instanceof BlockNode) {
+				BlockNode bn = (BlockNode) node;
+				if (bn.getApproach() != Approach.NOT)
+					covered.add(bn.getBlock());
+			}
+		}
+		return covered;
+	}
+	
+	public abstract void addNode(PriceNode node, double cost, double dual);
 	public abstract boolean isDominatedBy(Path p);
 	public abstract boolean isFeasible(PriceNode node);
+	
+	@Override
+	public String toString() {
+		return nodes.toString();
+	}
 }
