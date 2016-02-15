@@ -19,6 +19,8 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 	private Map<Part, Integer> timeArrivingParts;
 	private Map<Part, Integer> timeDepartingParts;
 	private Map<Part, Composition> partToComp = new HashMap<>();
+	private final double Q = 1;
+	private final double w = 1;
 
 	public CPLEXMatchAlgorithm(Schedule schedule) {
 		this.schedule = schedule;
