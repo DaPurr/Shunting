@@ -4,6 +4,8 @@ import java.util.*;
 
 import org.jgrapht.DirectedGraph;
 import org.jgrapht.graph.DefaultDirectedGraph;
+import org.jgrapht.graph.DefaultDirectedWeightedGraph;
+import org.jgrapht.graph.DefaultWeightedEdge;
 
 import com.google.common.collect.TreeMultimap;
 
@@ -36,9 +38,123 @@ public class PricingProblem {
 		mu.put(track, val);
 	}
 	
-	public TrackAssignment solve() {
-		// TODO: EVERYTHING!
-		return null;
+	private Path selectLowestCost(Set<Path> paths) {
+		Path bestPath = null;
+		double bestCost = Double.POSITIVE_INFINITY;
+		for (Path p : paths) {
+			double cost = p.getReducedCost();
+			if (cost < bestCost) {
+				bestPath = p;
+				bestCost = cost;
+			}
+		}
+		return bestPath;
+	}
+	
+	private Set<Path> selectNegativeReducedCosts(Set<Path> paths) {
+		Set<Path> set = new HashSet<>();
+		for (Path p : paths) {
+			if (p.getReducedCost() < 0)
+				set.add(p);
+		}
+		return set;
+	}
+	
+	private Path doRCSPP(PricingNetwork network) {
+		// Initialize RCSPP
+		DefaultDirectedWeightedGraph<PriceNode, DefaultWeightedEdge> graph = network.graph;		
+		
+		// for each node in the network we need a sorted set of paths
+		HashMap<PriceNode, TreeSet<Path>> nodePaths = new HashMap<>();
+		Set<PriceNode> nodes = graph.vertexSet();
+		ShuntTrack track = network.track;
+		for (PriceNode node : nodes) {
+			TreeSet<Path> set = new TreeSet<>();
+			nodePaths.put(node, set);
+		}
+		TreeSet<Path> set = nodePaths.get(network.source);
+		Path p = new LIFOPath(track.getRemainingCapacity());
+		p.addNode(network.source, 0.0, 0.0);
+		set.add(p);
+
+		// Begin iteration 1 - source to first layer
+		MatchBlock[] arrayLayers = new MatchBlock[matches.size()];
+		matches.toArray(arrayLayers);
+//		Set<Object> nextNodes = graph.edgesOf(network.source);
+		for (BlockNode bn : network.layers.get(arrayLayers[0])) {
+			LIFOPath myPath = (LIFOPath) nodePaths.get(network.source).first();
+			Path newPath = new LIFOPath(myPath);
+//			BlockNode nextNode = (BlockNode) graph.getEdgeTarget(o);
+			double dual = lambda.get(bn.getBlock());
+			DefaultWeightedEdge edge = graph.getEdge(network.source, bn);
+			double cost = graph.getEdgeWeight(edge);
+			newPath.addNode(bn, cost, dual);
+			TreeSet<Path> nextPaths	= nodePaths.get(bn);
+			nextPaths.add(newPath);
+		}
+		
+		// Begin iteration i - blocks to blocks
+		for (int i = 0; i < arrayLayers.length-1; i++) {
+			MatchBlock currentBlock = arrayLayers[i];
+//			MatchBlock nextBlock = arrayLayers[i+1];
+			for (BlockNode currentBn : network.layers.get(currentBlock)) {
+				for (Path currentPath : nodePaths.get(currentBn)) {
+					LIFOPath currentLIFO = (LIFOPath) currentPath;
+					Set<DefaultWeightedEdge> edges = graph.outgoingEdgesOf(currentBn);
+					for (DefaultWeightedEdge edge : edges) {
+						BlockNode nextBn = (BlockNode) graph.getEdgeTarget(edge);
+						MatchBlock nextBlock = nextBn.getBlock();
+						LIFOPath newPath = new LIFOPath(currentLIFO);
+						double cost = graph.getEdgeWeight(edge);
+						double dual = lambda.get(nextBlock);
+						newPath.addNode(nextBn, cost, dual);
+						TreeSet<Path> nextPaths = nodePaths.get(nextBn);
+						nextPaths.add(newPath);
+					}
+				}
+			}
+		}
+		
+		// Begin last iteration - last layer to sink
+		int arraySize = arrayLayers.length;
+//		Set<BlockNode> lastLayer = network.layers.get(arrayLayers[arraySize-1]);
+		for (BlockNode bn : network.layers.get(arrayLayers[arraySize-1])) {
+			for (Path currentPath : nodePaths.get(bn)) {
+				LIFOPath currentLIFO = (LIFOPath) currentPath;
+				LIFOPath newPath = new LIFOPath(currentLIFO);
+				DefaultWeightedEdge edge = graph.getEdge(bn, network.sink);
+				double cost = graph.getEdgeWeight(edge);
+				double dual = mu.get(track);
+				newPath.addNode(network.sink, cost, dual);
+				TreeSet<Path> nextPaths = nodePaths.get(network.sink);
+				nextPaths.add(newPath);
+			}
+		}
+		
+		Path bestPath = nodePaths.get(network.sink).first();
+		
+		return bestPath;
+	}
+	
+	public Path solve() {
+		
+		Set<Path> paths = new HashSet<>();
+		
+		// solve RCSPP for each network
+		for (ShuntTrack track : networks.keySet()) {
+			Path p = doRCSPP(networks.get(track));
+			paths.add(p);
+		}
+		
+		// search for assignment(s) with smallest (negative) reduced cost
+		Set<Path> candidates = selectNegativeReducedCosts(paths);
+		if (candidates.isEmpty())
+			return null;
+		Path bestPath = selectLowestCost(candidates);
+		if (bestPath == null) {
+			throw new IllegalStateException("bestPath can't be null!");
+		}
+		return bestPath;
 	}
 
 	private void initDuals() {
@@ -54,13 +170,13 @@ public class PricingProblem {
 		private SinkNode sink;
 		private ShuntTrack track;
 		private TreeMultimap<MatchBlock, BlockNode> layers;
-		private DirectedGraph<PriceNode, Double> graph = new DefaultDirectedGraph<>(Double.class);
+		private DefaultDirectedWeightedGraph<PriceNode, DefaultWeightedEdge> graph = new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
 
 		// we need to specify track for routing costs
 		public PricingNetwork(ShuntTrack track) {
 			layers = TreeMultimap.create(new BlockComparator(), new NodeComparator());
 			
-			for (MatchBlock block : layers.keySet()) {
+			for (MatchBlock block : matches) {
 				BlockNode n_LL = new BlockNode(block, Approach.LL, "n_"+block+"_LL");
 				// if free track...
 				if (track instanceof FreeShuntTrack) {
@@ -71,10 +187,10 @@ public class PricingProblem {
 					layers.put(block, n_LR);
 					layers.put(block, n_RL);
 					layers.put(block, n_RR);
+				} else {
+					layers.put(block, n_LL);
 				}
 				BlockNode n_NOT = new BlockNode(block, Approach.NOT, "n_"+block+"_NOT");
-
-				layers.put(block, n_LL);
 				layers.put(block, n_NOT);
 			}
 			
@@ -100,13 +216,17 @@ public class PricingProblem {
 			// source
 			MatchBlock firstBlock = layers.keySet().first();
 			for (BlockNode bn : layers.get(firstBlock)) {
-				graph.addEdge(source, bn, f_uv);
+				DefaultWeightedEdge edge = new DefaultWeightedEdge();
+				graph.addEdge(source, bn, edge);
+				graph.setEdgeWeight(edge, f_uv);
 			}
 			
 			// sink
 			MatchBlock lastBlock = layers.keySet().last();
 			for (BlockNode bn : layers.get(lastBlock)) {
-				graph.addEdge(bn, sink, f_uv);
+				DefaultWeightedEdge edge = new DefaultWeightedEdge();
+				graph.addEdge(bn, sink, edge);
+				graph.setEdgeWeight(edge, 0.0);
 			}
 			
 			// intermediate blocks
@@ -116,8 +236,11 @@ public class PricingProblem {
 				MatchBlock mb2 = (MatchBlock) arrayLayers[i+1];
 				for (BlockNode bn1 : layers.get(mb1)) {
 					for (BlockNode bn2 : layers.get(mb2)) {
-						if (isCompatible(bn1, bn2))
-							graph.addEdge(bn1, bn2, f_uv);
+						if (isCompatible(bn1, bn2)) {
+							DefaultWeightedEdge edge = new DefaultWeightedEdge();
+							graph.addEdge(bn1, bn2, edge);
+							graph.setEdgeWeight(edge, f_uv);
+						}
 					}
 				}
 			}
@@ -148,7 +271,7 @@ public class PricingProblem {
 			double weight = -lambda.get(bn2.getBlock());
 			
 			// TODO: REAL WEIGHTS! (ROUTING)
-			weight += graph.getEdge(pn1, pn2);
+			weight += graph.getEdgeWeight(graph.getEdge(pn1, pn2));
 			
 			return weight;
 		}

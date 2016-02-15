@@ -2,18 +2,27 @@ package shunting.models;
 
 import java.util.*;
 
-import org.jgrapht.DirectedGraph;
-
 public class LIFOPath extends Path {
 	
-	public LIFOPath(DirectedGraph<PriceNode, Double> graph, int remainingLength) {
-		super(graph, remainingLength);
+	public LIFOPath(int remainingLength) {
+		super(remainingLength);
 	}
 	
-	public LIFOPath(DirectedGraph<PriceNode, Double> graph, int remainingLength,
+	public LIFOPath(int remainingLength,
 			int earliestDeparture) {
-		super(graph, remainingLength);
+		super(remainingLength);
 		this.earliestDeparture = earliestDeparture;
+	}
+	
+	public LIFOPath(LIFOPath path) {
+		super(path.remainingLength);
+		
+		this.lastNode = path.lastNode;
+		this.dualCost = path.dualCost;
+		this.earliestDeparture = path.earliestDeparture;
+		this.isOneType = path.isOneType;
+		this.nodes = new ArrayList<>(path.nodes);
+		this.pathCost = path.pathCost;
 	}
 	
 	// TODO: NEEDS TESTING!
@@ -68,7 +77,7 @@ public class LIFOPath extends Path {
 	}
 
 	@Override
-	public void addNode(PriceNode node, double dual) {
+	public void addNode(PriceNode node, double cost, double dual) {
 		nodes.add(node);
 		if (lastNode == null) {
 			lastNode = node;
@@ -81,9 +90,9 @@ public class LIFOPath extends Path {
 		if (node instanceof SourceNode)
 			throw new IllegalArgumentException("Can't add source node to non-empty path.");
 		if (node instanceof BlockNode) {
-			if (!isSameType())
-				isOneType = false;
 			BlockNode bn = (BlockNode) node;
+			if (bn.getApproach() != Approach.NOT && !isSameType())
+				isOneType = false;
 			Set<BlockNode> departedBlocks = departBefore(bn);
 			int departedLength = getLengthBlocks(departedBlocks);
 			remainingLength += departedLength;
@@ -91,16 +100,21 @@ public class LIFOPath extends Path {
 			if (bn.getApproach() == Approach.NOT) {
 				Set<BlockNode> retained = retainBlocks(nodes, departedBlocks);
 				int minDeparture = minDeparture(retained);
-				earliestDeparture = minDeparture;
+				if (!(earliestDeparture < Integer.MAX_VALUE && minDeparture == Integer.MAX_VALUE))
+					earliestDeparture = minDeparture;
 			} else {
 				remainingLength -= bn.getBlock().getBlockLength();
 				earliestDeparture = bn.getBlock().getDepartureTime();
-				addToPathCost(graph.getEdge(lastNode, bn));
-				dualCost -= dual;
+				addToPathCost(cost);
+				dualCost += dual;
 			}
+			lastNode = node;
+			return;
 		} else if (node instanceof SinkNode) {
-			dualCost -= dual;
+			dualCost += dual;
 			addToPathCost(TRACK_PREFERENCE);
+			lastNode = node;
+			return;
 		}
 		throw new IllegalArgumentException("Node type not allowed: " + node.getClass());
 	}
@@ -113,6 +127,8 @@ public class LIFOPath extends Path {
 			if (node instanceof SourceNode || node instanceof SinkNode)
 				continue;
 			BlockNode bn = (BlockNode) node;
+			if (bn.getApproach() == Approach.NOT)
+				continue;
 			String blockType = bn.getBlock().getPart1().getUnit(0).getTrainType().getType();
 			blockType = blockType.substring(0, blockType.length()-2);
 			if (type.equals("")) {
