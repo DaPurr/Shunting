@@ -123,7 +123,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	private void addParkedVariable(MatchBlock match) throws IloException {
 		IloColumn column = master.column(objective, D_PARK);
 		column = column.and(master.column(coverageConstraints.get(match), 1));
-		IloNumVar isParked = master.numVar(column, 0, Double.POSITIVE_INFINITY, "N_" + match.toString());
+		IloNumVar isParked = master.numVar(column, 0, Double.MAX_VALUE, "N_" + match.toString());
 		notParked.put(match, isParked);
 	}
 	
@@ -131,16 +131,18 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		if (assignment.containsKey(ass))
 			throw new IllegalStateException("Already have track assignment: " + ass.toString());
 		
+		// add to all block constraints
 		IloColumn column = master.column(objective, cost);
 		for (MatchBlock match : ass.getPath().coveredBlocks()) {
 			IloRange constraint = coverageConstraints.get(match);
 			column = column.and(master.column(constraint, 1));
 		}
-		for (ShuntTrack t : tracks) {
-			IloRange constraint = capacityConstraints.get(t);
-			column = column.and(master.column(constraint, 1));
-		}
-		IloNumVar assign = master.numVar(column, 0, Double.POSITIVE_INFINITY, "X_" + ass.toString());
+		
+		// add to track constraint
+		IloRange constraint = capacityConstraints.get(ass.getTrack());
+		column = column.and(master.column(constraint, 1));
+		
+		IloNumVar assign = master.numVar(column, 0, Double.MAX_VALUE, "X_" + ass.toString());
 		assignment.put(ass, assign);
 		
 		return assign;
@@ -158,7 +160,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	
 	private void addCapacityConstraints() throws IloException {
 		for (ShuntTrack track : tracks) {
-			capacityConstraints.put(track, master.addRange(0, 1));
+			capacityConstraints.put(track, master.addRange(-Double.MAX_VALUE, 1));
 		}
 	}
 	
