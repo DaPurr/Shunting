@@ -81,11 +81,19 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			path = pricingProblem.solve();
 			if (path == null)
 				break;
+			if (assignment.containsKey(path)) {
+				System.out.println("Terminated as we generated a duplicate column.");
+				break;
+			}
 			
 			// add generated column
-			IloNumVar genCol = addAssignmentVariable(path, path.getPathCost());
-			assignment.put(path, genCol);
+			addAssignmentVariable(path, path.getPathCost());
 		}
+		
+		System.out.println("OPTIMAL SOLUTION (LP):");
+		System.out.println("------------------------------------");
+		displayVariables();
+		System.out.println("------------------------------------");
 	}
 
 	private void addParkedVariables() throws IloException {
@@ -97,11 +105,14 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	private void addParkedVariable(MatchBlock match) throws IloException {
 		IloColumn column = master.column(objective, D_PARK);
 		column = column.and(master.column(coverageConstraints.get(match), 1));
-		IloNumVar isParked = master.numVar(column, 0, 1);
+		IloNumVar isParked = master.numVar(column, 0, Double.POSITIVE_INFINITY, "N_" + match.toString());
 		notParked.put(match, isParked);
 	}
 	
 	private IloNumVar addAssignmentVariable(Path ass, double cost) throws IloException {
+		if (assignment.containsKey(ass))
+			throw new IllegalStateException("Already have track assignment: " + ass.toString());
+		
 		IloColumn column = master.column(objective, cost);
 		for (MatchBlock match : ass.coveredBlocks()) {
 			IloRange constraint = coverageConstraints.get(match);
@@ -111,7 +122,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			IloRange constraint = capacityConstraints.get(t);
 			column = column.and(master.column(constraint, 1));
 		}
-		IloNumVar assign = master.numVar(column, 0, 1);
+		IloNumVar assign = master.numVar(column, 0, Double.POSITIVE_INFINITY, "X_" + ass.toString());
 		assignment.put(ass, assign);
 		
 		return assign;
