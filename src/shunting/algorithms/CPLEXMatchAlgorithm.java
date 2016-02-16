@@ -14,7 +14,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 	// time in minutes
 	private static final int COUPLE_TIME = 3;
 	private static final int UNCOUPLE_TIME = 2;
-	
+
 	private Schedule schedule = new Schedule();
 	private Map<Part, Integer> timeArrivingParts;
 	private Map<Part, Integer> timeDepartingParts;
@@ -88,7 +88,16 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 						MatchBlock matchBlock = new MatchBlock(keyArrivals,keyDepartures, timeA, timeD,
 								couplingTime, decouplingTime);
 						matchingBlocks.put(matchBlock, z);
-						paramW.put(matchBlock, (double)Math.abs(timeA - timeD));
+						//version a)
+						//paramW.put(matchBlock, (double)(0)); 
+						
+						//version b)
+						//paramW.put(matchBlock, (double)Math.pow((timeA - timeD),2)); 
+						
+						//version c)
+						if(timeA-timeD < 2|| timeA-timeD >10) { paramW.put(matchBlock,(double)(1)); }
+						else {paramW.put(matchBlock, (double)(0));}
+						
 					}
 				}
 			}
@@ -108,6 +117,8 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				Part part2 = matchBlock.getPart2();
 				if(compatible(part1,part2)){
 					IloIntVar n = matchingBlocks.get(matchBlock);
+
+
 					totalZ = cplex.sum(totalZ, cplex.prod(paramW.get(matchBlock), n));
 				}
 			}
@@ -235,7 +246,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				cplex.addEq(totalZu,arrivalParts.get(keyArrivals));
 
 			}
-			
+
 			//departures
 			for (Part keyDepartures : departureParts.keySet()) {
 				IloNumExpr totalZv = cplex.numExpr();
@@ -255,13 +266,13 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					}
 
 				}
-				
+
 				cplex.addEq(totalZv,departureParts.get(keyDepartures));
 
 			}
-			
+
 			cplex.solve();
-			
+
 			// create MatchSolution
 			MatchSolution ms = new MatchSolution();
 			for (MatchBlock mb : matchingBlocks.keySet()) {
@@ -270,10 +281,10 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					ms.addBlock(mb);
 				}
 			}
-			
+
 			System.out.println("Objective value: " + cplex.getObjValue());
 			return ms;
-	
+
 
 		} catch (IloException exc){
 			exc.printStackTrace();
@@ -281,25 +292,25 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
 		return null;
 	}
-	
+
 	private boolean doCouple(Part p) {
 		Composition comp = partToComp.get(p);
 		return p.size() != comp.size();
 	}
-	
+
 	private boolean compatible(Part p, Part q) {
 		if (p.size() != q.size())
 			return false;
 		for (int i = 0; i < p.size(); i++) {
 			Train s = p.getUnit(i);
 			Train t = q.getUnit(i);
-			
+
 			if (!s.getTrainType().getType().equals(t.getTrainType().getType()))
 				return false;
 			if (!s.getInterchange() && !s.getID().equals(t.getID()))
 				return false;
 		}
-		
+
 		int arrivalP = timeArrivingParts.get(p);
 		int departureQ = timeDepartingParts.get(q);
 		int delay = p.getPlatformTime();
@@ -313,7 +324,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			delay +=p.getInspectionTime();
 		if (!(arrivalP + delay < departureQ))
 			return false;
-		
+
 		return true;
 	}
 
