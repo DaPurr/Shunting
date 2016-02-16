@@ -121,5 +121,9 @@ public abstract class Machine {
 		}
 		
 	}
+	
+	public void clear() {
+		jobs.clear();
+	}
 
 }

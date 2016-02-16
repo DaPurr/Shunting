@@ -1,12 +1,7 @@
 package shunting;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
-import java.util.Iterator;
+import java.util.*;
 
 import org.jgrapht.DirectedGraph;
 
@@ -26,8 +21,12 @@ public class Main {
 	public static void main(String[] args) {
 		int seed = 5;
 		int horizon = 1440;
-		int nrTrainUnits=54;
+		int nrTrainUnits=55;
+		int maxRerun = 1;
+		int rerunCounter = 0;
+		boolean needScheduleAgain = false;
 		Random rn = new Random(seed);
+		int c=10;
 		
 		Schedule test= Schedule.randomSchedule(nrTrainUnits, horizon,rn);
 		
@@ -132,19 +131,78 @@ public class Main {
 
 		// test Maintenance scheduling
 		long startTime = System.nanoTime();
-		MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingYard);
+		Set<MatchBlock> matchBlockTardy = new HashSet<MatchBlock>();
+		HashMap<MatchBlock, Integer> tardiness = new HashMap <MatchBlock, Integer>();
+		MaintenanceAlgorithm ma = new SchedulingMaintenance(mb,shuntingYard, matchBlockTardy,tardiness);
 		Set<MaintenanceActivity> activities = ma.solve(); 
+		
+		
 		for (MaintenanceActivity a : activities) {
 			System.out.println(a.getJob()+" , "+a.getStartPlatform()+" , "+a.getStartWasher()+
 					" , Platform: "+a.getPlatform() + " , Washer: "+a.getWasher()+" , "+a.getEndTime());
 		}
 		FeasibilityCheckScheduling feasibilityCheck= new FeasibilityCheckScheduling(activities); 
 		boolean feasible = feasibilityCheck.getFeasible();
-		if(feasible) { System.out.println("The schedule is feasible");}
-		else {System.out.println("The schedule is not feasible");
+		if(feasible) { System.out.println("The schedule is feasible, the rerun counter is "+rerunCounter);}
+		else {System.out.println("The schedule is not feasible, the rerun counter is "+ rerunCounter);
+		needScheduleAgain = true;
 		Set<MaintenanceActivity> tardyJobs = feasibilityCheck.getTardyJobs();
 		for(MaintenanceActivity ta: tardyJobs) { System.out.println(ta.getJob()+" , "+ta.getStartPlatform()+" , "+ta.getStartWasher()+
-				" , Platform: "+ta.getPlatform() + " , Washer: "+ta.getWasher()+" , "+ta.getEndTime()); }}
+				" , Platform: "+ta.getPlatform() + " , Washer: "+ta.getWasher()+" , "+ta.getEndTime()); 
+		System.out.println("The real deadline is "+ (ta.getJob().getMatchBlock().getDepartureTime()-3));
+		MatchBlock m = ta.getJob().getMatchBlock();
+		matchBlockTardy.add(m);
+		tardiness.put(m, feasibilityCheck.getTardiness(ta)+c);
+		
+		}
+		}
+		
+		boolean done = false;
+		while(rerunCounter<maxRerun&&!done){
+		if(needScheduleAgain)
+		{
+			System.out.println("Scheduling is rerun again, it is a "+rerunCounter+" run. Remaining reruns available are "+(maxRerun-rerunCounter));
+			rerunCounter++;
+			for(Platform p: shuntingYard.getPlatforms()){
+				p.clear();
+			}
+			
+			for(Washer w: shuntingYard.getWashers()) {
+				w.clear();
+			}
+			
+			ma = new SchedulingMaintenance(mb,shuntingYard, matchBlockTardy,tardiness);
+			activities = ma.solve(); 
+			matchBlockTardy = new HashSet<MatchBlock>();
+			tardiness = new HashMap <MatchBlock, Integer>();
+			
+			for (MaintenanceActivity a : activities) {
+				System.out.println(a.getJob()+" , "+a.getStartPlatform()+" , "+a.getStartWasher()+
+						" , Platform: "+a.getPlatform() + " , Washer: "+a.getWasher()+" , "+a.getEndTime());
+			}
+			feasibilityCheck= new FeasibilityCheckScheduling(activities); 
+			feasible = feasibilityCheck.getFeasible();
+			if(feasible) { System.out.println("The schedule is feasible, the rerunCounter is "+rerunCounter);
+			done = true;
+			break;
+			}
+			else {System.out.println("The schedule is not feasible, the rerun counter is "+rerunCounter);
+			needScheduleAgain = true;
+			Set<MaintenanceActivity> tardyJobs = feasibilityCheck.getTardyJobs();
+			for(MaintenanceActivity ta: tardyJobs) { System.out.println(ta.getJob()+" , "+ta.getStartPlatform()+" , "+ta.getStartWasher()+
+					" , Platform: "+ta.getPlatform() + " , Washer: "+ta.getWasher()+" , "+ta.getEndTime()); 
+			System.out.println("The real deadline is "+ (ta.getJob().getMatchBlock().getDepartureTime()-3));
+			MatchBlock m = ta.getJob().getMatchBlock();
+			matchBlockTardy.add(m);
+			tardiness.put(m, feasibilityCheck.getTardiness(ta)+c);
+			
+			}
+			}	
+			
+		}
+
+		
+	}
 		
 		
 		long endTime = System.nanoTime();

@@ -14,6 +14,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	public int time;
 
 	Set <MatchBlock> ms;
+	Set <MatchBlock> tardyJobs;
 	public Set <Job> jobs;
 //	public Set <JobWashingMachine> jobsWashingMachine;
 
@@ -32,8 +33,9 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 	public int minDeparturePlatform;
 	public Job jobAtWashingMachine;
 	public Map<Job, Integer> endTime;
+	public Map<MatchBlock, Integer> tardiness;
 
-	public SchedulingMaintenance(Set<MatchBlock> ms, ShuntingYard yard ) {
+	public SchedulingMaintenance(Set<MatchBlock> ms, ShuntingYard yard, Set<MatchBlock> tardyJobs, HashMap<MatchBlock, Integer> tardiness ) {
 
 		queuePlatform = new PriorityQueue<Job>(100, new jobTimeComparatorPlatform());
 		queueWashingMachine = new PriorityQueue<Job>(100,new jobTimeComparatorWashingMachine());
@@ -57,10 +59,13 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		jobsToBeCompleted = new HashSet <Job>();
 		maintenanceActivities = new HashSet <MaintenanceActivity>();
 		endTime = new HashMap<Job, Integer>();
+		this.tardyJobs = tardyJobs;
+		this.tardiness = tardiness;
 
 
 		for (MatchBlock mb: ms)
 		{
+			if(!tardyJobs.contains(mb)){
 			int arrivaltime=mb.getArrivalTime();
 			int inspectiontime=mb.getPart1().getInspectionTime();
 			int platformtime=mb.getPart1().getPlatformTime();
@@ -81,6 +86,31 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 			}
 
 		}
+		}
+		
+		for(MatchBlock tb:tardyJobs) {
+			int arrivaltime=tb.getArrivalTime();
+			int inspectiontime=tb.getPart1().getInspectionTime();
+			int platformtime=tb.getPart1().getPlatformTime();
+			int departuretime=tb.getDepartureTime();
+			int washingtime=tb.getPart1().getWashingTime();
+			
+			
+			if(tb.getPart1().getPartRepair()||tb.getPart1().getPartCleaning()) {
+				if(tb.getPart1().getPartWashing()) {
+					Job job = new Job(tb, arrivaltime + 2 + inspectiontime, platformtime, washingtime, departuretime-3-tardiness.get(tb));
+					jobs.add(job);
+				}
+
+				else {
+					Job job = new Job(tb, arrivaltime + 2 + inspectiontime, platformtime, 0, departuretime-3-tardiness.get(tb));
+					jobs.add(job);
+				}
+
+			}
+			
+		}
+		
 
 		for(Job j:jobs) {
 
@@ -163,9 +193,9 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				startPlatform.put(jobAtPlatform, time);
 				platformMap.put(jobAtPlatform, p);
 				p.scheduleJobPlatform(jobAtPlatform, time);
-				/*System.out.println("Job " +jobAtPlatform+ " arrived to platform at time "+ time);
+				//System.out.println("Job " +jobAtPlatform+ " arrived to platform at time "+ time);
 				int t = time + jobAtPlatform.getProcessingTime();
-				System.out.println("Job "+ jobAtPlatform +"is expected to departure from platform at"+ t); */
+				//System.out.println("Job "+ jobAtPlatform +"is expected to departure from platform at"+ t); 
 
 				if(jobAtPlatform.getMatchBlock().getPart1().getPartWashing() ) {
 					timeArrivalWashingMachine.put(jobAtPlatform, time+jobAtPlatform.getProcessingTime()+1);
@@ -184,9 +214,9 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		if(!queuePlatform.isEmpty()){
 			for(Job j: queuePlatform){
 				timeArrivalPlatform.put(j, minimum(timeDeparturePlatform));
-				/*System.out.println("There is a job waiting for a platform "+ j +"It's time of arrival to the platform is set to "+minimum(timeDeparturePlatform));
-				System.out.println("For the job in the queue the washing time is "+j.getMatchBlock().getPart1().getWashingTime());
-				System.out.println("For the job in the queue the platform time is "+ j.getMatchBlock().getPart1().getPlatformTime());*/
+				//System.out.println("There is a job waiting for a platform "+ j +"It's time of arrival to the platform is set to "+minimum(timeDeparturePlatform));
+				//System.out.println("For the job in the queue the washing time is "+j.getMatchBlock().getPart1().getWashingTime());
+				//System.out.println("For the job in the queue the platform time is "+ j.getMatchBlock().getPart1().getPlatformTime());
 			}
 		}
 	}
@@ -220,7 +250,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				washerMap.put(jobAtWashingMachine, w);
 				
 				//System.out.println("The arrival of job "+jobAtWashingMachine+" to washing machine at time "+time);
-				int a = time+jobAtWashingMachine.getWashTime();
+				//int a = time+jobAtWashingMachine.getWashTime();
 				//System.out.println("The departure of the job from washing machine "+jobAtWashingMachine + "is scheduled at "+a);
 				timeArrivalWashingMachine.put(jobAtWashingMachine, Integer.MAX_VALUE);
 				break;
@@ -269,7 +299,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 					if(jobAtPlatform.getMatchBlock().getPart1().getPartWashing()) {
 						timeArrivalWashingMachine.put(jobAtPlatform, time+jobAtPlatform.getProcessingTime()+1);
-						//int a = time+jobAtPlatform.getProcessingTime()+1;
+						int a = time+jobAtPlatform.getProcessingTime()+1;
 						//System.out.println("Job "+ jobAtPlatform + " is added to the washing queue at time "+a);
 					}
 					else {
@@ -287,9 +317,9 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		{ for(Job j: queuePlatform){
 			int a = minimum(timeDeparturePlatform);
 			timeArrivalPlatform.put(j, a);
-			/*System.out.println("There is a job waiting for a platform "+ j +"It's time of arrival to the platform is set to "+a);
-			System.out.println("For the job in the queue the washing time is "+j.getMatchBlock().getPart1().getWashingTime());
-			System.out.println("For the job in the queue the platform time is "+ j.getMatchBlock().getPart1().getPlatformTime());*/
+			//System.out.println("There is a job waiting for a platform "+ j +"It's time of arrival to the platform is set to "+a);
+			//System.out.println("For the job in the queue the washing time is "+j.getMatchBlock().getPart1().getWashingTime());
+			//System.out.println("For the job in the queue the platform time is "+ j.getMatchBlock().getPart1().getPlatformTime());
 		}
 		}
 	}
