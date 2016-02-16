@@ -189,4 +189,23 @@ public class LIFOPath extends Path {
 		return best;
 	}
 
+	@Override
+	public boolean equals(Object o) {
+		if (!(o instanceof LIFOPath))
+			return false;
+		LIFOPath other = (LIFOPath) o;
+		return this.nodes.equals(other.nodes);
+	}
+
+	@Override
+	public int hashCode() {
+		int lastNodeHash = 0;
+		if (lastNode != null)
+			lastNodeHash = lastNode.hashCode();
+		int isOneTypeInteger = 0;
+		if (isOneType)
+			isOneTypeInteger = 1;
+		return 3*nodes.hashCode();
+	}
+
 }
