@@ -79,8 +79,10 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			System.out.println("------------------------------------");
 			
 			path = pricingProblem.solve();
-			if (path == null)
+			if (path == null) {
+				System.out.println("Terminated as there are no more columns with negative reduced cost.");
 				break;
+			}
 			if (assignment.containsKey(path)) {
 				System.out.println("Terminated as we generated a duplicate column.");
 				break;
