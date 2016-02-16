@@ -127,6 +127,7 @@ public class Main {
 //		}
 
 		// test Maintenance scheduling
+		long startTime = System.nanoTime();
 		MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingYard);
 		Set<MaintenanceActivity> activities = ma.solve(); 
 		for (MaintenanceActivity a : activities) {
@@ -140,6 +141,20 @@ public class Main {
 		Set<MaintenanceActivity> tardyJobs = feasibilityCheck.getTardyJobs();
 		for(MaintenanceActivity ta: tardyJobs) { System.out.println(ta.getJob()+" , "+ta.getStartPlatform()+" , "+ta.getStartWasher()+
 				" , Platform: "+ta.getPlatform() + " , Washer: "+ta.getWasher()+" , "+ta.getEndTime()); }}
+		
+		
+		long endTime = System.nanoTime();
+		System.out.println("Scheduling maintenance took " + ((endTime-startTime)/Math.pow(10, 9))+" sec" );
+		
+		int cleaning = countCleaning(schedule);
+		int washing = countWashing(schedule);
+		int repair  = countRepair(schedule);
+		int inspection = countInspection(schedule);
+		
+		System.out.println("Number of trains that need cleaning is "+cleaning);
+		System.out.println("Number of trains that need washing is "+washing);
+		System.out.println("Number of trains that need repair is "+repair);
+		System.out.println("Number of trains that need inspection is "+inspection);
 		
 //		TrainFactory ct= new TrainFactory();
 //		Train ctrain=ct.typeDDZ4();
@@ -235,5 +250,79 @@ public class Main {
 //		boolean canSchedule33 = plat.canScheduleJob(j3, 0);
 //		boolean canSchedule34 = plat.canScheduleJob(j3, 9);
 	}
+	
+	private static int countCleaning(Schedule schedule) {
+		int counterCleaning = 0;
+		List <Arrival> arrivals = new ArrayList <Arrival>();
+		arrivals = schedule.arrivals();
+		for (Arrival a: arrivals) {
+			Composition composition = a.getComposition();
+		
+			for(int i=0; i<composition.size(); i++) {
+				if(composition.getTrain(i).getCleaning()) {
+					counterCleaning ++;
+				}
+				
+			}
+		}
+		return counterCleaning;
+	}
+	
+	private static int countWashing(Schedule schedule) {
+		int counterWashing = 0;
+		List <Arrival> arrivals = new ArrayList <Arrival>();
+		arrivals = schedule.arrivals();
+		for (Arrival a: arrivals) {
+			Composition composition = a.getComposition();
+		
+			for(int i=0; i<composition.size(); i++) {
+				if(composition.getTrain(i).getWashing()) {
+					counterWashing ++;
+				}
+				
+			}
+		}
+		return counterWashing;
+	}
+	
+	
+	private static int countRepair(Schedule schedule) {
+		int counterRepair = 0;
+		List <Arrival> arrivals = new ArrayList <Arrival>();
+		
+		arrivals = schedule.arrivals();
+		for (Arrival a: arrivals) {
+			Composition composition = a.getComposition();
+		
+			for(int i=0; i<composition.size(); i++) {
+				if(composition.getTrain(i).getRepair()) {
+					counterRepair ++;
+				}
+				
+			}
+		}
+		return counterRepair;
+	}
+	
+	
+	private static int countInspection(Schedule schedule) {
+		int counterInspection = 0;
+		List <Arrival> arrivals = new ArrayList <Arrival>();
+	
+		arrivals = schedule.arrivals();
+		for (Arrival a: arrivals) {
+			Composition composition = a.getComposition();
+		
+			for(int i=0; i<composition.size(); i++) {
+				if(composition.getTrain(i).getInspection()) {
+					counterInspection ++;
+				}
+				
+			}
+		}
+		return counterInspection;
+	}
+	
+	
 
 }
