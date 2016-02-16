@@ -11,9 +11,11 @@ public class LIFOPathTest {
 	private final static int horizon = 1600;
 
 	public static void main(String[] args) {		
-		ShuntTrack track = new LIFOShuntTrack(1000);
+		ShuntTrack track1 = new LIFOShuntTrack(1000);
+		ShuntTrack track2 = new LIFOShuntTrack(1000);
 		List<ShuntTrack> tracks = new ArrayList<>();
-		tracks.add(track);
+		tracks.add(track1);
+		tracks.add(track2);
 		TrainFactory tf = new TrainFactory();
 		Train t1 = tf.typeDDZ4("1", true, false, false, false, false);
 		Train t2 = tf.typeDDZ4("2", true, false, false, false, false);
