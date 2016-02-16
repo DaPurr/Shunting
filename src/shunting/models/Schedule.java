@@ -116,7 +116,7 @@ public class Schedule {
 
 		while(listVirm.isEmpty()==false){
 			int compSize = rn.nextInt(3) + 1;
-			int departureTime=rn.nextInt(horizon+1)+horizon/2;
+			int departureTime=rn.nextInt(horizon/2+1)+horizon/2;
 
 			if(compSize==1 || listVirm.size()==1){
 				Train depTrain=listVirm.get(0);
@@ -159,7 +159,7 @@ public class Schedule {
 		
 		while(listDdz.isEmpty()==false){
 			int compSize = rn.nextInt(3) + 1;
-			int departureTime=rn.nextInt(horizon+1)+horizon/2;
+			int departureTime=rn.nextInt(horizon/2+1)+horizon/2;
 
 			if(compSize==1 || listDdz.size()==1){
 				Train depTrain=listDdz.get(0);
@@ -202,7 +202,7 @@ public class Schedule {
 		
 		while(listSlt.isEmpty()==false){
 			int compSize = rn.nextInt(3) + 1;
-			int departureTime=rn.nextInt(horizon+1)+horizon/2;
+			int departureTime=rn.nextInt(horizon/2+1)+horizon/2;
 
 			if(compSize==1 || listSlt.size()==1){
 				Train depTrain=listSlt.get(0);

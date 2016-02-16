@@ -24,9 +24,9 @@ import shunting.models.*;
 public class Main {
 
 	public static void main(String[] args) {
-		int seed = 0;
-		int horizon = 1600;
-		int nrTrainUnits=5;
+		int seed = 5;
+		int horizon = 1440;
+		int nrTrainUnits=54;
 		Random rn = new Random(seed);
 		
 		Schedule test= Schedule.randomSchedule(nrTrainUnits, horizon,rn);
@@ -68,7 +68,11 @@ public class Main {
 		//	test for schedule (no departures in example affects e.g. schedule.events)
 		 File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
 		 ScheduleReader sr = new ScheduleReader();
-		 Schedule schedule = sr.parseXML(file);
+		 // using normal schedule
+		 //Schedule schedule = sr.parseXML(file);
+		 
+		 //using test random schedule
+		 Schedule schedule = test;
 
 		//		test Matching formulation
 		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
@@ -113,7 +117,7 @@ public class Main {
 			
 			System.out.println(block.toString()+ " "+block.getArrivalTime());
 			
-			if (block.getArrivalTime() >= horizon || block.getDepartureTime() >= horizon) 
+			if (block.getArrivalTime() > horizon || block.getDepartureTime() > horizon) 
 				throw new IllegalStateException(mb.toString());
 		}
 		
@@ -134,8 +138,8 @@ public class Main {
 			System.out.println(a.getJob()+" , "+a.getStartPlatform()+" , "+a.getStartWasher()+
 					" , Platform: "+a.getPlatform() + " , Washer: "+a.getWasher()+" , "+a.getEndTime());
 		}
-		FeasibilityCheckScheduling feasibilityCheck= new FeasibilityCheckScheduling(); 
-		boolean feasible = feasibilityCheck.FeasilibilityCheckScheduling(activities);
+		FeasibilityCheckScheduling feasibilityCheck= new FeasibilityCheckScheduling(activities); 
+		boolean feasible = feasibilityCheck.getFeasible();
 		if(feasible) { System.out.println("The schedule is feasible");}
 		else {System.out.println("The schedule is not feasible");
 		Set<MaintenanceActivity> tardyJobs = feasibilityCheck.getTardyJobs();
@@ -155,6 +159,23 @@ public class Main {
 		System.out.println("Number of trains that need washing is "+washing);
 		System.out.println("Number of trains that need repair is "+repair);
 		System.out.println("Number of trains that need inspection is "+inspection);
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 //		TrainFactory ct= new TrainFactory();
 //		Train ctrain=ct.typeDDZ4();
