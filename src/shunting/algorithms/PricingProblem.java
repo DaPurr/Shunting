@@ -2,8 +2,6 @@ package shunting.algorithms;
 
 import java.util.*;
 
-import org.jgrapht.DirectedGraph;
-import org.jgrapht.graph.DefaultDirectedGraph;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
@@ -13,6 +11,8 @@ import shunting.models.*;
 
 public class PricingProblem {
 
+	private final static double REDUCED_COST_ERROR = 1e-6;
+	
 	private Map<ShuntTrack, PricingNetwork> networks;
 	private Map<MatchBlock, Double> lambda = new HashMap<>();
 	private Map<ShuntTrack, Double> mu = new HashMap<>();
@@ -54,7 +54,7 @@ public class PricingProblem {
 	private Set<Path> selectNegativeReducedCosts(Set<Path> paths) {
 		Set<Path> set = new HashSet<>();
 		for (Path p : paths) {
-			if (p.getReducedCost() < 0)
+			if (p.getReducedCost() < REDUCED_COST_ERROR)
 				set.add(p);
 		}
 		return set;
@@ -86,6 +86,8 @@ public class PricingProblem {
 			Path newPath = new LIFOPath(myPath);
 //			BlockNode nextNode = (BlockNode) graph.getEdgeTarget(o);
 			double dual = lambda.get(bn.getBlock());
+//			if (bn.getApproach() == Approach.NOT)
+//				dual = 0.0;
 			DefaultWeightedEdge edge = graph.getEdge(network.source, bn);
 			double cost = graph.getEdgeWeight(edge);
 			newPath.addNode(bn, cost, dual);
@@ -107,6 +109,8 @@ public class PricingProblem {
 						LIFOPath newPath = new LIFOPath(currentLIFO);
 						double cost = graph.getEdgeWeight(edge);
 						double dual = lambda.get(nextBlock);
+//						if (nextBn.getApproach() == Approach.NOT)
+//							dual = 0.0;
 						newPath.addNode(nextBn, cost, dual);
 						TreeSet<Path> nextPaths = nodePaths.get(nextBn);
 						nextPaths.add(newPath);
@@ -154,6 +158,9 @@ public class PricingProblem {
 		if (bestPath == null) {
 			throw new IllegalStateException("bestPath can't be null!");
 		}
+		
+		System.out.println("Found path with reduced cost: " + bestPath.getReducedCost());
+		
 		return bestPath;
 	}
 
