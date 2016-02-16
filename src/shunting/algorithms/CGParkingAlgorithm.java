@@ -96,6 +96,23 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		System.out.println("------------------------------------");
 		displayVariables();
 		System.out.println("------------------------------------");
+		
+		// we found optimal LP solution in root node, so continue with
+		// making it integer
+		for (MatchBlock mb : notParked.keySet()) {
+			IloConversion parkToInt = master.conversion(notParked.get(mb), IloNumVarType.Int);
+			master.add(parkToInt);
+		}
+		for (Path p : assignment.keySet()) {
+			IloConversion assToInt = master.conversion(assignment.get(p), IloNumVarType.Int);
+			master.add(assToInt);
+		}
+		master.solve();
+		
+		System.out.println("OPTIMAL SOLUTION (MIP):");
+		System.out.println("------------------------------------");
+		displayVariables();
+		System.out.println("------------------------------------");
 	}
 
 	private void addParkedVariables() throws IloException {
