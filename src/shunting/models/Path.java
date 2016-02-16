@@ -71,6 +71,8 @@ public abstract class Path implements Comparable<Path> {
 	public abstract void addNode(PriceNode node, double cost, double dual);
 	public abstract boolean isDominatedBy(Path p);
 	public abstract boolean isFeasible(PriceNode node);
+	public abstract boolean equals(Object o);
+	public abstract int hashCode();
 	
 	@Override
 	public String toString() {
