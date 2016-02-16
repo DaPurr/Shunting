@@ -3,7 +3,6 @@ package shunting.algorithms;
 import java.util.*;
 
 import shunting.models.*;
-
 import ilog.cplex.*;
 import ilog.concert.*;
 
@@ -19,7 +18,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	private Map<ShuntTrack, IloRange> capacityConstraints = new HashMap<>();
 	
 	private Map<MatchBlock, IloNumVar> notParked = new HashMap<>();
-	private Map<Path, IloNumVar> assignment = new HashMap<>();
+	private Map<TrackAssignment, IloNumVar> assignment = new HashMap<>();
 	private IloObjective objective;
 	
 	public CGParkingAlgorithm(Set<MatchBlock> matches, ShuntingYard yard) throws IloException {
@@ -50,7 +49,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		
 		// create pricing problem
 		PricingProblem pricingProblem = new PricingProblem(tracks, matches);
-		Path path = null;
+		TrackAssignment ta = null;
 		
 		// perform column generation
 		while (true) {
@@ -78,18 +77,18 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			}
 			System.out.println("------------------------------------");
 			
-			path = pricingProblem.solve();
-			if (path == null) {
+			ta = pricingProblem.solve();
+			if (ta == null) {
 				System.out.println("Terminated as there are no more columns with negative reduced cost.");
 				break;
 			}
-			if (assignment.containsKey(path)) {
+			if (assignment.containsKey(ta)) {
 				System.out.println("Terminated as we generated a duplicate column.");
 				break;
 			}
 			
 			// add generated column
-			addAssignmentVariable(path, path.getPathCost());
+			addAssignmentVariable(ta, ta.getPath().getPathCost());
 		}
 		
 		System.out.println("OPTIMAL SOLUTION (LP):");
@@ -103,8 +102,8 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			IloConversion parkToInt = master.conversion(notParked.get(mb), IloNumVarType.Int);
 			master.add(parkToInt);
 		}
-		for (Path p : assignment.keySet()) {
-			IloConversion assToInt = master.conversion(assignment.get(p), IloNumVarType.Int);
+		for (TrackAssignment ass : assignment.keySet()) {
+			IloConversion assToInt = master.conversion(assignment.get(ass), IloNumVarType.Int);
 			master.add(assToInt);
 		}
 		master.solve();
@@ -128,12 +127,12 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		notParked.put(match, isParked);
 	}
 	
-	private IloNumVar addAssignmentVariable(Path ass, double cost) throws IloException {
+	private IloNumVar addAssignmentVariable(TrackAssignment ass, double cost) throws IloException {
 		if (assignment.containsKey(ass))
 			throw new IllegalStateException("Already have track assignment: " + ass.toString());
 		
 		IloColumn column = master.column(objective, cost);
-		for (MatchBlock match : ass.coveredBlocks()) {
+		for (MatchBlock match : ass.getPath().coveredBlocks()) {
 			IloRange constraint = coverageConstraints.get(match);
 			column = column.and(master.column(constraint, 1));
 		}
@@ -170,9 +169,9 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			IloNumVar var = notParked.get(block);
 			System.out.println("N_b\t" + block.toString() + ": " + master.getValue(var));
 		}
-		for (Path path : assignment.keySet()) {
-			IloNumVar var = assignment.get(path);
-			System.out.println("X_a^s\t" + path.toString() + ": " + master.getValue(var));
+		for (TrackAssignment ass : assignment.keySet()) {
+			IloNumVar var = assignment.get(ass);
+			System.out.println("X_a^s\t" + ass.toString() + ": " + master.getValue(var));
 		}
 		System.out.println("------------------------------------");
 	}

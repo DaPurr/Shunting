@@ -38,24 +38,24 @@ public class PricingProblem {
 		mu.put(track, val);
 	}
 	
-	private Path selectLowestCost(Set<Path> paths) {
-		Path bestPath = null;
+	private TrackAssignment selectLowestCost(Set<TrackAssignment> assignments) {
+		TrackAssignment bestAssignment = null;
 		double bestCost = Double.POSITIVE_INFINITY;
-		for (Path p : paths) {
-			double cost = p.getReducedCost();
+		for (TrackAssignment ta : assignments) {
+			double cost = ta.getPath().getReducedCost();
 			if (cost < bestCost) {
-				bestPath = p;
+				bestAssignment = ta;
 				bestCost = cost;
 			}
 		}
-		return bestPath;
+		return bestAssignment;
 	}
 	
-	private Set<Path> selectNegativeReducedCosts(Set<Path> paths) {
-		Set<Path> set = new HashSet<>();
-		for (Path p : paths) {
-			if (p.getReducedCost() < -REDUCED_COST_ERROR)
-				set.add(p);
+	private Set<TrackAssignment> selectNegativeReducedCosts(Set<TrackAssignment> assignments) {
+		Set<TrackAssignment> set = new HashSet<>();
+		for (TrackAssignment ta : assignments) {
+			if (ta.getPath().getReducedCost() < -REDUCED_COST_ERROR)
+				set.add(ta);
 		}
 		return set;
 	}
@@ -140,28 +140,29 @@ public class PricingProblem {
 		return bestPath;
 	}
 	
-	public Path solve() {
+	public TrackAssignment solve() {
 		
-		Set<Path> paths = new HashSet<>();
+		Set<TrackAssignment> assignments = new HashSet<>();
 		
 		// solve RCSPP for each network
 		for (ShuntTrack track : networks.keySet()) {
 			Path p = doRCSPP(networks.get(track));
-			paths.add(p);
+			TrackAssignment ta = new TrackAssignment(track, p);
+			assignments.add(ta);
 		}
 		
 		// search for assignment(s) with smallest (negative) reduced cost
-		Set<Path> candidates = selectNegativeReducedCosts(paths);
+		Set<TrackAssignment> candidates = selectNegativeReducedCosts(assignments);
 		if (candidates.isEmpty())
 			return null;
-		Path bestPath = selectLowestCost(candidates);
-		if (bestPath == null) {
-			throw new IllegalStateException("bestPath can't be null!");
+		TrackAssignment bestAssignment = selectLowestCost(candidates);
+		if (bestAssignment == null) {
+			throw new IllegalStateException("bestAssignment can't be null!");
 		}
 		
-		System.out.println("Found path with reduced cost: " + bestPath.getReducedCost());
+		System.out.println("Found path with reduced cost: " + bestAssignment.getPath().getReducedCost());
 		
-		return bestPath;
+		return bestAssignment;
 	}
 
 	private void initDuals() {
@@ -254,35 +255,35 @@ public class PricingProblem {
 			}
 		}
 		
-		// TODO: REMOVE DUAL COSTS?!?!
-		public double getEdgeWeight(PriceNode pn1, PriceNode pn2) {
-			if (pn2 instanceof SourceNode)
-				throw new IllegalArgumentException("Right node cannot be source node!");
-			if (pn1 instanceof SinkNode)
-				throw new IllegalArgumentException("Left node cannot be sink node!");
-			
-			// if right node is NOT node, we incur no costs
-			if (pn2 instanceof BlockNode) {
-				BlockNode bn = (BlockNode) pn2;
-				if (bn.getApproach() == Approach.NOT)
-					return 0.0;
-			}
-			
-			// if right node is sink node, incur only -mu_s TODO: CHECK THIS!
-			if (pn2 instanceof SinkNode)
-				return -mu.get(track);
-			
-			if (!(pn2 instanceof BlockNode))
-				throw new IllegalStateException("There are other Nodes than BlockNode?!");
-			
-			BlockNode bn2 = (BlockNode) pn2;
-			double weight = -lambda.get(bn2.getBlock());
-			
-			// TODO: REAL WEIGHTS! (ROUTING)
-			weight += graph.getEdgeWeight(graph.getEdge(pn1, pn2));
-			
-			return weight;
-		}
+//		// TODO: REMOVE DUAL COSTS?!?!
+//		public double getEdgeWeight(PriceNode pn1, PriceNode pn2) {
+//			if (pn2 instanceof SourceNode)
+//				throw new IllegalArgumentException("Right node cannot be source node!");
+//			if (pn1 instanceof SinkNode)
+//				throw new IllegalArgumentException("Left node cannot be sink node!");
+//			
+//			// if right node is NOT node, we incur no costs
+//			if (pn2 instanceof BlockNode) {
+//				BlockNode bn = (BlockNode) pn2;
+//				if (bn.getApproach() == Approach.NOT)
+//					return 0.0;
+//			}
+//			
+//			// if right node is sink node, incur only -mu_s TODO: CHECK THIS!
+//			if (pn2 instanceof SinkNode)
+//				return -mu.get(track);
+//			
+//			if (!(pn2 instanceof BlockNode))
+//				throw new IllegalStateException("There are other Nodes than BlockNode?!");
+//			
+//			BlockNode bn2 = (BlockNode) pn2;
+//			double weight = -lambda.get(bn2.getBlock());
+//			
+//			// TODO: REAL WEIGHTS! (ROUTING)
+//			weight += graph.getEdgeWeight(graph.getEdge(pn1, pn2));
+//			
+//			return weight;
+//		}
 		
 		private boolean isCompatible(BlockNode bn1, BlockNode bn2) {
 			Approach app1 = bn1.getApproach();

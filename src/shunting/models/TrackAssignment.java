@@ -2,26 +2,38 @@ package shunting.models;
 
 public class TrackAssignment {
 		
-		private Path nodes;
 		private ShuntTrack track;
+		private Path path;
 		
-		public TrackAssignment(Path nodes, ShuntTrack track) {
-			this.nodes = nodes;
+		public TrackAssignment(ShuntTrack track, Path path) {
 			this.track = track;
+			this.path = path;
+		}
+		
+		public ShuntTrack getTrack() {
+			return track;
+		}
+		
+		public Path getPath() {
+			return path;
 		}
 		
 		@Override
-		public boolean equals(Object other) {
-			if (other == null || !(other instanceof TrackAssignment))
+		public String toString() {
+			return "{" + track.toString() + ", " + path.toString() + "}";
+		}
+		
+		@Override
+		public boolean equals(Object o) {
+			if (!(o instanceof TrackAssignment))
 				return false;
-			TrackAssignment ass = (TrackAssignment) other;
-			if (!nodes.equals(ass.nodes))
-				return false;
-			return track.equals(ass.track);
+			TrackAssignment other = (TrackAssignment) o;
+			return this.track.equals(other.track) &&
+					this.path.equals(path);
 		}
 		
 		@Override
 		public int hashCode() {
-			return 3*nodes.hashCode() + 7*track.hashCode();
+			return 3*track.hashCode() + 7*path.hashCode();
 		}
 	}
