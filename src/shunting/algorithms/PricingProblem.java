@@ -54,7 +54,7 @@ public class PricingProblem {
 	private Set<Path> selectNegativeReducedCosts(Set<Path> paths) {
 		Set<Path> set = new HashSet<>();
 		for (Path p : paths) {
-			if (p.getReducedCost() < REDUCED_COST_ERROR)
+			if (p.getReducedCost() < -REDUCED_COST_ERROR)
 				set.add(p);
 		}
 		return set;
