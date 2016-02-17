@@ -21,12 +21,13 @@ public class Main {
 	public static void main(String[] args) {
 		int seed = 5;
 		int horizon = 1440;
-		int nrTrainUnits=55;
+		int nrTrainUnits=53;
 		int maxRerun = 1;
 		int rerunCounter = 0;
 		boolean needScheduleAgain = false;
 		Random rn = new Random(seed);
-		int c=10;
+		int c=5;
+		boolean done = false;
 		
 		Schedule test= Schedule.randomSchedule(nrTrainUnits, horizon,rn);
 		
@@ -143,7 +144,8 @@ public class Main {
 		}
 		FeasibilityCheckScheduling feasibilityCheck= new FeasibilityCheckScheduling(activities); 
 		boolean feasible = feasibilityCheck.getFeasible();
-		if(feasible) { System.out.println("The schedule is feasible, the rerun counter is "+rerunCounter);}
+		if(feasible) { System.out.println("The schedule is feasible, the rerun counter is "+rerunCounter);
+		done = true; }
 		else {System.out.println("The schedule is not feasible, the rerun counter is "+ rerunCounter);
 		needScheduleAgain = true;
 		Set<MaintenanceActivity> tardyJobs = feasibilityCheck.getTardyJobs();
@@ -157,7 +159,7 @@ public class Main {
 		}
 		}
 		
-		boolean done = false;
+		
 		while(rerunCounter<maxRerun&&!done){
 		if(needScheduleAgain)
 		{
