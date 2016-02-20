@@ -65,19 +65,20 @@ public class PricingProblem {
 		DefaultDirectedWeightedGraph<PriceNode, DefaultWeightedEdge> graph = network.graph;		
 		
 		// for each node in the network we need a sorted set of paths
-		HashMap<PriceNode, TreeSet<Path>> nodePaths = new HashMap<>();
+		HashMap<PriceNode, SortedSet<Path>> nodePaths = new HashMap<>();
 		Set<PriceNode> nodes = graph.vertexSet();
 		ShuntTrack track = network.track;
 		for (PriceNode node : nodes) {
 			TreeSet<Path> set = new TreeSet<>();
 			nodePaths.put(node, set);
 		}
-		TreeSet<Path> set = nodePaths.get(network.source);
+		SortedSet<Path> set = nodePaths.get(network.source);
 		Path p = new LIFOPath(track.getRemainingCapacity());
 		p.addNode(network.source, 0.0, 0.0);
 		set.add(p);
 
 		// Begin iteration 1 - source to first layer
+//		System.out.println("... Going from source to layer[0]");
 		MatchBlock[] arrayLayers = new MatchBlock[network.layers.keySet().size()];
 		network.layers.keySet().toArray(arrayLayers);
 //		Set<Object> nextNodes = graph.edgesOf(network.source);
@@ -91,28 +92,34 @@ public class PricingProblem {
 			DefaultWeightedEdge edge = graph.getEdge(network.source, bn);
 			double cost = graph.getEdgeWeight(edge);
 			newPath.addNode(bn, cost, dual);
-			TreeSet<Path> nextPaths	= nodePaths.get(bn);
+			SortedSet<Path> nextPaths = nodePaths.get(bn);
 			nextPaths.add(newPath);
 		}
 		
 		// Begin iteration i - blocks to blocks
+//		System.out.println("...Going from layer[i] to layer[i+1]");
 		for (int i = 0; i < arrayLayers.length-1; i++) {
 			MatchBlock currentBlock = arrayLayers[i];
 //			MatchBlock nextBlock = arrayLayers[i+1];
 			for (BlockNode currentBn : network.layers.get(currentBlock)) {
+//				System.out.println("Current node: " + currentBn);
 				for (Path currentPath : nodePaths.get(currentBn)) {
 					LIFOPath currentLIFO = (LIFOPath) currentPath;
 					Set<DefaultWeightedEdge> edges = graph.outgoingEdgesOf(currentBn);
 					for (DefaultWeightedEdge edge : edges) {
 						BlockNode nextBn = (BlockNode) graph.getEdgeTarget(edge);
+//						System.out.println("......Going from " + currentBn + " to " + nextBn);
 						MatchBlock nextBlock = nextBn.getBlock();
 						LIFOPath newPath = new LIFOPath(currentLIFO);
 						double cost = graph.getEdgeWeight(edge);
 						double dual = lambda.get(nextBlock);
 //						if (nextBn.getApproach() == Approach.NOT)
 //							dual = 0.0;
+						if (!newPath.isFeasible(nextBn))
+							continue;
 						newPath.addNode(nextBn, cost, dual);
-						TreeSet<Path> nextPaths = nodePaths.get(nextBn);
+						SortedSet<Path> nextPaths = nodePaths.get(nextBn);
+						removeAfter(nextPaths, newPath);
 						nextPaths.add(newPath);
 					}
 				}
@@ -120,6 +127,7 @@ public class PricingProblem {
 		}
 		
 		// Begin last iteration - last layer to sink
+//		System.out.println("...Going from layer[n] to sink");
 		int arraySize = arrayLayers.length;
 //		Set<BlockNode> lastLayer = network.layers.get(arrayLayers[arraySize-1]);
 		for (BlockNode bn : network.layers.get(arrayLayers[arraySize-1])) {
@@ -130,7 +138,8 @@ public class PricingProblem {
 				double cost = graph.getEdgeWeight(edge);
 				double dual = mu.get(track);
 				newPath.addNode(network.sink, cost, dual);
-				TreeSet<Path> nextPaths = nodePaths.get(network.sink);
+				SortedSet<Path> nextPaths = nodePaths.get(network.sink);
+				removeAfter(nextPaths, newPath);
 				nextPaths.add(newPath);
 			}
 		}
@@ -140,7 +149,20 @@ public class PricingProblem {
 		return bestPath;
 	}
 	
-	public TrackAssignment solve() {
+	private void removeAfter(SortedSet<Path> set, Path path) {
+		Iterator<Path> iter = set.tailSet(path).iterator();
+		while (iter.hasNext()) {
+			Path p = iter.next();
+			if (path.compareTo(p) <= 0)
+				continue;
+			else {
+				iter.remove();
+				System.out.println("Removed: " + p.toString());
+			}
+		}
+	}
+	
+	public Set<TrackAssignment> solve() {
 		
 		Set<TrackAssignment> assignments = new HashSet<>();
 		
@@ -155,14 +177,18 @@ public class PricingProblem {
 		Set<TrackAssignment> candidates = selectNegativeReducedCosts(assignments);
 		if (candidates.isEmpty())
 			return null;
-		TrackAssignment bestAssignment = selectLowestCost(candidates);
-		if (bestAssignment == null) {
-			throw new IllegalStateException("bestAssignment can't be null!");
+//		TrackAssignment bestAssignment = selectLowestCost(candidates);
+//		if (bestAssignment == null) {
+//			throw new IllegalStateException("bestAssignment can't be null!");
+//		}
+		
+//		System.out.println("Found path with reduced cost: " + bestAssignment.getPath().getReducedCost());
+		for (TrackAssignment ta : candidates) {
+			System.out.println("Found path with reduced cost: " + ta.getPath().getReducedCost());
 		}
 		
-		System.out.println("Found path with reduced cost: " + bestAssignment.getPath().getReducedCost());
-		
-		return bestAssignment;
+//		return bestAssignment;
+		return candidates;
 	}
 
 	private void initDuals() {
@@ -254,36 +280,6 @@ public class PricingProblem {
 				}
 			}
 		}
-		
-//		// TODO: REMOVE DUAL COSTS?!?!
-//		public double getEdgeWeight(PriceNode pn1, PriceNode pn2) {
-//			if (pn2 instanceof SourceNode)
-//				throw new IllegalArgumentException("Right node cannot be source node!");
-//			if (pn1 instanceof SinkNode)
-//				throw new IllegalArgumentException("Left node cannot be sink node!");
-//			
-//			// if right node is NOT node, we incur no costs
-//			if (pn2 instanceof BlockNode) {
-//				BlockNode bn = (BlockNode) pn2;
-//				if (bn.getApproach() == Approach.NOT)
-//					return 0.0;
-//			}
-//			
-//			// if right node is sink node, incur only -mu_s TODO: CHECK THIS!
-//			if (pn2 instanceof SinkNode)
-//				return -mu.get(track);
-//			
-//			if (!(pn2 instanceof BlockNode))
-//				throw new IllegalStateException("There are other Nodes than BlockNode?!");
-//			
-//			BlockNode bn2 = (BlockNode) pn2;
-//			double weight = -lambda.get(bn2.getBlock());
-//			
-//			// TODO: REAL WEIGHTS! (ROUTING)
-//			weight += graph.getEdgeWeight(graph.getEdge(pn1, pn2));
-//			
-//			return weight;
-//		}
 		
 		private boolean isCompatible(BlockNode bn1, BlockNode bn2) {
 			Approach app1 = bn1.getApproach();

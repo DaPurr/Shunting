@@ -49,48 +49,53 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		
 		// create pricing problem
 		PricingProblem pricingProblem = new PricingProblem(tracks, matches);
-		TrackAssignment ta = null;
+		Set<TrackAssignment> candidates = null;
 		
 		// perform column generation
-		while (true) {
-			master.solve();
-			
-			// display solution
-			displayVariables();
-			
-			System.out.println("DUALS:");
-			System.out.println("------------------------------------");
-			// update lambda's
-			for (MatchBlock mb : coverageConstraints.keySet()) {
-				IloRange constraint = coverageConstraints.get(mb);
-				double dual = master.getDual(constraint);
-				pricingProblem.setDualLambda(mb, dual);
-				System.out.println("Coverage\t" + mb.toString() + ": " + dual);
+		outer:
+			while (true) {
+				master.solve();
+
+				// display solution
+				displayVariables();
+
+				System.out.println("DUALS:");
+				System.out.println("------------------------------------");
+				// update lambda's
+				for (MatchBlock mb : coverageConstraints.keySet()) {
+					IloRange constraint = coverageConstraints.get(mb);
+					double dual = master.getDual(constraint);
+					pricingProblem.setDualLambda(mb, dual);
+					System.out.println("Coverage\t" + mb.toString() + ": " + dual);
+				}
+
+				// update mu's
+				for (ShuntTrack track : capacityConstraints.keySet()) {
+					IloRange constraint = capacityConstraints.get(track);
+					double dual = master.getDual(constraint);
+					pricingProblem.setDualMu(track, dual);
+					System.out.println("Capacity\t" + track.toString() + ": " + dual);
+				}
+				System.out.println("------------------------------------");
+
+				candidates = pricingProblem.solve();
+				if (candidates == null) {
+					System.out.println("Terminated as there are no more columns with negative reduced cost.");
+					break;
+				}
+				for (TrackAssignment ta : candidates) {
+					if (assignment.containsKey(ta)) {
+						System.out.println("Terminated as we generated a duplicate column.");
+						break outer;
+					}
+				}
+
+				// add generated columns
+				for (TrackAssignment ta : candidates) {
+					addAssignmentVariable(ta, ta.getPath().getPathCost());
+				}
 			}
-			
-			// update mu's
-			for (ShuntTrack track : capacityConstraints.keySet()) {
-				IloRange constraint = capacityConstraints.get(track);
-				double dual = master.getDual(constraint);
-				pricingProblem.setDualMu(track, dual);
-				System.out.println("Capacity\t" + track.toString() + ": " + dual);
-			}
-			System.out.println("------------------------------------");
-			
-			ta = pricingProblem.solve();
-			if (ta == null) {
-				System.out.println("Terminated as there are no more columns with negative reduced cost.");
-				break;
-			}
-			if (assignment.containsKey(ta)) {
-				System.out.println("Terminated as we generated a duplicate column.");
-				break;
-			}
-			
-			// add generated column
-			addAssignmentVariable(ta, ta.getPath().getPathCost());
-		}
-		
+
 		System.out.println("OPTIMAL SOLUTION (LP):");
 		System.out.println("------------------------------------");
 		displayVariables();
@@ -112,6 +117,20 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		System.out.println("------------------------------------");
 		displayVariables();
 		System.out.println("------------------------------------");
+		
+		// check if we park everything
+		int countNotParked = 0;
+		for (MatchBlock mb : notParked.keySet()) {
+			double val = master.getValue(notParked.get(mb));
+			if (val > 1e-6) {
+				System.out.println("Didn't park: " + mb + " val=" + val);
+				countNotParked++;
+			}
+		}
+		System.out.println("Total nr. of blocks to be parked: " + notParked.size());
+		System.out.println("Blocks not parked: " + countNotParked);
+		System.out.println("Nr. of columns generated: " + assignment.size());
+		System.out.println("Total nr. of variables: " + (assignment.size() + notParked.size()));
 	}
 
 	private void addParkedVariables() throws IloException {

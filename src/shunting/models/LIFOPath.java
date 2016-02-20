@@ -25,29 +25,29 @@ public class LIFOPath extends Path {
 		this.pathCost = path.pathCost;
 	}
 	
-	// TODO: NEEDS TESTING!
-	public Set<BlockNode> departBefore(BlockNode bn) {
-		Set<BlockNode> set = new HashSet<>();
-		if (lastNode == null)
-			return set;
-		if (lastNode instanceof SourceNode)
-			return set;
-		if (lastNode instanceof SinkNode)
-			throw new IllegalStateException("Path is already complete.");
+	public Set<BlockNode> departBetween(PriceNode u, PriceNode v) {
+		if (u instanceof SinkNode || v instanceof SourceNode)
+			throw new IllegalStateException("Nodes u and v have impossible values.");
 		
-		BlockNode lastBlockNode = (BlockNode) lastNode;
-		for (PriceNode node : nodes) {
-			if (node instanceof SourceNode ||
-					node instanceof SinkNode)
+		Set<BlockNode> set = new HashSet<>();
+		for (PriceNode w : nodes) {
+			if (w instanceof SourceNode ||
+					w instanceof SinkNode)
 				continue;
-			
-			// we're a block node
-			BlockNode blockNode = (BlockNode) node;
-			int departureW =  blockNode.getBlock().getDepartureTime();
-			int arrivalU = lastBlockNode.getBlock().getArrivalTime();
-			int arrivalV = bn.getBlock().getArrivalTime();
+			BlockNode blockW = (BlockNode) w;
+			int departureW = blockW.getBlock().getDepartureTime();
+			int arrivalU = Integer.MIN_VALUE;
+			int arrivalV = Integer.MAX_VALUE;
+			if (u instanceof BlockNode) {
+				BlockNode blockU = (BlockNode) u;
+				arrivalU = blockU.getBlock().getArrivalTime();
+			}
+			if (v instanceof BlockNode) {
+				BlockNode blockV = (BlockNode) v;
+				arrivalV = blockV.getBlock().getArrivalTime();
+			}
 			if (arrivalU < departureW && departureW < arrivalV)
-				set.add(blockNode);
+				set.add(blockW);
 		}
 		return set;
 	}
@@ -93,7 +93,7 @@ public class LIFOPath extends Path {
 			BlockNode bn = (BlockNode) node;
 			if (bn.getApproach() != Approach.NOT && !isSameType())
 				isOneType = false;
-			Set<BlockNode> departedBlocks = departBefore(bn);
+			Set<BlockNode> departedBlocks = departBetween(lastNode, bn);
 			int departedLength = getLengthBlocks(departedBlocks);
 			remainingLength += departedLength;
 			
@@ -145,7 +145,7 @@ public class LIFOPath extends Path {
 	public boolean isFeasible(PriceNode node) {
 		if (node instanceof SinkNode)
 			return true;
-		if (node instanceof SourceNode || !nodes.isEmpty())
+		if (node instanceof SourceNode && !nodes.isEmpty())
 			throw new IllegalStateException("Source node can only be added at the beginning of a path!");
 		if (!(node instanceof BlockNode))
 			throw new IllegalStateException("Another node type?!?!");
@@ -154,7 +154,7 @@ public class LIFOPath extends Path {
 		BlockNode bn = (BlockNode) node;
 		if (bn.getApproach() == Approach.NOT)
 			return true;
-		Set<BlockNode> departsBetweenUV = departBefore(bn);
+		Set<BlockNode> departsBetweenUV = departBetween(lastNode, bn);
 		if ( bn.getBlock().getBlockLength() >= remainingLength + getLengthBlocks(departsBetweenUV) ) {
 			return false;
 		}
@@ -199,12 +199,12 @@ public class LIFOPath extends Path {
 
 	@Override
 	public int hashCode() {
-		int lastNodeHash = 0;
-		if (lastNode != null)
-			lastNodeHash = lastNode.hashCode();
-		int isOneTypeInteger = 0;
-		if (isOneType)
-			isOneTypeInteger = 1;
+//		int lastNodeHash = 0;
+//		if (lastNode != null)
+//			lastNodeHash = lastNode.hashCode();
+//		int isOneTypeInteger = 0;
+//		if (isOneType)
+//			isOneTypeInteger = 1;
 		return 3*nodes.hashCode();
 	}
 
