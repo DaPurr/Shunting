@@ -70,12 +70,10 @@ public class Main {
 		File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
 		List<Schedule> testboolean=new ArrayList<>();
 		ScheduleReader sr = new ScheduleReader();
-		for(int i=0;i<3;i++){
 		Schedule schedule = sr.parseXML(file);
-		testboolean.add(schedule);
-		}
+		
 		// using test random schedule
-		Schedule schedule = test;
+		//Schedule schedule = test;
 
 		// test Matching formulation
 		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
