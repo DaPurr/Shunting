@@ -78,7 +78,6 @@ public class Main {
 		// test Matching formulation
 		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
 		MatchSolution ms = cm.solve();
-		Set<MatchSolution> poolMatchSolution = cm.populate();
 		Set<MatchBlock> mb = ms.getMatchBlocks();
 		System.out.println(ms.toString());
 		List<Platform> platforms = new ArrayList<Platform>();

@@ -272,7 +272,6 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			}
 
 			cplex.solve();
-			cplex.populate();
 
 			// create MatchSolution
 			MatchSolution ms = new MatchSolution();
@@ -282,7 +281,6 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 					ms.addBlock(mb);
 				}
 			}
-		
 
 			System.out.println("Objective value: " + cplex.getObjValue());
 			return ms;
