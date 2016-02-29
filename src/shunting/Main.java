@@ -19,7 +19,7 @@ import shunting.models.*;
 public class Main {
 
 	public static void main(String[] args) {
-		int seed = 5;
+		int seed = 50;
 		int horizon = 1440;
 		int nrTrainUnits = 53;
 		int maxRerun = 1;
@@ -68,10 +68,12 @@ public class Main {
 		// test for schedule (no departures in example affects e.g.
 		// schedule.events)
 		File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
+		List<Schedule> testboolean=new ArrayList<>();
 		ScheduleReader sr = new ScheduleReader();
-		// using normal schedule
-		// Schedule schedule = sr.parseXML(file);
-
+		for(int i=0;i<3;i++){
+		Schedule schedule = sr.parseXML(file);
+		testboolean.add(schedule);
+		}
 		// using test random schedule
 		Schedule schedule = test;
 
