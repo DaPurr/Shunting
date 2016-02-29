@@ -19,7 +19,7 @@ import shunting.models.*;
 public class Main {
 
 	public static void main(String[] args) {
-		int seed = 5;
+		int seed = 50;
 		int horizon = 1440;
 		int nrTrainUnits = 53;
 		int maxRerun = 1;
