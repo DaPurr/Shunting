@@ -92,9 +92,9 @@ public class ScheduleReader {
 		boolean washing = Boolean.parseBoolean(attr.getNamedItem("washing").getNodeValue());
 		String type = attr.getNamedItem("type").getNodeValue();		
 		
-		Train t = tf.createTrainByType(ID, type, interchangeable, 
-				inspection, repair, cleaning, washing);
-//		Train t = tf.createTrainByType(ID, type);
+		//Train t = tf.createTrainByType(ID, type, interchangeable, 
+			//	inspection, repair, cleaning, washing);
+		Train t = tf.createTrainByType(ID, type);
 		trainCache.put(ID, t);
 		
 		return t;
