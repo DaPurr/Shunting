@@ -38,6 +38,7 @@ public class Procedure {
 		//Solve Matching Algorithm
 		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
 		MatchSolution ms = cm.solve(); 
+		// For (solutions s: solutionpool){
 		//solution pool, if no solution, throw exception?
 		Set<MatchBlock> mb = ms.getMatchBlocks();
 
@@ -56,9 +57,18 @@ public class Procedure {
 		}
 
 		boolean feasible = feasibilityCheck.getFeasible();
-		
+		// We check if Maintenance gives feasible schedule
+		// If so, go to parking
+		// If not, go to next solution in solutionpool of matching
 		if(feasible){
 			System.out.println("Scheduling Maintenance is feasible");
+			//TODO: parking
+			// if(parking feasible){
+			// Break;}
+			//else
+			//		Go to next solution in solutionpool of matching	
+			//}
+
 		}
 
 		else {
@@ -66,4 +76,5 @@ public class Procedure {
 		}
 		return true;
 	}
+	//} 
 }
