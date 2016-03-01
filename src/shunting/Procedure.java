@@ -38,17 +38,24 @@ public class Procedure {
 	public Boolean solve(){
 
 		//Solve Matching Algorithm
+		int counter = 1;
 		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
 		HashMap<MatchSolution, Double> ms = cm.solve(); 
+		Initialisation_procedure initialisation = new Initialisation_procedure();
 		// For (solutions s: solutionpool){
 		//solution pool, if no solution, throw exception?
+		
+		
 		for (MatchSolution i: ms.keySet()){
-		//	MatchSolution i = minimum(ms);
+			//MatchSolution i = minimum(ms);
 			Set<MatchBlock> mb = i.getMatchBlocks();
 			double mb_objective = ms.get(i);
 			ms.put(i, Double.POSITIVE_INFINITY);
+			System.out.println("In the "+counter+" round");
+			counter++;
 
 			// Solve Maintenance Scheduling
+		
 			MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingyard, matchBlockTardy, tardiness);
 			Set<MaintenanceActivity> activities = ma.solve();
 			FeasibilityCheckScheduling feasibilityCheck = new FeasibilityCheckScheduling(activities);
@@ -73,11 +80,14 @@ public class Procedure {
 				break;
 			}
 
-			else {
-				// Go to next solution in solutionpool
+			else { 
+				System.out.println("The scheduling of activities is not feasible in round "+counter);
+				shuntingyard = initialisation.initialisation(horizon);
+				
 			}
 
 		}
+		
 		return true;
 	}
 	//} 
