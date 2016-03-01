@@ -21,13 +21,13 @@ public class Main {
 	public static void main(String[] args) {
 		int seed = 5;
 		int horizon = 1440;
-		int nrTrainUnits = 53;
+		int nrTrainUnits = 54;
 		boolean needScheduleAgain = false;
 		Random rn = new Random(seed);
 		int c = 5;
 		boolean done = false;
 
-		//Schedule test = Schedule.randomSchedule(nrTrainUnits, horizon, rn);
+		Schedule test = Schedule.randomSchedule(nrTrainUnits, horizon, rn);
 
 		// Create kleine binckhorst
 		Washer s63 = new Washer(horizon);
@@ -63,9 +63,12 @@ public class Main {
 		//boolean alright = test.ScheduleFeasible(kb);
 
 		File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
-		List<Schedule> testboolean=new ArrayList<>();
+		/*List<Schedule> testboolean=new ArrayList<>();
 		ScheduleReader sr = new ScheduleReader(seed);
 		Schedule schedule = sr.parseXML(file);
+		*/
+		
+		Schedule schedule = test;
 		
 		Procedure proc = new Procedure(schedule, kb, horizon);
 		Boolean procedureFeasible = proc.solve();

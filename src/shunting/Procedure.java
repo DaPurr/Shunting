@@ -42,14 +42,11 @@ public class Procedure {
 		HashMap<MatchSolution, Double> ms = cm.solve(); 
 		// For (solutions s: solutionpool){
 		//solution pool, if no solution, throw exception?
-		for (MatchSolution j: ms.keySet()){
-			MatchSolution i = minimum(ms);
+		for (MatchSolution i: ms.keySet()){
+		//	MatchSolution i = minimum(ms);
 			Set<MatchBlock> mb = i.getMatchBlocks();
+			double mb_objective = ms.get(i);
 			ms.put(i, Double.POSITIVE_INFINITY);
-
-			for (MatchBlock block : mb) {
-				System.out.println(block.toString() + " " + block.getArrivalTime());
-			}
 
 			// Solve Maintenance Scheduling
 			MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingyard, matchBlockTardy, tardiness);
@@ -73,7 +70,7 @@ public class Procedure {
 				//else
 				//		Go to next solution in solutionpool of matching	
 				//}
-
+				break;
 			}
 
 			else {

@@ -281,7 +281,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
 				System.out.println("One of the obj values is "+ cplex.getObjValue(i));
 				MatchSolution mp = new MatchSolution();
-				
+
 				for (MatchBlock mb : matchingBlocks.keySet()) {
 					IloIntVar w = matchingBlocks.get(mb);
 					if(cplex.getValue(w, i)==1) {
@@ -290,66 +290,49 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				}
 				solutionPool.add(mp);
 				solutionAndObj.put(mp,cplex.getObjValue(i));
-				return solutionAndObj;
 			}
-			
-				
+			return solutionAndObj;
 
-
-
-				// create MatchSolution
-				MatchSolution ms = new MatchSolution();
-				for (MatchBlock mb : matchingBlocks.keySet()) {
-					IloIntVar w = matchingBlocks.get(mb);
-					if (cplex.getValue(w) == 1.0) {
-						ms.addBlock(mb);
-					}
-				}
-
-				System.out.println("Objective value: " + cplex.getObjValue());
-				//return ms;
-
-
-			} catch (IloException exc){
-				exc.printStackTrace();
-			}
-
-			return null;
+		} catch (IloException exc){
+			exc.printStackTrace();
 		}
 
-		private boolean doCouple(Part p) {
-			Composition comp = partToComp.get(p);
-			return p.size() != comp.size();
-		}
-
-		private boolean compatible(Part p, Part q) {
-			if (p.size() != q.size())
-				return false;
-			for (int i = 0; i < p.size(); i++) {
-				Train s = p.getUnit(i);
-				Train t = q.getUnit(i);
-
-				if (!s.getTrainType().getType().equals(t.getTrainType().getType()))
-					return false;
-				if (!s.getInterchange() && !s.getID().equals(t.getID()))
-					return false;
-			}
-
-			int arrivalP = timeArrivingParts.get(p);
-			int departureQ = timeDepartingParts.get(q);
-			int delay = p.getPlatformTime();
-			if (doCouple(p))
-				delay += UNCOUPLE_TIME;
-			if (doCouple(q))
-				delay += COUPLE_TIME;
-			if (p.getPartWashing())
-				delay += p.getWashingTime();
-			if(p.getPartInspection())
-				delay +=p.getInspectionTime();
-			if (!(arrivalP + delay < departureQ))
-				return false;
-
-			return true;
-		}
-
+		return null;
 	}
+
+	private boolean doCouple(Part p) {
+		Composition comp = partToComp.get(p);
+		return p.size() != comp.size();
+	}
+
+	private boolean compatible(Part p, Part q) {
+		if (p.size() != q.size())
+			return false;
+		for (int i = 0; i < p.size(); i++) {
+			Train s = p.getUnit(i);
+			Train t = q.getUnit(i);
+
+			if (!s.getTrainType().getType().equals(t.getTrainType().getType()))
+				return false;
+			if (!s.getInterchange() && !s.getID().equals(t.getID()))
+				return false;
+		}
+
+		int arrivalP = timeArrivingParts.get(p);
+		int departureQ = timeDepartingParts.get(q);
+		int delay = p.getPlatformTime();
+		if (doCouple(p))
+			delay += UNCOUPLE_TIME;
+		if (doCouple(q))
+			delay += COUPLE_TIME;
+		if (p.getPartWashing())
+			delay += p.getWashingTime();
+		if(p.getPartInspection())
+			delay +=p.getInspectionTime();
+		if (!(arrivalP + delay < departureQ))
+			return false;
+
+		return true;
+	}
+
+}
