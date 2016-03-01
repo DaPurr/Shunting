@@ -1,8 +1,10 @@
 package shunting.algorithms;
 
+import java.util.HashMap;
+
 import shunting.models.MatchSolution;
 
 public interface MatchAlgorithm {
 	
-	public MatchSolution solve();
+	public HashMap<MatchSolution, Double> solve();
 }
