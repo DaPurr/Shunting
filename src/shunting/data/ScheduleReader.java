@@ -31,7 +31,7 @@ public class ScheduleReader {
 	
 	private Map<String, Train> trainCache;
 	private LocalTime base;
-	private TrainFactory tf = new TrainFactory(9);
+	private TrainFactory tf = new TrainFactory(0);
 	
 	public ScheduleReader() {
 		trainCache = new HashMap<>();

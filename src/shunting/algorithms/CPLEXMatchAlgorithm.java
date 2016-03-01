@@ -102,7 +102,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 				}
 			}
 
-			// TODO: Determine parameters Q (cost per matching) and w_ij (cost of matching i and j)
+			
 			// objective function (1)
 			IloNumExpr totalU = cplex.numExpr();
 			IloNumExpr totalZ = cplex.numExpr();
@@ -272,6 +272,17 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			}
 
 			cplex.solve();
+			cplex.populate();
+			int n = cplex.getSolnPoolNsolns();
+			
+			System.out.println("The number of solutions in CPLEX is " +n);
+			Set<MatchSolution> solutionPool = new HashSet<MatchSolution>();
+			for(int i=0; i<n; i++) {
+				System.out.println("One of the obj values is "+ cplex.getObjValue(i));
+				
+				
+				
+			}
 
 			// create MatchSolution
 			MatchSolution ms = new MatchSolution();
