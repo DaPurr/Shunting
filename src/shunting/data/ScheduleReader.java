@@ -31,11 +31,12 @@ public class ScheduleReader {
 	
 	private Map<String, Train> trainCache;
 	private LocalTime base;
-	private TrainFactory tf = new TrainFactory(0);
-	
-	public ScheduleReader() {
+	private TrainFactory tf = new TrainFactory();
+	   
+	public ScheduleReader(int seed) {
 		trainCache = new HashMap<>();
 		base = null;
+		tf = new TrainFactory(seed);
 	}
 	
 	public Schedule parseXML(File f) {
