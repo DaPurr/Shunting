@@ -198,7 +198,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				//System.out.println("Job "+ jobAtPlatform +"is expected to departure from platform at"+ t); 
 
 				if(jobAtPlatform.getMatchBlock().getPart1().getPartWashing() ) {
-					timeArrivalWashingMachine.put(jobAtPlatform, time+jobAtPlatform.getProcessingTime()+1);
+					timeArrivalWashingMachine.put(jobAtPlatform, time+jobAtPlatform.getProcessingTime());
 					//System.out.println("Job "+ jobAtPlatform + " is added to the washing queue at time "+timeArrivalWashingMachine.get(jobAtPlatform));
 				}
 				else {
@@ -298,8 +298,8 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 					//System.out.println("Job arrives to platform "+ jobAtPlatform);
 
 					if(jobAtPlatform.getMatchBlock().getPart1().getPartWashing()) {
-						timeArrivalWashingMachine.put(jobAtPlatform, time+jobAtPlatform.getProcessingTime()+1);
-						int a = time+jobAtPlatform.getProcessingTime()+1;
+						timeArrivalWashingMachine.put(jobAtPlatform, time+jobAtPlatform.getProcessingTime());
+						int a = time+jobAtPlatform.getProcessingTime();
 						//System.out.println("Job "+ jobAtPlatform + " is added to the washing queue at time "+a);
 					}
 					else {
@@ -463,7 +463,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 		}
 
-		System.out.println("Service scheduling is done");
+		//System.out.println("Service scheduling is done");
 		writeResults();
 		return maintenanceActivities;
 	}

@@ -17,7 +17,7 @@ public boolean getFeasible() {
 	boolean result = true;
 	tardiness = new HashMap<MaintenanceActivity, Integer>();
 	for (MaintenanceActivity ma: maintenanceActivities) {
-		if(ma.getEndTime() > ma.getJob().getMatchBlock().getDepartureTime()-3) {
+		if(ma.getEndTime() >= ma.getJob().getMatchBlock().getDepartureTime()-3) {
 			result =false;	
 			tardyJobs.add(ma);
 			tardiness.put(ma, ma.getEndTime() -  ma.getJob().getMatchBlock().getDepartureTime()-3);

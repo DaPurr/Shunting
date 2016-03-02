@@ -1,60 +1,95 @@
 package shunting;
 
+import java.io.File;
 import java.util.*;
+
+import shunting.data.ScheduleReader;
 import shunting.models.*;
 
 public class Main {
 
 	public static void main(String[] args) {
 		int horizon = 1440;
-		int maxNrTrainUnits = 100;
-		int numberOfSeeds = 1;
+		int maxNrTrainUnits = 50;
+		int numberOfSeeds = 100;
 
-		//File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
+
 		List<Schedule> schedules=new ArrayList<>();
-		
-		for (int trains=1; trains<maxNrTrainUnits; trains++){
+
+		for (int trains=20; trains<maxNrTrainUnits; trains=trains + 5){
 			System.out.println("number of trains is:" + trains);
+			int countMatch = 0;
 			List<Boolean> feasible=new ArrayList<>();
 			for (int seed=0; seed<numberOfSeeds; seed++){
-				
-				//ScheduleReader sr = new ScheduleReader(seed);
-				//Schedule schedule = sr.parseXML(file);
+
 				Random rn = new Random(seed);
 				Schedule test = Schedule.randomSchedule(trains, horizon, rn);
 				Schedule schedule=test;
 				schedules.add(schedule);
 
-				//Schedule schedule = test;
 				Initialisation_procedure initialisation = new Initialisation_procedure();
 
 				ShuntingYard kb =  initialisation.initialisation(horizon);
 				Procedure proc = new Procedure(schedule, kb, horizon);
 				Boolean procedureFeasible = proc.solve();
 				feasible.add(procedureFeasible);
+				countMatch = countMatch + proc.getCounterMatching();
 
-				int cleaning = countCleaning(schedule);
-				int washing = countWashing(schedule);
-				int repair = countRepair(schedule);
-				int inspection = countInspection(schedule);
+				//int cleaning = countCleaning(schedule);
+				//int washing = countWashing(schedule);
+				//int repair = countRepair(schedule);
+				//int inspection = countInspection(schedule);
 
-				/*System.out.println("Number of trains that need cleaning is " + cleaning);
-			System.out.println("Number of trains that need washing is " + washing);
-			System.out.println("Number of trains that need repair is " + repair);
-			System.out.println("Number of trains that need inspection is " + inspection);
-				 */
+				//System.out.println("Number of trains that need cleaning is " + cleaning);
+				//System.out.println("Number of trains that need washing is " + washing);
+				//System.out.println("Number of trains that need repair is " + repair);
+				//System.out.println("Number of trains that need inspection is " + inspection);
+
 			}
 			int count = 0;
 			for(Boolean temp : feasible){
 				if(temp){ count++;}
 			}
-			double frac = (double) count/feasible.size();
+			double frac = (double) (count+countMatch)/(feasible.size());
 			System.out.println("Fraction of feasible solutions using different booleans: " + frac);
 		}
 	}
+	/*	
+		File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
+		List<Boolean> feasible=new ArrayList<>();
+		for (int seed=0; seed<numberOfSeeds; seed++){
 
+			ScheduleReader sr = new ScheduleReader(seed);
+			Schedule schedule = sr.parseXML(file);
+			schedules.add(schedule);
+			Initialisation_procedure initialisation = new Initialisation_procedure();
 
+			ShuntingYard kb =  initialisation.initialisation(horizon);
+			Procedure proc = new Procedure(schedule, kb, horizon);
+			Boolean procedureFeasible = proc.solve();
+			feasible.add(procedureFeasible);
+			countMatch = countMatch + proc.getCounterMatching();
 
+			int cleaning = countCleaning(schedule);
+			int washing = countWashing(schedule);
+			int repair = countRepair(schedule);
+			int inspection = countInspection(schedule);
+
+			//System.out.println("Number of trains that need cleaning is " + cleaning);
+			//System.out.println("Number of trains that need washing is " + washing);
+			//System.out.println("Number of trains that need repair is " + repair);
+			//System.out.println("Number of trains that need inspection is " + inspection);
+
+		}
+		int count = 0;
+		for(Boolean temp : feasible){
+			if(temp){ count++;}
+		}
+		double frac = (double) count/(feasible.size()-countMatch);
+		System.out.println("Fraction of feasible solutions using different booleans: " + frac);
+		System.out.println(countMatch);
+	}
+	 */
 	private static int countCleaning(Schedule schedule) {
 		int counterCleaning = 0;
 		List<Arrival> arrivals = new ArrayList<Arrival>(); 

@@ -274,6 +274,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			cplex.solve();
 			cplex.populate();
 			int n = cplex.getSolnPoolNsolns();
+			//System.out.println("The number of solutions is "+n);
 			Set<MatchSolution> solutionPool = new HashSet<MatchSolution>();
 			HashMap<MatchSolution, Double> solutionAndObj = new HashMap<MatchSolution, Double >();
 			for(int i=0; i<n; i++) {
@@ -326,7 +327,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			delay += p.getWashingTime();
 		if(p.getPartInspection())
 			delay +=p.getInspectionTime();
-		if (!(arrivalP + delay < departureQ))
+		if (!(arrivalP + delay< departureQ))
 			return false;
 
 		return true;

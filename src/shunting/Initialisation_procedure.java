@@ -14,8 +14,13 @@ public class Initialisation_procedure {
 	
 	public  ShuntingYard initialisation(int horizon) {
 		Washer s63 = new Washer(horizon);
+		Washer extra1=new Washer(horizon);
 		Platform s62 = new Platform(horizon);
 		Platform s61 = new Platform(horizon);
+		Platform extra2=new Platform(horizon);
+		Platform extra3=new Platform(horizon);
+		Platform extra4=new Platform(horizon);
+		Platform extra5=new Platform(horizon);
 		FreeShuntTrack s58 = new FreeShuntTrack(203);
 		FreeShuntTrack s57 = new FreeShuntTrack(202);
 		FreeShuntTrack s56 = new FreeShuntTrack(222);

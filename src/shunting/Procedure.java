@@ -27,55 +27,71 @@ public class Procedure {
 		this.shuntingyard = shuntingyard;
 		this.horizon = horizon;
 	}
-
+	public int counterMatching;
 	public Boolean solve(){
 
 		//Solve Matching Algorithm
 		int counter = 1;
-		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
-		HashMap<MatchSolution, Double> ms = cm.solve(); 
-		Initialisation_procedure initialisation = new Initialisation_procedure();
+		counterMatching = 0;
 		Boolean tempFeas = false;
-		for (MatchSolution j: ms.keySet()){
-			MatchSolution i = minimum(ms);
-			Set<MatchBlock> mb = i.getMatchBlocks();
-			ms.put(i, Double.POSITIVE_INFINITY);
-			System.out.println("In the "+counter+" round");
-			counter++;
-			tempFeas = false;
+		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
+		HashMap<MatchSolution, Double> ms = cm.solve();
+		if(ms.isEmpty()){ 
+			counterMatching = 1;
+			tempFeas = false;}
+		else {
 
-			// Solve Maintenance Scheduling
-			MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingyard, matchBlockTardy, tardiness);
-			Set<MaintenanceActivity> activities = ma.solve();
-			FeasibilityCheckScheduling feasibilityCheck = new FeasibilityCheckScheduling(activities);
-/*
+
+			Initialisation_procedure initialisation = new Initialisation_procedure();
+
+			for (MatchSolution j: ms.keySet()){
+				MatchSolution i = minimum(ms);
+				Set<MatchBlock> mb = i.getMatchBlocks();
+				ms.put(i, Double.POSITIVE_INFINITY);
+				//System.out.println("In the "+counter+" round");
+				counter++;
+				tempFeas = false;
+
+				// Solve Maintenance Scheduling
+				MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingyard, matchBlockTardy, tardiness);
+				Set<MaintenanceActivity> activities = ma.solve();
+				FeasibilityCheckScheduling feasibilityCheck = new FeasibilityCheckScheduling(activities);
+				/*
 			for (MaintenanceActivity a : activities) {
 				System.out.println(a.getJob() + " , " + a.getStartPlatform() + " , " + a.getStartWasher() + " , Platform: "
 						+ a.getPlatform() + " , Washer: " + a.getWasher() + " , " + a.getEndTime());
 			}
-*/
-			boolean feasible = feasibilityCheck.getFeasible();
-			// We check if Maintenance gives feasible schedule
-			// If so, go to parking
-			// If not, go to next solution in solutionpool of matching
-			if(feasible){
-				System.out.println("Scheduling Maintenance is feasible");
-				//TODO: parking
-				// if(parking feasible){
-				// Break;}
-				//else
-				//		Go to next solution in solutionpool of matching	
-				//}
-				tempFeas = true;
-				break;
-			}
+				 */
+				boolean feasible = feasibilityCheck.getFeasible();
+				// We check if Maintenance gives feasible schedule
+				// If so, go to parking
+				// If not, go to next solution in solutionpool of matching
+				if(feasible){
+					//System.out.println("Scheduling Maintenance is feasible");
+					//TODO: parking
+					// if(parking feasible){
+					// Break;}
+					//else
+					//		Go to next solution in solutionpool of matching	
+					//}
+					tempFeas = true;
+					break;
+				}
 
-			else { 
-				System.out.println("The scheduling of activities is not feasible in round "+counter);
-				shuntingyard = initialisation.initialisation(horizon);
-			}
-		}	
-		return tempFeas;
+				else { 
+					//System.out.println("The scheduling of activities is not feasible in round "+counter);
+
+					shuntingyard = initialisation.initialisation(horizon);
+				}
+			}	}
+			//System.out.println("counter matching "+counterMatching);
+
+			return tempFeas;
+		}
+	
+
+	public int getCounterMatching(){
+		return counterMatching;
 	}
 
 	private MatchSolution minimum (HashMap<MatchSolution, Double> findMin) {
