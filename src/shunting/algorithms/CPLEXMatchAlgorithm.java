@@ -275,7 +275,6 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			cplex.populate();
 			int n = cplex.getSolnPoolNsolns();
 			Set<MatchSolution> solutionPool = new HashSet<MatchSolution>();
-			System.out.println("The number of solutions in CPLEX is " +n);
 			HashMap<MatchSolution, Double> solutionAndObj = new HashMap<MatchSolution, Double >();
 			for(int i=0; i<n; i++) {
 				MatchSolution mp = new MatchSolution();

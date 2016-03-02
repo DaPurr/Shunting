@@ -10,10 +10,6 @@ public class Main {
 		int maxNrTrainUnits = 100;
 		int numberOfSeeds = 1;
 
-		// Create kleine binckhorst
-		// Test check if random schedule is feasible for shunting yard
-		//boolean alright = test.ScheduleFeasible(kb);
-
 		//File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
 		List<Schedule> schedules=new ArrayList<>();
 		
