@@ -10,16 +10,26 @@ public class Main {
 
 	public static void main(String[] args) {
 		int horizon = 1440;
-		int maxNrTrainUnits = 50;
+		int maxNrTrainUnits = 100;
 		int numberOfSeeds = 100;
 
 
 		List<Schedule> schedules=new ArrayList<>();
+		List<Double> fractions=new ArrayList<>();
+		List<Integer> nrTrains=new ArrayList<>();
+		
 
-		for (int trains=20; trains<maxNrTrainUnits; trains=trains + 5){
-			System.out.println("number of trains is:" + trains);
+		for (int trains=30; trains<maxNrTrainUnits; trains=trains + 5){
+			//System.out.println("number of trains is:" + trains);
 			int countMatch = 0;
+			nrTrains.add(trains);
+			
 			List<Boolean> feasible=new ArrayList<>();
+			List<Integer> countCleaning=new ArrayList<>();
+			List<Integer> countWashing=new ArrayList<>();
+			List<Integer> countRepair=new ArrayList<>();
+			List<Integer> countInspection=new ArrayList<>();
+			
 			for (int seed=0; seed<numberOfSeeds; seed++){
 
 				Random rn = new Random(seed);
@@ -35,10 +45,14 @@ public class Main {
 				feasible.add(procedureFeasible);
 				countMatch = countMatch + proc.getCounterMatching();
 
-				//int cleaning = countCleaning(schedule);
-				//int washing = countWashing(schedule);
-				//int repair = countRepair(schedule);
-				//int inspection = countInspection(schedule);
+				int cleaning = countCleaning(schedule);
+				countCleaning.add(cleaning);
+				int washing = countWashing(schedule);
+				countWashing.add(washing);
+				int repair = countRepair(schedule);
+				countRepair.add(repair);
+				int inspection = countInspection(schedule);
+				countInspection.add(inspection);
 
 				//System.out.println("Number of trains that need cleaning is " + cleaning);
 				//System.out.println("Number of trains that need washing is " + washing);
@@ -46,13 +60,37 @@ public class Main {
 				//System.out.println("Number of trains that need inspection is " + inspection);
 
 			}
+			int sumcleaning=0;
+			int sumwashing=0;
+			int sumrepair=0;
+			int suminspect=0;
+			
+			for(int i=0;i<numberOfSeeds;i++){
+				sumcleaning=sumcleaning+countCleaning.get(i);
+				sumwashing=sumwashing+countWashing.get(i);
+				sumrepair=sumrepair+countRepair.get(i);
+				suminspect=suminspect+countInspection.get(i);
+			}
+			double avgcleaning=sumcleaning/numberOfSeeds;
+			double avgwashing=sumwashing/numberOfSeeds;
+			double avgrepair=sumrepair/numberOfSeeds;
+			double avginspect=suminspect/numberOfSeeds;
+			
+			System.out.println("Average number of trains that need cleaning: "+avgcleaning+ ", washing: "+avgwashing+ ", repair: "+avgrepair+", inspection: "+avginspect);
+			
 			int count = 0;
 			for(Boolean temp : feasible){
 				if(temp){ count++;}
 			}
 			double frac = (double) (count+countMatch)/(feasible.size());
 			System.out.println("Fraction of feasible solutions using different booleans: " + frac);
+			fractions.add(frac);
 		}
+		for (int i=0;i<fractions.size();i++){
+			System.out.println("With "+ nrTrains.get(i) + " trains the fraction of feasible solutions is "+ fractions.get(i));
+		}
+		
+		
 	}
 	/*	
 		File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
