@@ -35,7 +35,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 
 		try {
 			IloCplex cplex = new IloCplex();
-
+			cplex.setOut(null);
 			// create variables
 			// u_i
 			Map<Part,IloIntVar> arrivalParts = new HashMap<Part,IloIntVar>();
@@ -278,8 +278,6 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 			System.out.println("The number of solutions in CPLEX is " +n);
 			HashMap<MatchSolution, Double> solutionAndObj = new HashMap<MatchSolution, Double >();
 			for(int i=0; i<n; i++) {
-
-				System.out.println("One of the obj values is "+ cplex.getObjValue(i));
 				MatchSolution mp = new MatchSolution();
 
 				for (MatchBlock mb : matchingBlocks.keySet()) {

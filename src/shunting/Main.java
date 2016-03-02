@@ -1,67 +1,67 @@
 package shunting;
 
-import java.io.File;
 import java.util.*;
-
-import org.jgrapht.DirectedGraph;
-
-import ilog.concert.IloException;
-import shunting.algorithms.CGParkingAlgorithm;
-import shunting.algorithms.CPLEXMatchAlgorithm;
-import shunting.algorithms.FeasibilityCheckScheduling;
-import shunting.algorithms.MaintenanceAlgorithm;
-import shunting.algorithms.MatchAlgorithm;
-import shunting.algorithms.ParkingAlgorithm;
-import shunting.algorithms.SchedulingMaintenance;
-import shunting.data.ScheduleReader;
 import shunting.models.*;
 
 public class Main {
 
 	public static void main(String[] args) {
-		int seed = 5;
 		int horizon = 1440;
-		int nrTrainUnits = 78;
-		boolean needScheduleAgain = false;
-		Random rn = new Random(seed);
-		int c = 5;
-		boolean done = false;
-
-		Schedule test = Schedule.randomSchedule(nrTrainUnits, horizon, rn);
+		int maxNrTrainUnits = 100;
+		int numberOfSeeds = 1;
 
 		// Create kleine binckhorst
-	
-		
 		// Test check if random schedule is feasible for shunting yard
 		//boolean alright = test.ScheduleFeasible(kb);
 
-		File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
-		/*List<Schedule> testboolean=new ArrayList<>();
-		ScheduleReader sr = new ScheduleReader(seed);
-		Schedule schedule = sr.parseXML(file);
-		*/
-
-		Schedule schedule = test;
-		Initialisation_procedure initialisation = new Initialisation_procedure();
+		//File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
+		List<Schedule> schedules=new ArrayList<>();
 		
-		ShuntingYard kb =  initialisation.initialisation(horizon);
-		Procedure proc = new Procedure(schedule, kb, horizon);
-		Boolean procedureFeasible = proc.solve();
-		
-		int cleaning = countCleaning(schedule);
-		int washing = countWashing(schedule);
-		int repair = countRepair(schedule);
-		int inspection = countInspection(schedule);
+		for (int trains=1; trains<maxNrTrainUnits; trains++){
+			System.out.println("number of trains is:" + trains);
+			List<Boolean> feasible=new ArrayList<>();
+			for (int seed=0; seed<numberOfSeeds; seed++){
+				
+				//ScheduleReader sr = new ScheduleReader(seed);
+				//Schedule schedule = sr.parseXML(file);
+				Random rn = new Random(seed);
+				Schedule test = Schedule.randomSchedule(trains, horizon, rn);
+				Schedule schedule=test;
+				schedules.add(schedule);
 
-		System.out.println("Number of trains that need cleaning is " + cleaning);
-		System.out.println("Number of trains that need washing is " + washing);
-		System.out.println("Number of trains that need repair is " + repair);
-		System.out.println("Number of trains that need inspection is " + inspection);
+				//Schedule schedule = test;
+				Initialisation_procedure initialisation = new Initialisation_procedure();
+
+				ShuntingYard kb =  initialisation.initialisation(horizon);
+				Procedure proc = new Procedure(schedule, kb, horizon);
+				Boolean procedureFeasible = proc.solve();
+				feasible.add(procedureFeasible);
+
+				int cleaning = countCleaning(schedule);
+				int washing = countWashing(schedule);
+				int repair = countRepair(schedule);
+				int inspection = countInspection(schedule);
+
+				/*System.out.println("Number of trains that need cleaning is " + cleaning);
+			System.out.println("Number of trains that need washing is " + washing);
+			System.out.println("Number of trains that need repair is " + repair);
+			System.out.println("Number of trains that need inspection is " + inspection);
+				 */
+			}
+			int count = 0;
+			for(Boolean temp : feasible){
+				if(temp){ count++;}
+			}
+			double frac = (double) count/feasible.size();
+			System.out.println("Fraction of feasible solutions using different booleans: " + frac);
+		}
 	}
+
+
 
 	private static int countCleaning(Schedule schedule) {
 		int counterCleaning = 0;
-		List<Arrival> arrivals = new ArrayList<Arrival>();
+		List<Arrival> arrivals = new ArrayList<Arrival>(); 
 		arrivals = schedule.arrivals();
 		for (Arrival a : arrivals) {
 			Composition composition = a.getComposition();
@@ -124,6 +124,6 @@ public class Main {
 		}
 		return counterInspection;
 	}
-	
+
 
 }
