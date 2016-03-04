@@ -98,10 +98,10 @@ public class LIFOPathTest {
 		
 		ShuntingYard yard2 = new ShuntingYard(platforms1, washers1, tracks1);
 		
-		ScheduleReader sr = new ScheduleReader();
+		ScheduleReader sr = new ScheduleReader(0);
 		Schedule schedule = sr.parseXML(new File("data/schedule_kleine_binckhorst_real_nomark.xml"));
 		MatchAlgorithm ma = new CPLEXMatchAlgorithm(schedule);
-		Set<MatchBlock> matches2 = ma.solve().getMatchBlocks();
+		Set<MatchBlock> matches2 = ma.solve().keySet().iterator().next().getMatchBlocks();
 		
 		try {
 			long begin = System.nanoTime();
