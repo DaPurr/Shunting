@@ -23,6 +23,8 @@ public class Main {
 		List<Integer> countWashing=new ArrayList<>();
 		List<Integer> countRepair=new ArrayList<>();
 		List<Integer> countInspection=new ArrayList<>();
+		List <Integer> numberOfReruns = new ArrayList<>();
+		List<Double> runningTimes = new ArrayList<>();
 
 
 
@@ -102,19 +104,22 @@ public class Main {
 			int sumrepair=0;
 			int suminspect=0;
 			int countMatch = 0;
+			double totalRunningTime = 0;
 			
 			for (int seed=0; seed<numberOfSeeds; seed++){
-
+				long startTime = System.nanoTime();
 				ScheduleReader sr = new ScheduleReader(seed);
 				Schedule schedule = sr.parseXML(file);
 				schedules.add(schedule);
 				Initialisation_procedure initialisation = new Initialisation_procedure();
+				
 
 				ShuntingYard kb =  initialisation.initialisation(horizon);
 				Procedure proc = new Procedure(schedule, kb, horizon);
 				Boolean procedureFeasible = proc.solve();
 				feasible.add(procedureFeasible);
 				countMatch = countMatch + proc.getCounterMatching();
+				
 
 				int cleaning = countCleaning(schedule);
 				countCleaning.add(cleaning);
@@ -124,6 +129,11 @@ public class Main {
 				countRepair.add(repair);
 				int inspection = countInspection(schedule);
 				countInspection.add(inspection);
+				numberOfReruns.add(proc.numberOfReruns);
+				double runningTime = (System.nanoTime()-startTime)*Math.pow(10, 9);
+				runningTimes.add(runningTime);
+				
+				
 				
 
 				//System.out.println("Number of trains that need cleaning is " + cleaning);
@@ -136,27 +146,39 @@ public class Main {
 			int minWashing = Integer.MAX_VALUE;
 			int minRepair = Integer.MAX_VALUE;
 			int minInspection = Integer.MAX_VALUE;
+			int minNumberOfReruns = Integer.MAX_VALUE;
+			double minRunningTime = Double.MAX_VALUE;
 			
 			int maxCleaning = 0;
 			int maxWashing = 0;
 			int maxRepair = 0;
 			int maxInspection = 0;
+			int maxNumberOfReruns = 0;
+			int sumNumberOfReruns = 0;
+			double maxRunningTime = 0;
 			
 			for (int i=0; i< numberOfSeeds;i++) {
 				sumcleaning = sumcleaning+countCleaning.get(i);
 				sumwashing = sumwashing+countWashing.get(i);
 				sumrepair = sumrepair +countRepair.get(i);
 				suminspect = suminspect+countInspection.get(i);
+				sumNumberOfReruns = sumNumberOfReruns+numberOfReruns.get(i);
+				totalRunningTime = totalRunningTime+runningTimes.get(i);
+				
 				
 				if(minCleaning>countCleaning.get(i)) { minCleaning = countCleaning.get(i);}
 				if(minWashing>countWashing.get(i)) { minWashing = countWashing.get(i);}
 				if(minRepair>countRepair.get(i)) { minRepair = countRepair.get(i);}
 				if(minInspection>countInspection.get(i)) { minInspection = countInspection.get(i);}
+				if(minNumberOfReruns>numberOfReruns.get(i)) {minNumberOfReruns = numberOfReruns.get(i);}
+				if(minRunningTime>runningTimes.get(i)) {minRunningTime = runningTimes.get(i);}
 				
 				if(maxCleaning<countCleaning.get(i)) { maxCleaning = countCleaning.get(i);}
 				if(maxWashing<countWashing.get(i)) { maxWashing = countWashing.get(i);}
 				if(maxRepair<countRepair.get(i)) { maxRepair = countRepair.get(i);}
 				if(maxInspection<countInspection.get(i)) { maxInspection = countInspection.get(i);}
+				if(maxNumberOfReruns<numberOfReruns.get(i)) { maxNumberOfReruns = numberOfReruns.get(i);}
+				if(maxRunningTime<runningTimes.get(i)) { maxRunningTime = runningTimes.get(i);}
 				
 				
 			}
@@ -167,13 +189,16 @@ public class Main {
 			double avgwashing=sumwashing/numberOfSeeds;
 			double avgrepair=sumrepair/numberOfSeeds;
 			double avginspect=suminspect/numberOfSeeds;
+			double avgNumberOfReruns = sumNumberOfReruns/(numberOfSeeds-countMatch);
+			double avRunningTime = totalRunningTime/(numberOfSeeds-countMatch);
 
 			System.out.println("Average number of trains that need cleaning: "+avgcleaning+ ", washing: "+avgwashing+ ", repair: "+avgrepair+", inspection: "+avginspect);
 			System.out.println("Maximum number of trains in need of cleaning is "+maxCleaning+" and minimum is "+minCleaning);
 			System.out.println("Maximum number of trains in need of washing is "+maxWashing+" and minimum is "+minWashing);
 			System.out.println("Maximum number of trains in need of inspection is "+maxInspection+" and minimum is "+minInspection);
 			System.out.println("Maximum number of trains in need of repair is "+maxRepair+" and minimum is "+minRepair);
-
+			System.out.println("The solution is obtained with "+avgNumberOfReruns+" number of reruns, max is " +maxNumberOfReruns+" min is "+minNumberOfReruns);
+			System.out.println("The average running time of schediling is "+avRunningTime+" min is "+minRunningTime+" max is"+maxRunningTime);
 			int count = 0;
 			for(Boolean temp : feasible){
 				if(temp){ count++;}

@@ -21,6 +21,7 @@ public class Procedure {
 	private Integer horizon;
 	Set<MatchBlock> matchBlockTardy = new HashSet<MatchBlock>();
 	HashMap<MatchBlock, Integer> tardiness = new HashMap<MatchBlock, Integer>();
+	public int numberOfReruns = 1;
 
 	public Procedure(Schedule schedule, ShuntingYard shuntingyard, int horizon){
 		this.schedule = schedule;
@@ -28,6 +29,7 @@ public class Procedure {
 		this.horizon = horizon;
 	}
 	public int counterMatching;
+
 	public Boolean solve(){
 
 		//Solve Matching Algorithm
@@ -38,7 +40,8 @@ public class Procedure {
 		HashMap<MatchSolution, Double> ms = cm.solve();
 		if(ms.isEmpty()){ 
 			counterMatching = 1;
-			tempFeas = false;}
+			tempFeas = false;
+			numberOfReruns = 0;	}
 		else {
 
 
@@ -80,18 +83,22 @@ public class Procedure {
 
 				else { 
 					//System.out.println("The scheduling of activities is not feasible in round "+counter);
-
+					numberOfReruns++;
 					shuntingyard = initialisation.initialisation(horizon);
 				}
 			}	}
 			//System.out.println("counter matching "+counterMatching);
-
+		
+			
 			return tempFeas;
 		}
 	
 
 	public int getCounterMatching(){
 		return counterMatching;
+	}
+	public int getNumberOfReruns() {
+		return numberOfReruns;
 	}
 
 	private MatchSolution minimum (HashMap<MatchSolution, Double> findMin) {
