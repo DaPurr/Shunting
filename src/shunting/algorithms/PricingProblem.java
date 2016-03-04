@@ -143,29 +143,36 @@ public class PricingProblem {
 				nextPaths.add(newPath);
 			}
 		}
-		
+
 		Path bestPath = nodePaths.get(network.sink).first();
-		
+
 		return bestPath;
 	}
-	
+
+	// TODO: CHECK IF DOMINANCE RULES WORK!
 	private void removeAfter(SortedSet<Path> set, Path path) {
-		Iterator<Path> iter = set.tailSet(path).iterator();
+		boolean doRemove = false;
+		// Set<Path> tailSet = set.tailSet(path);
+		// Iterator<Path> iter = tailSet.iterator();
+		Iterator<Path> iter = set.iterator();
 		while (iter.hasNext()) {
 			Path p = iter.next();
-			if (path.compareTo(p) <= 0)
-				continue;
-			else {
-				iter.remove();
-				System.out.println("Removed: " + p.toString());
+			if (p.isDominatedBy(path)) {
+				// now we can remove all 'lower' paths
+				doRemove = true;
+			}
+			if (doRemove) {
+//				throw new IllegalStateException("YAY WE REMOVED DOMINATED PATHS!");
+			 iter.remove();
+			// System.out.println("Removed: " + p.toString());
 			}
 		}
 	}
-	
+
 	public Set<TrackAssignment> solve() {
-		
+
 		Set<TrackAssignment> assignments = new HashSet<>();
-		
+
 		// solve RCSPP for each network
 		for (ShuntTrack track : networks.keySet()) {
 			Path p = doRCSPP(networks.get(track));
