@@ -2,7 +2,9 @@ package shunting.models;
 
 import java.util.*;
 
-public class LIFOPath extends Path {
+public class LIFOPath extends Path implements Comparable<LIFOPath>{
+	
+	private int earliestDeparture = Integer.MAX_VALUE;
 	
 	public LIFOPath(int remainingLength) {
 		super(remainingLength);
@@ -53,7 +55,7 @@ public class LIFOPath extends Path {
 	}
 
 	@Override
-	public int compareTo(Path o) {
+	public int compareTo(LIFOPath o) {
 		if (this.isDominatedBy(o))
 			return 1;
 		double totalCost = (this.getPathCost()-this.dualCost) - (o.getPathCost() - o.dualCost);
@@ -70,10 +72,17 @@ public class LIFOPath extends Path {
 	}
 
 	@Override
-	public boolean isDominatedBy(Path p) {
-		return (this.getPathCost() - this.dualCost >= p.getPathCost() - p.dualCost) &&
-				(this.remainingLength <= p.remainingLength) &&
-				(this.earliestDeparture <= p.earliestDeparture);
+	public boolean isDominatedBy(Path path) {
+		if (!(path instanceof LIFOPath))
+			return false;
+		LIFOPath p = (LIFOPath) path;
+		boolean thisHasLargerCosts = this.getPathCost() - this.dualCost >= p.getPathCost() - p.dualCost;
+		boolean thisHasLessRemainingCapacity = this.remainingLength <= p.remainingLength;
+		boolean thisHasSmallerEarliestDeparture = this.earliestDeparture <= p.earliestDeparture;
+		
+		return thisHasLargerCosts &&
+				thisHasLessRemainingCapacity &&
+				thisHasSmallerEarliestDeparture;
 	}
 
 	@Override
@@ -199,13 +208,7 @@ public class LIFOPath extends Path {
 
 	@Override
 	public int hashCode() {
-//		int lastNodeHash = 0;
-//		if (lastNode != null)
-//			lastNodeHash = lastNode.hashCode();
-//		int isOneTypeInteger = 0;
-//		if (isOneType)
-//			isOneTypeInteger = 1;
-		return 3*nodes.hashCode();
+		return 3*nodes.hashCode() + 5*"LIFO".hashCode();
 	}
 
 }

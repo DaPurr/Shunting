@@ -2,14 +2,13 @@ package shunting.models;
 
 import java.util.*;
 
-public abstract class Path implements Comparable<Path> {
+public abstract class Path {
 
 	protected List<PriceNode> nodes;
 	protected PriceNode lastNode = null;
 	protected final double TRACK_PREFERENCE = 0.0;
 	protected final double SINGLE_TYPE_PENALTY = 100.0;
 	
-	protected int earliestDeparture = Integer.MAX_VALUE;
 	protected double dualCost = 0.0;
 	protected int remainingLength;
 	protected double pathCost;
@@ -48,9 +47,9 @@ public abstract class Path implements Comparable<Path> {
 		return remainingLength;
 	}
 
-	public int getEarliestDeparture() {
-		return earliestDeparture;
-	}
+//	public int getEarliestDeparture() {
+//		return earliestDeparture;
+//	}
 
 	public double getDualCost() {
 		return dualCost;
