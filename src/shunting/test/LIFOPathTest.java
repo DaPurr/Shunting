@@ -66,7 +66,7 @@ public class LIFOPathTest {
 		lifo1.addNode(bn3, 0.0, 0.0);
 		lifo1.addNode(bn4, 0.0, 0.0);
 		lifo1.addNode(sink, 0.0, 0.0);
-		Set<BlockNode> before = lifo1.departBetween(source, sink);
+		Set<BlockNode> before = lifo1.departsBetween(source, sink);
 		
 		// test for Kleine Binckhorst - LIFO
 		Washer s63=new Washer(horizon);
