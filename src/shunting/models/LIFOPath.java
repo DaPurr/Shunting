@@ -26,33 +26,6 @@ public class LIFOPath extends Path implements Comparable<LIFOPath>{
 		this.nodes = new ArrayList<>(path.nodes);
 		this.pathCost = path.pathCost;
 	}
-	
-	public Set<BlockNode> departBetween(PriceNode u, PriceNode v) {
-		if (u instanceof SinkNode || v instanceof SourceNode)
-			throw new IllegalStateException("Nodes u and v have impossible values.");
-		
-		Set<BlockNode> set = new HashSet<>();
-		for (PriceNode w : nodes) {
-			if (w instanceof SourceNode ||
-					w instanceof SinkNode)
-				continue;
-			BlockNode blockW = (BlockNode) w;
-			int departureW = blockW.getBlock().getDepartureTime();
-			int arrivalU = Integer.MIN_VALUE;
-			int arrivalV = Integer.MAX_VALUE;
-			if (u instanceof BlockNode) {
-				BlockNode blockU = (BlockNode) u;
-				arrivalU = blockU.getBlock().getArrivalTime();
-			}
-			if (v instanceof BlockNode) {
-				BlockNode blockV = (BlockNode) v;
-				arrivalV = blockV.getBlock().getArrivalTime();
-			}
-			if (arrivalU < departureW && departureW < arrivalV)
-				set.add(blockW);
-		}
-		return set;
-	}
 
 	@Override
 	public int compareTo(LIFOPath o) {
@@ -102,7 +75,7 @@ public class LIFOPath extends Path implements Comparable<LIFOPath>{
 			BlockNode bn = (BlockNode) node;
 			if (bn.getApproach() != Approach.NOT && !isSameType())
 				isOneType = false;
-			Set<BlockNode> departedBlocks = departBetween(lastNode, bn);
+			Set<BlockNode> departedBlocks = departsBetween(lastNode, bn);
 			int departedLength = getLengthBlocks(departedBlocks);
 			remainingLength += departedLength;
 			
@@ -163,7 +136,7 @@ public class LIFOPath extends Path implements Comparable<LIFOPath>{
 		BlockNode bn = (BlockNode) node;
 		if (bn.getApproach() == Approach.NOT)
 			return true;
-		Set<BlockNode> departsBetweenUV = departBetween(lastNode, bn);
+		Set<BlockNode> departsBetweenUV = departsBetween(lastNode, bn);
 		if ( bn.getBlock().getBlockLength() >= remainingLength + getLengthBlocks(departsBetweenUV) ) {
 			return false;
 		}
@@ -174,18 +147,6 @@ public class LIFOPath extends Path implements Comparable<LIFOPath>{
 			return false;
 		
 		return true;
-	}
-	
-	private Set<BlockNode> retainBlocks(List<PriceNode> path, Set<? extends PriceNode> blocks) {
-		Set<PriceNode> temp = new HashSet<>(path);
-		temp.retainAll(blocks);
-		Set<BlockNode> set = new HashSet<>();
-		for (PriceNode node : temp) {
-			if (!(node instanceof BlockNode))
-				throw new IllegalArgumentException("Nodes may only be BlockNodes!");
-			set.add((BlockNode) node);
-		}
-		return set;
 	}
 	
 	private int minDeparture(Collection<BlockNode> nodes) {
