@@ -73,7 +73,7 @@ public class LIFOPath extends Path implements Comparable<LIFOPath>{
 			throw new IllegalArgumentException("Can't add source node to non-empty path.");
 		if (node instanceof BlockNode) {
 			BlockNode bn = (BlockNode) node;
-			if (bn.getApproach() != Approach.NOT && !isSameType())
+			if (bn.getApproach() != Approach.NOT && isOneType && !isSameType())
 				isOneType = false;
 			Set<BlockNode> departedBlocks = departsBetween(lastNode, bn);
 			int departedLength = getLengthBlocks(departedBlocks);
@@ -99,28 +99,6 @@ public class LIFOPath extends Path implements Comparable<LIFOPath>{
 			return;
 		}
 		throw new IllegalArgumentException("Node type not allowed: " + node.getClass());
-	}
-	
-	private boolean isSameType() {
-		if (!isOneType)
-			return false;
-		String type = "";
-		for (PriceNode node : nodes) {
-			if (node instanceof SourceNode || node instanceof SinkNode)
-				continue;
-			BlockNode bn = (BlockNode) node;
-			if (bn.getApproach() == Approach.NOT)
-				continue;
-			String blockType = bn.getBlock().getPart1().getUnit(0).getTrainType().getType();
-			blockType = blockType.substring(0, blockType.length()-2);
-			if (type.equals("")) {
-				type = blockType;
-				continue;
-			}
-			if (!type.equals(blockType))
-				return false;
-		}
-		return true;
 	}
 
 	@Override
@@ -152,6 +130,8 @@ public class LIFOPath extends Path implements Comparable<LIFOPath>{
 	private int minDeparture(Collection<BlockNode> nodes) {
 		int best = Integer.MAX_VALUE;
 		for (BlockNode node : nodes) {
+			if (node.getApproach() == Approach.NOT)
+				continue;
 			int departure = node.getBlock().getDepartureTime();
 			if (departure < best)
 				best = departure;
@@ -172,4 +152,14 @@ public class LIFOPath extends Path implements Comparable<LIFOPath>{
 		return 3*nodes.hashCode() + 5*"LIFO".hashCode();
 	}
 
+	public LIFOPath copy() {
+		LIFOPath p = new LIFOPath(earliestDeparture);
+		p.lastNode = lastNode;
+		p.dualCost = dualCost;
+		p.earliestDeparture = earliestDeparture;
+		p.isOneType = isOneType;
+		p.nodes = new ArrayList<>(nodes);
+		p.pathCost = pathCost;
+		return p;
+	}
 }
