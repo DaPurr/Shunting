@@ -17,15 +17,105 @@ public class FreePath extends Path implements Comparable<FreePath> {
 		super(remainingLength);
 	}
 
+	// perhaps not entirely correct
 	@Override
-	public int compareTo(FreePath path) {
-		// TODO Auto-generated method stub
+	public int compareTo(FreePath o) {
+		if (this.isDominatedBy(o))
+			return 1;
+		double totalCost = (this.getPathCost()-this.dualCost) - (o.getPathCost() - o.dualCost);
+		if ( totalCost > 0 )
+			return 1;
+		else if (totalCost < 0)
+			return -1;
 		return 0;
 	}
 
 	@Override
 	public void addNode(PriceNode node, double cost, double dual) {
-		// TODO Auto-generated method stub
+		nodes.add(node);
+		if (lastNode == null) {
+			lastNode = node;
+			if (node instanceof BlockNode)
+				throw new IllegalArgumentException("First node can't be a BlockNode!");
+			return;
+		}
+		
+		// we are added to a non-empty (incomplete) path
+		if (node instanceof SourceNode)
+			throw new IllegalArgumentException("Can't add source node to non-empty path.");
+		if (node instanceof BlockNode) {
+			BlockNode bn = (BlockNode) node;
+			if (bn.getApproach() != Approach.NOT && isOneType && !isSameType())
+				isOneType = false;
+			
+			// update resources...
+			Set<BlockNode> departedBlocks = departsBetween(lastNode, bn);
+			Set<BlockNode> remainingBlocks = retainBlocks(nodes, departedBlocks);
+			
+			// ...remaining track capacity
+			int departedLength = getLengthBlocks(departedBlocks);
+			remainingLength += departedLength;
+			if (bn.getApproach() != Approach.NOT)
+				remainingLength -= bn.getBlock().getBlockLength();
+			
+			// ...earliest departure left
+			if (bn.getApproach() == Approach.LL) {
+				earliestDepartureLeft = bn.getBlock().getDepartureTime();
+			} else if (bn.getApproach() == Approach.RL) {
+				int earliestRemainingLeft = calcEarliestDepartureLeft(remainingBlocks);
+				int depLeftV = bn.getBlock().getDepartureTime();
+				earliestDepartureLeft = Integer.min(earliestRemainingLeft, depLeftV);
+			} else {
+				earliestDepartureLeft = calcEarliestDepartureLeft(remainingBlocks);
+			}
+
+			// ...earliest departure right
+			if (bn.getApproach() == Approach.RR) {
+				earliestDepartureRight = bn.getBlock().getDepartureTime();
+			} else if (bn.getApproach() == Approach.LR) {
+				int earliestRemainingRight = calcEarliestDepartureRight(remainingBlocks);
+				int depRightV = bn.getBlock().getDepartureTime();
+				earliestDepartureRight = Integer.min(earliestRemainingRight, depRightV);
+			} else {
+				earliestDepartureRight = calcEarliestDepartureRight(remainingBlocks);
+			}
+			
+			// ...latest departure left
+			if (bn.getApproach() == Approach.RL) {
+				latestDepartureLeft = bn.getBlock().getDepartureTime();
+			} else if (bn.getApproach() == Approach.LL) {
+				int latestRemainingLeft = calcLatestDepartureLeft(remainingBlocks);
+				int depLeftV = bn.getBlock().getDepartureTime();
+				latestDepartureLeft = Integer.max(latestRemainingLeft, depLeftV);
+			} else {
+				latestDepartureLeft = calcLatestDepartureLeft(remainingBlocks);
+			}
+
+			// ...latest departure right
+			if (bn.getApproach() == Approach.LR) {
+				latestDepartureRight = bn.getBlock().getDepartureTime();
+			} else if (bn.getApproach() == Approach.RR) {
+				int latestRemainingRight = calcLatestDepartureRight(remainingBlocks);
+				int depRightV = bn.getBlock().getDepartureTime();
+				latestDepartureRight = Integer.max(latestRemainingRight, depRightV);
+			} else {
+				latestDepartureRight = calcLatestDepartureRight(remainingBlocks);
+			}
+			
+			// ...dual cost
+			if (bn.getApproach() != Approach.NOT)
+				dualCost += dual;
+			// ...path cost
+			addToPathCost(cost);
+			
+			// finished
+			lastNode = node;
+		} else if (node instanceof SinkNode) {
+			dualCost += dual;
+			addToPathCost(TRACK_PREFERENCE);
+			lastNode = node;
+		} else
+			throw new IllegalStateException("Subclass " + node.getClass() + " of PriceNode not allowed.");
 	}
 
 	public boolean isDominatedBy(Path path) {
@@ -83,12 +173,16 @@ public class FreePath extends Path implements Comparable<FreePath> {
 			if (earliestDeparture <= bnDepartureTime)
 				return false;
 		} else if (approach == Approach.RL) {
-			int latestDeparture = calcLatestDepartureLeft(retainedBlocks);
-			if (latestDeparture >= bnDepartureTime)
+			int latestDepartureLeft = calcLatestDepartureLeft(retainedBlocks);
+			int earliestDepartureRight = calcEarliestDepartureRight(retainedBlocks);
+			if (latestDepartureLeft >= bnDepartureTime ||
+					earliestDepartureRight >= bnDepartureTime)
 				return false;
 		} else {
 			int latestDeparture = calcLatestDepartureRight(retainedBlocks);
-			if (latestDeparture >= bnDepartureTime)
+			int earliestDepartureLeft = calcEarliestDepartureLeft(retainedBlocks);
+			if (latestDeparture >= bnDepartureTime ||
+					earliestDepartureLeft >= bnDepartureTime)
 				return false;
 		}
 		
@@ -98,6 +192,8 @@ public class FreePath extends Path implements Comparable<FreePath> {
 	private int calcEarliestDepartureLeft(Set<BlockNode> blocks) {
 		int r = Integer.MAX_VALUE;
 		for (BlockNode bn : blocks) {
+			if (bn.getApproach() == Approach.NOT)
+				continue;
 			if (bn.getApproach() == Approach.LL ||
 					bn.getApproach() == Approach.RL) {
 				int departure = bn.getBlock().getDepartureTime();
@@ -112,6 +208,8 @@ public class FreePath extends Path implements Comparable<FreePath> {
 	private int calcEarliestDepartureRight(Set<BlockNode> blocks) {
 		int r = Integer.MAX_VALUE;
 		for (BlockNode bn : blocks) {
+			if (bn.getApproach() == Approach.NOT)
+				continue;
 			if (bn.getApproach() == Approach.LR ||
 					bn.getApproach() == Approach.RR) {
 				int departure = bn.getBlock().getDepartureTime();
@@ -126,6 +224,8 @@ public class FreePath extends Path implements Comparable<FreePath> {
 	private int calcLatestDepartureLeft(Set<BlockNode> blocks) {
 		int r = Integer.MIN_VALUE;
 		for (BlockNode bn : blocks) {
+			if (bn.getApproach() == Approach.NOT)
+				continue;
 			if (bn.getApproach() == Approach.LL ||
 					bn.getApproach() == Approach.RL) {
 				int departure = bn.getBlock().getDepartureTime();
@@ -140,6 +240,8 @@ public class FreePath extends Path implements Comparable<FreePath> {
 	private int calcLatestDepartureRight(Set<BlockNode> blocks) {
 		int r = Integer.MIN_VALUE;
 		for (BlockNode bn : blocks) {
+			if (bn.getApproach() == Approach.NOT)
+				continue;
 			if (bn.getApproach() == Approach.LR ||
 					bn.getApproach() == Approach.RR) {
 				int departure = bn.getBlock().getDepartureTime();
@@ -149,6 +251,20 @@ public class FreePath extends Path implements Comparable<FreePath> {
 		}
 		
 		return r;
+	}
+	
+	public FreePath copy() {
+		FreePath p = new FreePath(remainingLength);
+		p.dualCost = dualCost;
+		p.earliestDepartureLeft = earliestDepartureLeft;
+		p.earliestDepartureRight = earliestDepartureRight;
+		p.isOneType = isOneType;
+		p.lastNode = lastNode;
+		p.latestDepartureLeft = latestDepartureLeft;
+		p.latestDepartureRight = latestDepartureRight;
+		p.nodes = new ArrayList<>(nodes);
+		p.pathCost = pathCost;
+		return p;
 	}
 
 	@Override
