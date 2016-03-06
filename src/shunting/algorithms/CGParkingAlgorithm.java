@@ -8,7 +8,7 @@ import ilog.concert.*;
 
 public class CGParkingAlgorithm implements ParkingAlgorithm {
 
-	private final int D_PARK = 10000; // penalty for not parking a block
+	private final int D_PARK = 100000; // penalty for not parking a block
 	
 	private Set<MatchBlock> matches;
 	private Set<ShuntTrack> tracks;
@@ -57,7 +57,8 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 				master.solve();
 
 				// display solution
-				displayVariables();
+				displayVariables(false);
+				System.out.println("RMP Solution: " + master.getObjValue());
 
 				System.out.println("DUALS:");
 				System.out.println("------------------------------------");
@@ -98,7 +99,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 
 		System.out.println("OPTIMAL SOLUTION (LP):");
 		System.out.println("------------------------------------");
-		displayVariables();
+		displayVariables(true);
 		System.out.println("------------------------------------");
 		
 		// we found optimal LP solution in root node, so continue with
@@ -115,8 +116,9 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		
 		System.out.println("OPTIMAL SOLUTION (MIP):");
 		System.out.println("------------------------------------");
-		displayVariables();
+		displayVariables(true);
 		System.out.println("------------------------------------");
+		System.out.println("Solution status: " + master.getStatus());
 		
 		// check if we park everything
 		int countNotParked = 0;
@@ -183,16 +185,24 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		}
 	}
 	
-	private void displayVariables() throws IloException {
+	private void displayVariables(boolean sparse) throws IloException {
 		System.out.println("SOLUTION:");
 		System.out.println("------------------------------------");
 		for (MatchBlock block : notParked.keySet()) {
 			IloNumVar var = notParked.get(block);
-			System.out.println("N_b\t" + block.toString() + ": " + master.getValue(var));
+			if (sparse) {
+				if (master.getValue(var) > 0)
+					System.out.println("N_b\t" + block.toString() + ": " + master.getValue(var));
+			} else
+				System.out.println("N_b\t" + block.toString() + ": " + master.getValue(var));
 		}
 		for (TrackAssignment ass : assignment.keySet()) {
 			IloNumVar var = assignment.get(ass);
-			System.out.println("X_a^s\t" + ass.toString() + ": " + master.getValue(var));
+			if (sparse) {
+				if (master.getValue(var) > 0)
+					System.out.println("X_a^s\t" + ass.toString() + ": " + master.getValue(var));
+			} else
+				System.out.println("X_a^s\t" + ass.toString() + ": " + master.getValue(var));
 		}
 		System.out.println("------------------------------------");
 	}
