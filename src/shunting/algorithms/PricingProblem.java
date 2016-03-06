@@ -73,7 +73,14 @@ public class PricingProblem {
 			nodePaths.put(node, set);
 		}
 		SortedSet<Path> set = nodePaths.get(network.source);
-		Path p = new LIFOPath(track.getRemainingCapacity());
+		Path p = null;
+		// track is either LIFO or free
+		if (track instanceof LIFOShuntTrack)
+			p = new LIFOPath(track.getRemainingCapacity());
+		else if (track instanceof FreeShuntTrack)
+			p = new FreePath(track.getRemainingCapacity());
+		else
+			throw new IllegalArgumentException("Illegal subclass of ShuntTrack: " + track.getClass());
 		p.addNode(network.source, 0.0, 0.0);
 		set.add(p);
 
@@ -83,8 +90,8 @@ public class PricingProblem {
 		network.layers.keySet().toArray(arrayLayers);
 //		Set<Object> nextNodes = graph.edgesOf(network.source);
 		for (BlockNode bn : network.layers.get(arrayLayers[0])) {
-			LIFOPath myPath = (LIFOPath) nodePaths.get(network.source).first();
-			Path newPath = new LIFOPath(myPath);
+			Path myPath = nodePaths.get(network.source).first();
+			Path newPath = myPath.copy();
 //			BlockNode nextNode = (BlockNode) graph.getEdgeTarget(o);
 			double dual = lambda.get(bn.getBlock());
 //			if (bn.getApproach() == Approach.NOT)
@@ -94,6 +101,8 @@ public class PricingProblem {
 			newPath.addNode(bn, cost, dual);
 			SortedSet<Path> nextPaths = nodePaths.get(bn);
 			nextPaths.add(newPath);
+			if (newPath.size() != 2)
+				throw new IllegalStateException("Path should have 2 nodes, but has: " + newPath.size());
 		}
 		
 		// Begin iteration i - blocks to blocks
@@ -104,13 +113,13 @@ public class PricingProblem {
 			for (BlockNode currentBn : network.layers.get(currentBlock)) {
 //				System.out.println("Current node: " + currentBn);
 				for (Path currentPath : nodePaths.get(currentBn)) {
-					LIFOPath currentLIFO = (LIFOPath) currentPath;
+//					Path currentPath = currentPath;
 					Set<DefaultWeightedEdge> edges = graph.outgoingEdgesOf(currentBn);
 					for (DefaultWeightedEdge edge : edges) {
 						BlockNode nextBn = (BlockNode) graph.getEdgeTarget(edge);
 //						System.out.println("......Going from " + currentBn + " to " + nextBn);
 						MatchBlock nextBlock = nextBn.getBlock();
-						LIFOPath newPath = new LIFOPath(currentLIFO);
+						Path newPath = currentPath.copy();
 						double cost = graph.getEdgeWeight(edge);
 						double dual = lambda.get(nextBlock);
 //						if (nextBn.getApproach() == Approach.NOT)
@@ -121,6 +130,8 @@ public class PricingProblem {
 						SortedSet<Path> nextPaths = nodePaths.get(nextBn);
 						removeAfter(nextPaths, newPath);
 						nextPaths.add(newPath);
+						if (newPath.size() != i+3)
+							throw new IllegalStateException("Path should have length " + (i+3) + " but has: " + newPath.size());
 					}
 				}
 			}
@@ -132,8 +143,8 @@ public class PricingProblem {
 //		Set<BlockNode> lastLayer = network.layers.get(arrayLayers[arraySize-1]);
 		for (BlockNode bn : network.layers.get(arrayLayers[arraySize-1])) {
 			for (Path currentPath : nodePaths.get(bn)) {
-				LIFOPath currentLIFO = (LIFOPath) currentPath;
-				LIFOPath newPath = new LIFOPath(currentLIFO);
+//				Path currentLIFO = (LIFOPath) currentPath;
+				Path newPath = currentPath.copy();
 				DefaultWeightedEdge edge = graph.getEdge(bn, network.sink);
 				double cost = graph.getEdgeWeight(edge);
 				double dual = mu.get(track);
@@ -141,6 +152,17 @@ public class PricingProblem {
 				SortedSet<Path> nextPaths = nodePaths.get(network.sink);
 				removeAfter(nextPaths, newPath);
 				nextPaths.add(newPath);
+				if (newPath.size()-2 != matches.size())
+					throw new IllegalStateException("Path has too few blocks: " + (newPath.size()-2));
+				
+				// TODO: DEBUGGING PURPOSES
+				for (PriceNode node : newPath.nodes()) {
+					if (!(node instanceof BlockNode))
+						continue;
+					BlockNode blocknode = (BlockNode) node;
+					if (blocknode.toString().contains("34:") && blocknode.getApproach() != Approach.NOT)
+						System.out.println("PATH COST: " + newPath.getReducedCost());
+				}
 			}
 		}
 
@@ -220,6 +242,7 @@ public class PricingProblem {
 			
 			for (MatchBlock block : matches) {
 				BlockNode n_LL = new BlockNode(block, Approach.LL, "n_"+block+"_LL");
+				layers.put(block, n_LL);
 				// if free track...
 				if (track instanceof FreeShuntTrack) {
 					BlockNode n_LR = new BlockNode(block, Approach.LR, "n_"+block+"_LR");
@@ -229,8 +252,6 @@ public class PricingProblem {
 					layers.put(block, n_LR);
 					layers.put(block, n_RL);
 					layers.put(block, n_RR);
-				} else {
-					layers.put(block, n_LL);
 				}
 				BlockNode n_NOT = new BlockNode(block, Approach.NOT, "n_"+block+"_NOT");
 				layers.put(block, n_NOT);
@@ -296,13 +317,18 @@ public class PricingProblem {
 				throw new IllegalStateException("Layers should be ordered, earliest arrival time first.");
 			if (app1 == Approach.NOT || app2 == Approach.NOT)
 				return true;
+			
+			int departure1 = bn1.getBlock().getDepartureTime();
+			int departure2 = bn2.getBlock().getDepartureTime();
+//			int arrival1 = bn1.getBlock().getArrivalTime();
+			int arrival2 = bn2.getBlock().getArrivalTime();
 
-			// never possible
+			// only feasible if 1 leaves before 2 arrives
 			if ((app1 == Approach.LL && app2 == Approach.LR) ||
 					(app1 == Approach.LR && app2 == Approach.RL) ||
 					(app1 == Approach.RL && app2 == Approach.LR) ||
 					(app1 == Approach.RR && app2 == Approach.RL))
-				return false;
+				return (departure1 <= arrival2);
 			
 			// always possible
 			if ((app1 == Approach.LL && app2 == Approach.RR) ||
@@ -310,9 +336,6 @@ public class PricingProblem {
 					(app1 == Approach.LR && app2 == Approach.LL) ||
 					(app1 == Approach.RL && app2 == Approach.RR))
 				return true;
-
-			int departure1 = bn1.getBlock().getDepartureTime();
-			int departure2 = bn2.getBlock().getDepartureTime();
 			
 			// LL -> RL, LR -> LR, RL -> RL: d1 <= d2
 			if ((app1 == Approach.LL && app2 == Approach.RL) ||
@@ -325,8 +348,7 @@ public class PricingProblem {
 			if ((app1 == Approach.LL && app2 == Approach.LL) ||
 					(app1 == Approach.RR && app2 == Approach.RR) ||
 					(app1 == Approach.LR && app2 == Approach.RR) ||
-					(app1 == Approach.RL && app2 == Approach.LL) ||
-					(app1 == Approach.RR && app2 == Approach.RR))
+					(app1 == Approach.RL && app2 == Approach.LL))
 				return (departure1 >= departure2);
 			
 			throw new IllegalStateException("Did I fuck up? (arcs)");
