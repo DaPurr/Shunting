@@ -272,11 +272,22 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		MatchBlock[] arrayLayers = new MatchBlock[matches.size()];
 		matches.toArray(arrayLayers);
 		Arrays.sort(arrayLayers, new BlockComparator());
+		
+		// get initial track assignments
+//		Set<TrackAssignment> trackAssignments = new HashSet<>();
+		Map<TrackAssignment, Path> currentAssignments = new HashMap<>();
+		for (TrackAssignment ta : assignment.keySet()) {
+			IloNumVar var = assignment.get(ta);
+			if (master.getValue(var) > 0.5) {
+//				trackAssignments.add(ta);
+				currentAssignments.put(ta, ta.getPath());
+			}
+		}
 
 		int pointerEmptyTracks = 0;
+		Set<MatchBlock> parked = new HashSet<>();
 		for (MatchBlock mb : blocksNotParked) {
-			// if we have empty tracks, assign the block to the
-			// first one
+			// if we have empty tracks, assign the block to the first one
 			if (pointerEmptyTracks < emptyTracks.size()) {
 				ShuntTrack track = emptyTracks.get(pointerEmptyTracks);
 				Path path = null;
@@ -303,9 +314,78 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 
 				TrackAssignment ta = new TrackAssignment(track, path);
 				addAssignmentVariable(ta, path.getPathCost(), true);
+//				trackAssignments.add(ta);
+				currentAssignments.put(ta, ta.getPath());
+				parked.add(mb);
 				pointerEmptyTracks++;
 			}
 		}
+		
+		// we assigned to empty tracks (if any), so now we try to squeeze them in non-empty ones
+		blocksNotParked.removeAll(parked);
+		for (MatchBlock mb : blocksNotParked) {
+			// go through every assignment to see if there is some room to fit the block in
+			for (TrackAssignment ta : currentAssignments.keySet()) {
+				Path path = currentAssignments.get(ta);
+				Path newPath = modifiedPath(path, mb);
+				if (newPath != null) {
+					// we have succesfully inserted the block
+					// now we need to update
+					currentAssignments.put(ta, newPath);
+					break;
+				}
+			}
+		}
+
+		// add generated columns to master problem
+		for (TrackAssignment ta : currentAssignments.keySet()) {
+			if (ta.getPath() != currentAssignments.get(ta)) {
+				addAssignmentVariable(new TrackAssignment(ta.getTrack(), currentAssignments.get(ta)), 0.0, true);
+			}
+		}
+	}
+
+	private Path modifiedPath(Path path, MatchBlock mb) {
+		Path p = path.copy();
+		for (int i = 0; i < p.nodes().size(); i++) {
+			PriceNode pn = p.nodes().get(i);
+			if (!(pn instanceof BlockNode))
+				continue;
+			BlockNode bn = (BlockNode) pn;
+			if (bn.getBlock() != mb)
+				continue;
+			// we have found the node corresponding to the block
+			if (bn.getApproach() != Approach.NOT)
+				throw new IllegalStateException("Block is already parked: " + bn);
+			for (Approach approach : Approach.values()) {
+				if (approach == Approach.NOT)
+					continue;
+				BlockNode newBn = new BlockNode(mb, approach, "n_"+mb+"_"+approach);
+				p.nodes().set(i, newBn);
+				if (isFeasiblePath(p))
+					return p;
+			}
+		}
+		return null;
+	}
+	
+	private boolean isFeasiblePath(Path path) {
+		Path p = null;
+		if (path instanceof LIFOPath)
+			p = new LIFOPath(path.getRemainingLength());
+		else if (path instanceof FreePath)
+			p = new FreePath(path.getRemainingLength());
+		else
+			throw new IllegalStateException("Illegal subtype of Path: " + path.getClass());
+		
+		p.addNode(path.nodes().get(0), 0.0, 0.0);
+		for (int i = 1; i < path.size(); i++) {
+			PriceNode nextNode = path.nodes().get(i);
+			if (!p.isFeasible(nextNode))
+				return false;
+			p.addNode(path.nodes().get(i), 0.0, 0.0);
+		}
+		return true;
 	}
 
 	private Set<MatchBlock> getNotParked() throws IloException {
