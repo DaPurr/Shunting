@@ -5,6 +5,7 @@ import java.util.*;
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.TreeMultimap;
 
 import shunting.models.*;
@@ -85,10 +86,11 @@ public class PricingProblem {
 		set.add(p);
 
 		// Begin iteration 1 - source to first layer
-//		System.out.println("... Going from source to layer[0]");
+		// sort matches according to arrival time
 		MatchBlock[] arrayLayers = new MatchBlock[network.layers.keySet().size()];
 		network.layers.keySet().toArray(arrayLayers);
-//		Set<Object> nextNodes = graph.edgesOf(network.source);
+		Arrays.sort(arrayLayers, new BlockComparator());
+		
 		for (BlockNode bn : network.layers.get(arrayLayers[0])) {
 			Path myPath = nodePaths.get(network.source).first();
 			Path newPath = myPath.copy();
@@ -155,14 +157,14 @@ public class PricingProblem {
 				if (newPath.size()-2 != matches.size())
 					throw new IllegalStateException("Path has too few blocks: " + (newPath.size()-2));
 				
-				// TODO: DEBUGGING PURPOSES
-				for (PriceNode node : newPath.nodes()) {
-					if (!(node instanceof BlockNode))
-						continue;
-					BlockNode blocknode = (BlockNode) node;
-					if (blocknode.toString().contains("34:") && blocknode.getApproach() != Approach.NOT)
-						System.out.println("PATH COST: " + newPath.getReducedCost());
-				}
+//				// TODO: DEBUGGING PURPOSES
+//				for (PriceNode node : newPath.nodes()) {
+//					if (!(node instanceof BlockNode))
+//						continue;
+//					BlockNode blocknode = (BlockNode) node;
+//					if (blocknode.toString().contains("34:") && blocknode.getApproach() != Approach.NOT)
+//						System.out.println("PATH COST: " + newPath.getReducedCost());
+//				}
 			}
 		}
 
@@ -232,13 +234,15 @@ public class PricingProblem {
 		private SourceNode source;
 		private SinkNode sink;
 		private ShuntTrack track;
-		private TreeMultimap<MatchBlock, BlockNode> layers;
+		private HashMultimap<MatchBlock, BlockNode> layers;
+		
 		private DefaultDirectedWeightedGraph<PriceNode, DefaultWeightedEdge> graph = 
 				new DefaultDirectedWeightedGraph<>(DefaultWeightedEdge.class);
 
 		// we need to specify track for routing costs
 		public PricingNetwork(ShuntTrack track) {
-			layers = TreeMultimap.create(new BlockComparator(), new NodeComparator());
+//			layers = TreeMultimap.create(new BlockComparator(), new NodeComparator());
+			layers = HashMultimap.create();
 			
 			for (MatchBlock block : matches) {
 				BlockNode n_LL = new BlockNode(block, Approach.LL, "n_"+block+"_LL");
@@ -275,9 +279,13 @@ public class PricingProblem {
 			// TODO: ROUTING COSTS!
 			double f_uv = 0.0; // MAKE FUNCTION (MAPPING) OUT OF IT!
 			
+			MatchBlock[] arrayLayers = new MatchBlock[layers.keySet().size()];
+			layers.keySet().toArray(arrayLayers);
+			Arrays.sort(arrayLayers, new BlockComparator());
+			
 			// add edges
 			// source
-			MatchBlock firstBlock = layers.keySet().first();
+			MatchBlock firstBlock = arrayLayers[0];
 			for (BlockNode bn : layers.get(firstBlock)) {
 				DefaultWeightedEdge edge = new DefaultWeightedEdge();
 				graph.addEdge(source, bn, edge);
@@ -285,7 +293,7 @@ public class PricingProblem {
 			}
 			
 			// sink
-			MatchBlock lastBlock = layers.keySet().last();
+			MatchBlock lastBlock = arrayLayers[arrayLayers.length-1];
 			for (BlockNode bn : layers.get(lastBlock)) {
 				DefaultWeightedEdge edge = new DefaultWeightedEdge();
 				graph.addEdge(bn, sink, edge);
@@ -293,7 +301,6 @@ public class PricingProblem {
 			}
 			
 			// intermediate blocks
-			Object[] arrayLayers = layers.keySet().toArray();
 			for (int i = 0; i < arrayLayers.length-1; i++) {
 				MatchBlock mb1 = (MatchBlock) arrayLayers[i];
 				MatchBlock mb2 = (MatchBlock) arrayLayers[i+1];
