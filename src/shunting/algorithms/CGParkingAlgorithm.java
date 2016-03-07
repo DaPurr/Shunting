@@ -125,7 +125,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		for (MatchBlock mb : notParked.keySet()) {
 			double val = master.getValue(notParked.get(mb));
 			if (val > 1e-6) {
-				System.out.println("Didn't park: " + mb + " val=" + val);
+				System.out.println("Didn't park: " + mb + " val=" + val + " arrival="+mb.getArrivalTime() + ", departure="+mb.getDepartureTime());
 				countNotParked++;
 			}
 		}
@@ -133,6 +133,22 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		System.out.println("Blocks not parked: " + countNotParked);
 		System.out.println("Nr. of columns generated: " + assignment.size());
 		System.out.println("Total nr. of variables: " + (assignment.size() + notParked.size()));
+		
+		int countTrack = 1;
+		System.out.println();
+		for (TrackAssignment ta : assignment.keySet()) {
+			if (master.getValue(assignment.get(ta)) < 0.5)
+				continue;
+			System.out.println("TRACK " + countTrack);
+			countTrack++;
+			for (PriceNode node : ta.getPath().nodes()) {
+				if (!(node instanceof BlockNode))
+					continue;
+				BlockNode bn = (BlockNode) node;
+				System.out.println(bn + " arrival="+bn.getBlock().getArrivalTime() + ", departure="+bn.getBlock().getDepartureTime());
+			}
+			System.out.println();
+		}
 	}
 
 	private void addParkedVariables() throws IloException {
