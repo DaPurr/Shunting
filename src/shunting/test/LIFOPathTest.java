@@ -13,6 +13,8 @@ public class LIFOPathTest {
 	private final static int horizon = 1600;
 
 	public static void main(String[] args) {		
+//		ShuntTrack track1 = new LIFOShuntTrack(1000);
+//		ShuntTrack track2 = new LIFOShuntTrack(1000);
 		ShuntTrack track1 = new LIFOShuntTrack(1000);
 		ShuntTrack track2 = new LIFOShuntTrack(1000);
 		List<ShuntTrack> tracks = new ArrayList<>();
@@ -72,13 +74,20 @@ public class LIFOPathTest {
 		Washer s63=new Washer(horizon);
 		Platform s62=new Platform(horizon);
 		Platform s61=new Platform(horizon);
-		LIFOShuntTrack s58=new LIFOShuntTrack(203);
-		LIFOShuntTrack s57=new LIFOShuntTrack(202);
-		LIFOShuntTrack s56=new LIFOShuntTrack(222);
-		LIFOShuntTrack s55=new LIFOShuntTrack(357);
-		LIFOShuntTrack s54=new LIFOShuntTrack(387);
-		LIFOShuntTrack s53=new LIFOShuntTrack(431);
-		LIFOShuntTrack s52=new LIFOShuntTrack(480);
+//		ShuntTrack s58=new LIFOShuntTrack(203);
+//		ShuntTrack s57=new LIFOShuntTrack(202);
+//		ShuntTrack s56=new LIFOShuntTrack(222);
+//		ShuntTrack s55=new LIFOShuntTrack(357);
+//		ShuntTrack s54=new LIFOShuntTrack(387);
+//		ShuntTrack s53=new LIFOShuntTrack(431);
+//		ShuntTrack s52=new LIFOShuntTrack(480);
+		ShuntTrack s58=new FreeShuntTrack(203);
+		ShuntTrack s57=new FreeShuntTrack(202);
+		ShuntTrack s56=new FreeShuntTrack(222);
+		ShuntTrack s55=new FreeShuntTrack(357);
+		ShuntTrack s54=new FreeShuntTrack(387);
+		ShuntTrack s53=new FreeShuntTrack(431);
+		ShuntTrack s52=new FreeShuntTrack(480);
 		
 		List <Washer> washers1 = new ArrayList<>();
 		washers1.add(s63);
