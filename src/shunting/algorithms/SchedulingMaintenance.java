@@ -62,6 +62,8 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 		endTime = new HashMap<Job, Integer>();
 		this.tardyJobs = tardyJobs;
 		this.tardiness = tardiness;
+		endPlatform = new HashMap<Job, Integer>();
+		endWasher = new HashMap<Job, Integer>();
 
 
 		for (MatchBlock mb: ms)
@@ -205,6 +207,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 				else {
 					startWasher.put(jobAtPlatform, 0);
 					washerMap.put(jobAtPlatform, null);
+					endWasher.put(jobAtPlatform, 0);
 				}
 
 				timeArrivalPlatform.put(jobAtPlatform, Integer.MAX_VALUE);
@@ -308,6 +311,7 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 					else {
 						startWasher.put(jobAtPlatform, 0);
 						washerMap.put(jobAtPlatform, null);
+						endWasher.put(jobAtPlatform, 0);
 					}
 					timeArrivalPlatform.put(jobAtPlatform, Integer.MAX_VALUE);
 					//System.out.println("The arrival time of job "+ jobAtPlatform + "is set to " +timeArrivalPlatform.get(jobAtPlatform));
