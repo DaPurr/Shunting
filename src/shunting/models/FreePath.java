@@ -164,6 +164,7 @@ public class FreePath extends Path implements Comparable<FreePath> {
 		// we need to discern approach types
 		Approach approach = bn.getApproach();
 		int bnDepartureTime = bn.getBlock().getDepartureTime();
+		int bnArrivalTime = bn.getBlock().getArrivalTime();
 		if (approach == Approach.LL) {
 			int earliestDeparture = calcEarliestDepartureLeft(retainedBlocks);
 			if (earliestDeparture <= bnDepartureTime)
@@ -174,15 +175,15 @@ public class FreePath extends Path implements Comparable<FreePath> {
 				return false;
 		} else if (approach == Approach.RL) {
 			int latestDepartureLeft = calcLatestDepartureLeft(retainedBlocks);
-			int earliestDepartureRight = calcEarliestDepartureRight(retainedBlocks);
+			int latestDepartureRight = calcLatestDepartureRight(retainedBlocks);
 			if (latestDepartureLeft >= bnDepartureTime ||
-					earliestDepartureRight >= bnDepartureTime)
+					latestDepartureRight >= bnArrivalTime)
 				return false;
 		} else {
-			int latestDeparture = calcLatestDepartureRight(retainedBlocks);
-			int earliestDepartureLeft = calcEarliestDepartureLeft(retainedBlocks);
-			if (latestDeparture >= bnDepartureTime ||
-					earliestDepartureLeft >= bnDepartureTime)
+			int latestDepartureRight = calcLatestDepartureRight(retainedBlocks);
+			int latestDepartureLeft = calcLatestDepartureLeft(retainedBlocks);
+			if (latestDepartureRight >= bnDepartureTime ||
+					latestDepartureLeft >= bnArrivalTime)
 				return false;
 		}
 		
