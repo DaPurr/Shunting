@@ -6,7 +6,6 @@ import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
 import com.google.common.collect.HashMultimap;
-import com.google.common.collect.TreeMultimap;
 
 import shunting.models.*;
 
@@ -30,6 +29,14 @@ public class PricingProblem {
 
 		initDuals();
 	}
+	
+	public SourceNode getSourceNode(ShuntTrack track) {
+		return networks.get(track).source;
+	}
+	
+	public SinkNode getSinkNode(ShuntTrack track) {
+		return networks.get(track).sink;
+	}
 
 	public void setDualLambda(MatchBlock block, double val) {
 		lambda.put(block, val);
@@ -39,18 +46,18 @@ public class PricingProblem {
 		mu.put(track, val);
 	}
 	
-	private TrackAssignment selectLowestCost(Set<TrackAssignment> assignments) {
-		TrackAssignment bestAssignment = null;
-		double bestCost = Double.POSITIVE_INFINITY;
-		for (TrackAssignment ta : assignments) {
-			double cost = ta.getPath().getReducedCost();
-			if (cost < bestCost) {
-				bestAssignment = ta;
-				bestCost = cost;
-			}
-		}
-		return bestAssignment;
-	}
+//	private TrackAssignment selectLowestCost(Set<TrackAssignment> assignments) {
+//		TrackAssignment bestAssignment = null;
+//		double bestCost = Double.POSITIVE_INFINITY;
+//		for (TrackAssignment ta : assignments) {
+//			double cost = ta.getPath().getReducedCost();
+//			if (cost < bestCost) {
+//				bestAssignment = ta;
+//				bestCost = cost;
+//			}
+//		}
+//		return bestAssignment;
+//	}
 	
 	private Set<TrackAssignment> selectNegativeReducedCosts(Set<TrackAssignment> assignments) {
 		Set<TrackAssignment> set = new HashSet<>();
@@ -316,6 +323,14 @@ public class PricingProblem {
 			}
 		}
 		
+//		public SourceNode getSourceNode() {
+//			return source;
+//		}
+//		
+//		public SinkNode getSinkNode() {
+//			return sink;
+//		}
+		
 		private boolean isCompatible(BlockNode bn1, BlockNode bn2) {
 			Approach app1 = bn1.getApproach();
 			Approach app2 = bn2.getApproach();
@@ -371,15 +386,15 @@ public class PricingProblem {
 
 	}
 
-	private class NodeComparator implements Comparator<BlockNode> {
-
-		@Override
-		public int compare(BlockNode o1, BlockNode o2) {
-			int compBlocks = o1.getBlock().getArrivalTime() - o2.getBlock().getArrivalTime();
-			if (compBlocks == 0)
-				return o1.getApproach().compareTo(o2.getApproach());
-			return compBlocks;
-		}
-
-	}
+//	private class NodeComparator implements Comparator<BlockNode> {
+//
+//		@Override
+//		public int compare(BlockNode o1, BlockNode o2) {
+//			int compBlocks = o1.getBlock().getArrivalTime() - o2.getBlock().getArrivalTime();
+//			if (compBlocks == 0)
+//				return o1.getApproach().compareTo(o2.getApproach());
+//			return compBlocks;
+//		}
+//
+//	}
 }
