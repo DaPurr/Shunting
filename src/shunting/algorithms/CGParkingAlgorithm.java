@@ -220,6 +220,10 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 					master.addRange(-Double.MAX_VALUE, 1));
 		}
 	}
+	
+	public boolean isFeasible() throws IloException {
+		return countNotParked() > 0;
+	}
 
 	private int countNotParked() throws IloException {
 		int countNotParked = 0;
