@@ -11,7 +11,7 @@ public class Main {
 	public static void main(String[] args) {
 		int horizon = 1440;
 		int maxNrTrainUnits = 101;
-		int numberOfSeeds = 100;
+		int numberOfSeeds = 1;
 
 
 		List<Schedule> schedules=new ArrayList<>();

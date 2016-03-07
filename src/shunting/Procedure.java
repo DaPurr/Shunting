@@ -1,8 +1,11 @@
 package shunting;
 
 import java.util.HashMap;
+
 import java.util.HashSet;
 import java.util.Set;
+
+import ilog.concert.IloException;
 import shunting.algorithms.CPLEXMatchAlgorithm;
 import shunting.algorithms.FeasibilityCheckScheduling;
 import shunting.algorithms.MaintenanceAlgorithm;
@@ -13,6 +16,7 @@ import shunting.models.MatchBlock;
 import shunting.models.MatchSolution;
 import shunting.models.Schedule;
 import shunting.models.ShuntingYard;
+import shunting.algorithms.CGParkingAlgorithm;
 
 public class Procedure {
 
@@ -75,6 +79,15 @@ public class Procedure {
 					
 					//TODO: parking
 					Set<MatchBlock> mbParking = createMatchBlocksForParking(activities);
+					try {
+						CGParkingAlgorithm nemParking  = new CGParkingAlgorithm(mbParking, shuntingyard);
+						nemParking.solve();
+						
+					} catch (IloException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
 					
 					// if(parking feasible){
 					// Break;}
