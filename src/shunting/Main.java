@@ -111,7 +111,7 @@ public class Main {
 	*/
 
 
-		/*
+		
 
 			File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
 			int sumcleaning=0;
@@ -222,10 +222,11 @@ public class Main {
 			double frac = (double) count/(feasible.size()-countMatch);
 			System.out.println("Fraction of feasible solutions using different booleans: " + frac);
 			System.out.println(countMatch);
-		 */
+		 
 
 		//simple check IMPORTANT: it does not lead to feasible/non-feasible outcome
 	
+		/*
 		for (int trains=98; trains<maxNrTrainUnits; trains=trains+1){
 			System.out.println("number of trains is:" + trains);
 			int sumcleaning =0;
@@ -267,7 +268,7 @@ public class Main {
 		System.out.println("Average number need washing "+averageNumberNeedWashing.toString());
 		System.out.println("Average number need repair "+averageNumberNeedRepair.toString());
 
-
+*/
 
 
 

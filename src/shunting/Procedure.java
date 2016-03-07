@@ -22,6 +22,7 @@ public class Procedure {
 	Set<MatchBlock> matchBlockTardy = new HashSet<MatchBlock>();
 	HashMap<MatchBlock, Integer> tardiness = new HashMap<MatchBlock, Integer>();
 	public int numberOfReruns = 1;
+	public int z = 10;
 
 	public Procedure(Schedule schedule, ShuntingYard shuntingyard, int horizon){
 		this.schedule = schedule;
@@ -71,14 +72,17 @@ public class Procedure {
 				// If not, go to next solution in solutionpool of matching
 				if(feasible){
 					//System.out.println("Scheduling Maintenance is feasible");
+					
 					//TODO: parking
+					Set<MatchBlock> mbParking = createMatchBlocksForParking(activities);
+					
 					// if(parking feasible){
 					// Break;}
 					//else
 					//		Go to next solution in solutionpool of matching	
 					//}
 					tempFeas = true;
-					break;
+					//break;
 				}
 
 				else { 
@@ -109,5 +113,33 @@ public class Procedure {
 			if(min>findMin.get(key)) { keyReturn = key;}
 		}
 		return keyReturn;
+	}
+	
+	
+	private Set<MatchBlock> createMatchBlocksForParking(Set<MaintenanceActivity> ma) {
+		Set<MatchBlock> mbParking = new HashSet<MatchBlock>();
+		for(MaintenanceActivity i:ma) {
+			if(i.getStartPlatform()-i.getArrivalTime() >z) 
+			{ MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getArrivalTime(), i.getStartPlatform(),3,2);
+			mbParking.add(m);
+			}
+			
+			if(i.getJob().getWashTime()!=0 && i.getStartWasher()-i.getStartPlatform()>z) {
+				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndPlatform(), i.getStartWasher(),3,2);
+				mbParking.add(m);
+			}
+			
+			if(i.getJob().getWashingTime()==0 && i.getDepartureTime()-i.getEndPlatform()>z) {
+				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndPlatform(), i.getDepartureTime(),3,2);
+				mbParking.add(m);
+			}
+			
+			if(i.getJob().getWashingTime()!=0 && i.getDepartureTime()-i.getEndWasher() > z) {
+				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndWasher(), i.getDepartureTime(),3,2);
+				mbParking.add(m);
+			}
+			
+		}
+		return mbParking;
 	}
 }
