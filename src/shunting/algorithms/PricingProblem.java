@@ -221,9 +221,9 @@ public class PricingProblem {
 //		}
 		
 //		System.out.println("Found path with reduced cost: " + bestAssignment.getPath().getReducedCost());
-		for (TrackAssignment ta : candidates) {
-			System.out.println("Found path with reduced cost: " + ta.getPath().getReducedCost());
-		}
+		//for (TrackAssignment ta : candidates) {
+			//System.out.println("Found path with reduced cost: " + ta.getPath().getReducedCost());
+		//}
 		
 //		return bestAssignment;
 		return candidates;

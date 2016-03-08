@@ -89,14 +89,14 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 								couplingTime, decouplingTime);
 						matchingBlocks.put(matchBlock, z);
 						//version a)
-						//paramW.put(matchBlock, (double)(0)); 
+						paramW.put(matchBlock, (double)(0)); 
 
 						//version b)
 						//paramW.put(matchBlock, (double)Math.pow((timeA - timeD),2)); 
 
 						//version c)
-						if(timeA-timeD < 2|| timeA-timeD >10) { paramW.put(matchBlock,(double)(1)); }
-						else {paramW.put(matchBlock, (double)(0));}
+						//if(timeA-timeD < 2|| timeA-timeD >10) { paramW.put(matchBlock,(double)(1)); }
+						//else {paramW.put(matchBlock, (double)(0));}
 
 					}
 				}

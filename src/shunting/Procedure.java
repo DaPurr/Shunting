@@ -75,28 +75,27 @@ public class Procedure {
 				// If so, go to parking
 				// If not, go to next solution in solutionpool of matching
 				if(feasible){
-					//System.out.println("Scheduling Maintenance is feasible");
-					
-					//TODO: parking
+					System.out.println("Scheduling Maintenance is feasible");
+
 					Set<MatchBlock> mbParking = createMatchBlocksForParking(activities);
 					try {
 						CGParkingAlgorithm nemParking  = new CGParkingAlgorithm(mbParking, shuntingyard);
 						nemParking.solve();
-						System.out.println("BOE");
-						if(nemParking.isFeasible()){break;}
+						System.out.println("Parking is done");
+						if(nemParking.isFeasible()){
+							break; }
+						else { 
+							numberOfReruns++;
+							shuntingyard = initialisation.initialisation(horizon);
+						
+						}
+
 					} catch (IloException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					
-					
-					// if(parking feasible){
-					// Break;}
-					//else
-					//		Go to next solution in solutionpool of matching	
-					//}
+
 					tempFeas = true;
-					//break;
 				}
 
 				else { 
@@ -105,12 +104,12 @@ public class Procedure {
 					shuntingyard = initialisation.initialisation(horizon);
 				}
 			}	}
-			//System.out.println("counter matching "+counterMatching);
-		
-			
-			return tempFeas;
-		}
-	
+		//System.out.println("counter matching "+counterMatching);
+
+
+		return tempFeas;
+	}
+
 
 	public int getCounterMatching(){
 		return counterMatching;
@@ -128,8 +127,8 @@ public class Procedure {
 		}
 		return keyReturn;
 	}
-	
-	
+
+
 	private Set<MatchBlock> createMatchBlocksForParking(Set<MaintenanceActivity> ma) {
 		Set<MatchBlock> mbParking = new HashSet<MatchBlock>();
 		for(MaintenanceActivity i:ma) {
@@ -137,22 +136,22 @@ public class Procedure {
 			{ MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getArrivalTime(), i.getStartPlatform(),3,2);
 			mbParking.add(m);
 			}
-			
+
 			if(i.getJob().getWashTime()!=0 && i.getStartWasher()-i.getStartPlatform()>z) {
 				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndPlatform(), i.getStartWasher(),3,2);
 				mbParking.add(m);
 			}
-			
+
 			if(i.getJob().getWashingTime()==0 && i.getDepartureTime()-i.getEndPlatform()>z) {
 				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndPlatform(), i.getDepartureTime(),3,2);
 				mbParking.add(m);
 			}
-			
+
 			if(i.getJob().getWashingTime()!=0 && i.getDepartureTime()-i.getEndWasher() > z) {
 				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndWasher(), i.getDepartureTime(),3,2);
 				mbParking.add(m);
 			}
-			
+
 		}
 		return mbParking;
 	}

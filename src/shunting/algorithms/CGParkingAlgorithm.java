@@ -58,16 +58,16 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 
 			// display solution
 			displayVariables(false);
-			System.out.println("RMP Solution: " + master.getObjValue());
+			//System.out.println("RMP Solution: " + master.getObjValue());
 
-			System.out.println("DUALS:");
-			System.out.println("------------------------------------");
+			//System.out.println("DUALS:");
+			//System.out.println("------------------------------------");
 			// update lambda's
 			for (MatchBlock mb : coverageConstraints.keySet()) {
 				IloRange constraint = coverageConstraints.get(mb);
 				double dual = master.getDual(constraint);
 				pricingProblem.setDualLambda(mb, dual);
-				System.out.println("Coverage\t" + mb.toString() + ": " + dual);
+				//System.out.println("Coverage\t" + mb.toString() + ": " + dual);
 			}
 
 			// update mu's
@@ -75,10 +75,10 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 				IloRange constraint = capacityConstraints.get(track);
 				double dual = master.getDual(constraint);
 				pricingProblem.setDualMu(track, dual);
-				System.out.println("Capacity\t" + track.toString() + ": "
-						+ dual);
+				//System.out.println("Capacity\t" + track.toString() + ": "
+					//	+ dual);
 			}
-			System.out.println("------------------------------------");
+			//System.out.println("------------------------------------");
 
 			candidates = pricingProblem.solve();
 			if (candidates == null) {
@@ -100,10 +100,10 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			}
 		}
 
-		System.out.println("OPTIMAL SOLUTION (LP):");
-		System.out.println("------------------------------------");
+		//System.out.println("OPTIMAL SOLUTION (LP):");
+		//System.out.println("------------------------------------");
 		displayVariables(true);
-		System.out.println("------------------------------------");
+		//System.out.println("------------------------------------");
 
 		// we found optimal LP solution in root node, so continue with
 		// making it integer
@@ -119,11 +119,11 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		}
 		master.solve();
 
-		System.out.println("OPTIMAL SOLUTION (MIP):");
-		System.out.println("------------------------------------");
+		//System.out.println("OPTIMAL SOLUTION (MIP):");
+		//System.out.println("------------------------------------");
 		displayVariables(true);
-		System.out.println("------------------------------------");
-		System.out.println("Solution status: " + master.getStatus());
+		//System.out.println("------------------------------------");
+		//System.out.println("Solution status: " + master.getStatus());
 
 		// check if we park everything
 		int countNotParked = countNotParked();
@@ -144,19 +144,19 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 		}
 
 		int countTrack = 1;
-		System.out.println();
+		//System.out.println();
 		for (TrackAssignment ta : assignment.keySet()) {
 			if (master.getValue(assignment.get(ta)) < 0.5)
 				continue;
-			System.out.println("TRACK " + countTrack);
+			//System.out.println("TRACK " + countTrack);
 			countTrack++;
 			for (PriceNode node : ta.getPath().nodes()) {
 				if (!(node instanceof BlockNode))
 					continue;
 				BlockNode bn = (BlockNode) node;
-				System.out.println(bn + " arrival="
-						+ bn.getBlock().getArrivalTime() + ", departure="
-						+ bn.getBlock().getDepartureTime());
+				//System.out.println(bn + " arrival="
+					//	+ bn.getBlock().getArrivalTime() + ", departure="
+						//+ bn.getBlock().getDepartureTime());
 			}
 			System.out.println();
 		}
@@ -240,29 +240,29 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	}
 
 	private void displayVariables(boolean sparse) throws IloException {
-		System.out.println("SOLUTION:");
-		System.out.println("------------------------------------");
-		for (MatchBlock block : notParked.keySet()) {
-			IloNumVar var = notParked.get(block);
-			if (sparse) {
-				if (master.getValue(var) > 0)
-					System.out.println("N_b\t" + block.toString() + ": "
-							+ master.getValue(var));
-			} else
-				System.out.println("N_b\t" + block.toString() + ": "
-						+ master.getValue(var));
-		}
-		for (TrackAssignment ass : assignment.keySet()) {
-			IloNumVar var = assignment.get(ass);
-			if (sparse) {
-				if (master.getValue(var) > 0)
-					System.out.println("X_a^s\t" + ass.toString() + ": "
-							+ master.getValue(var));
-			} else
-				System.out.println("X_a^s\t" + ass.toString() + ": "
-						+ master.getValue(var));
-		}
-		System.out.println("------------------------------------");
+		//System.out.println("SOLUTION:");
+		//System.out.println("------------------------------------");
+	//	for (MatchBlock block : notParked.keySet()) {
+			//IloNumVar var = notParked.get(block);
+			//if (sparse) {
+				//if (master.getValue(var) > 0)
+					//System.out.println("N_b\t" + block.toString() + ": "
+							//+ master.getValue(var));
+			//} else
+				//System.out.println("N_b\t" + block.toString() + ": "
+					//	+ master.getValue(var));
+	//	}
+		//for (TrackAssignment ass : assignment.keySet()) {
+			//IloNumVar var = assignment.get(ass);
+			//if (sparse) {
+				//if (master.getValue(var) > 0)
+					//System.out.println("X_a^s\t" + ass.toString() + ": "
+						//	+ master.getValue(var));
+			//} else
+				//System.out.println("X_a^s\t" + ass.toString() + ": "
+					//	+ master.getValue(var));
+		//}
+		//System.out.println("------------------------------------");
 	}
 
 	private void insertUnparkedBlocks(PricingProblem problem)
