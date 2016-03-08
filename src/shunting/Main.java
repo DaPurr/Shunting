@@ -11,7 +11,7 @@ public class Main {
 	public static void main(String[] args) {
 		int horizon = 1440;
 		int maxNrTrainUnits = 101;
-		int numberOfSeeds = 1;
+		int numberOfSeeds = 10;
 
 
 		List<Schedule> schedules=new ArrayList<>();
@@ -204,7 +204,7 @@ public class Main {
 			double avgwashing=sumwashing/numberOfSeeds;
 			double avgrepair=sumrepair/numberOfSeeds;
 			double avginspect=suminspect/numberOfSeeds;
-			double avgNumberOfReruns = sumNumberOfReruns/(numberOfSeeds-countMatch);
+			double avgNumberOfReruns = (double)sumNumberOfReruns/(numberOfSeeds-countMatch);
 			double avRunningTime = totalRunningTime/(numberOfSeeds-countMatch);
 
 			System.out.println("Average number of trains that need cleaning: "+avgcleaning+ ", washing: "+avgwashing+ ", repair: "+avgrepair+", inspection: "+avginspect);
