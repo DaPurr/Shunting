@@ -83,6 +83,7 @@ public class Procedure {
 						CGParkingAlgorithm nemParking  = new CGParkingAlgorithm(mbParking, shuntingyard);
 						nemParking.solve();
 						System.out.println("BOE");
+						if(nemParking.isFeasible()){break;}
 					} catch (IloException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
