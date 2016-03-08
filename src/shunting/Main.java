@@ -145,7 +145,9 @@ public class Main {
 				int inspection = countInspection(schedule);
 				countInspection.add(inspection);
 				numberOfReruns.add(proc.numberOfReruns);
-				double runningTime = (System.nanoTime()-startTime)*Math.pow(10, 9);
+				long endTime = System.nanoTime();
+				long duration = endTime - startTime;
+				double runningTime = duration * 1e-9;
 				runningTimes.add(runningTime);
 
 
@@ -198,8 +200,6 @@ public class Main {
 
 			}
 
-
-
 			double avgcleaning=sumcleaning/numberOfSeeds;
 			double avgwashing=sumwashing/numberOfSeeds;
 			double avgrepair=sumrepair/numberOfSeeds;
@@ -212,11 +212,12 @@ public class Main {
 			System.out.println("Maximum number of trains in need of washing is "+maxWashing+" and minimum is "+minWashing);
 			System.out.println("Maximum number of trains in need of inspection is "+maxInspection+" and minimum is "+minInspection);
 			System.out.println("Maximum number of trains in need of repair is "+maxRepair+" and minimum is "+minRepair);
-			System.out.println("The solution is obtained with "+avgNumberOfReruns+" number of reruns, max is " +maxNumberOfReruns+" min is "+minNumberOfReruns);
-			System.out.println("The average running time of schediling is "+avRunningTime+" min is "+minRunningTime+" max is"+maxRunningTime);
+			System.out.println("The solution is obtained with "+avgNumberOfReruns+" number of runs, max is " +maxNumberOfReruns+" min is "+minNumberOfReruns);
+			System.out.println("The average running time of scheduling is "+avRunningTime+" s is "+minRunningTime+" max is "+maxRunningTime);
 			int count = 0;
 			for(Boolean temp : feasible){
-				if(temp){ count++;}
+				if(temp)
+					count++;
 			}
 
 			double frac = (double) count/(feasible.size()-countMatch);
