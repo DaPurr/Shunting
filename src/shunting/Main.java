@@ -186,7 +186,7 @@ public class Main {
 				suminspect = suminspect+countInspection.get(i);
 				sumNumberOfReruns = sumNumberOfReruns+numberOfReruns.get(i);
 				totalRunningTime = totalRunningTime+runningTimes.get(i);
-				sumParkingBlocks = numberOfBlocksParking.get(i);
+				sumParkingBlocks = numberOfBlocksParking.get(i)+sumParkingBlocks;
 				
 
 
