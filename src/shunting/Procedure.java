@@ -83,6 +83,7 @@ public class Procedure {
 						nemParking.solve();
 						System.out.println("Parking is done");
 						if(nemParking.isFeasible()){
+							System.out.println("Parking is feasible");
 							break; }
 						else { 
 							numberOfReruns++;
