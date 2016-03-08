@@ -222,7 +222,7 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	}
 	
 	public boolean isFeasible() throws IloException {
-		return countNotParked() > 0;
+		return countNotParked() == 0;
 	}
 
 	private int countNotParked() throws IloException {
