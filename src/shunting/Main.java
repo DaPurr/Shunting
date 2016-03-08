@@ -25,6 +25,7 @@ public class Main {
 		List<Integer> countInspection=new ArrayList<>();
 		List <Integer> numberOfReruns = new ArrayList<>();
 		List<Double> runningTimes = new ArrayList<>();
+		List<Integer> numberOfBlocksParking = new ArrayList<>();
 
 
 
@@ -134,6 +135,7 @@ public class Main {
 				Boolean procedureFeasible = proc.solve();
 				feasible.add(procedureFeasible);
 				countMatch = countMatch + proc.getCounterMatching();
+				numberOfBlocksParking.add(proc.counterParkingBlocks);
 
 
 				int cleaning = countCleaning(schedule);
@@ -165,6 +167,7 @@ public class Main {
 			int minInspection = Integer.MAX_VALUE;
 			int minNumberOfReruns = Integer.MAX_VALUE;
 			double minRunningTime = Double.MAX_VALUE;
+			int minParkingBlocks = Integer.MAX_VALUE;
 
 			int maxCleaning = 0;
 			int maxWashing = 0;
@@ -173,6 +176,8 @@ public class Main {
 			int maxNumberOfReruns = 0;
 			int sumNumberOfReruns = 0;
 			double maxRunningTime = 0;
+			int maxParkingBlocks = 0;
+			int sumParkingBlocks = 0;
 
 			for (int i=0; i< numberOfSeeds;i++) {
 				sumcleaning = sumcleaning+countCleaning.get(i);
@@ -181,6 +186,8 @@ public class Main {
 				suminspect = suminspect+countInspection.get(i);
 				sumNumberOfReruns = sumNumberOfReruns+numberOfReruns.get(i);
 				totalRunningTime = totalRunningTime+runningTimes.get(i);
+				sumParkingBlocks = numberOfBlocksParking.get(i);
+				
 
 
 				if(minCleaning>countCleaning.get(i)) { minCleaning = countCleaning.get(i);}
@@ -189,6 +196,7 @@ public class Main {
 				if(minInspection>countInspection.get(i)) { minInspection = countInspection.get(i);}
 				if(minNumberOfReruns>numberOfReruns.get(i)) {minNumberOfReruns = numberOfReruns.get(i);}
 				if(minRunningTime>runningTimes.get(i)) {minRunningTime = runningTimes.get(i);}
+				if(minParkingBlocks>numberOfBlocksParking.get(i)) {minParkingBlocks = numberOfBlocksParking.get(i);}
 
 				if(maxCleaning<countCleaning.get(i)) { maxCleaning = countCleaning.get(i);}
 				if(maxWashing<countWashing.get(i)) { maxWashing = countWashing.get(i);}
@@ -196,16 +204,18 @@ public class Main {
 				if(maxInspection<countInspection.get(i)) { maxInspection = countInspection.get(i);}
 				if(maxNumberOfReruns<numberOfReruns.get(i)) { maxNumberOfReruns = numberOfReruns.get(i);}
 				if(maxRunningTime<runningTimes.get(i)) { maxRunningTime = runningTimes.get(i);}
+				if(maxParkingBlocks<numberOfBlocksParking.get(i)) {maxParkingBlocks = numberOfBlocksParking.get(i);}
 
 
 			}
 
-			double avgcleaning=sumcleaning/numberOfSeeds;
-			double avgwashing=sumwashing/numberOfSeeds;
-			double avgrepair=sumrepair/numberOfSeeds;
-			double avginspect=suminspect/numberOfSeeds;
+			double avgcleaning=(double)sumcleaning/numberOfSeeds;
+			double avgwashing=(double)sumwashing/numberOfSeeds;
+			double avgrepair=(double)sumrepair/numberOfSeeds;
+			double avginspect=(double)suminspect/numberOfSeeds;
 			double avgNumberOfReruns = (double)sumNumberOfReruns/(numberOfSeeds-countMatch);
 			double avRunningTime = totalRunningTime/(numberOfSeeds-countMatch);
+			double avNumberParkingBlocks =(double)sumParkingBlocks/ (numberOfSeeds-countMatch);
 
 			System.out.println("Average number of trains that need cleaning: "+avgcleaning+ ", washing: "+avgwashing+ ", repair: "+avgrepair+", inspection: "+avginspect);
 			System.out.println("Maximum number of trains in need of cleaning is "+maxCleaning+" and minimum is "+minCleaning);
@@ -214,6 +224,7 @@ public class Main {
 			System.out.println("Maximum number of trains in need of repair is "+maxRepair+" and minimum is "+minRepair);
 			System.out.println("The solution is obtained with "+avgNumberOfReruns+" number of runs, max is " +maxNumberOfReruns+" min is "+minNumberOfReruns);
 			System.out.println("The average running time of scheduling is "+avRunningTime+" s is "+minRunningTime+" max is "+maxRunningTime);
+			System.out.println("The average parking blocks: "+avNumberParkingBlocks+" min: "+minParkingBlocks+" max:"+maxParkingBlocks);
 			int count = 0;
 			for(Boolean temp : feasible){
 				if(temp)

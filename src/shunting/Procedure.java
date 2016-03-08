@@ -18,6 +18,7 @@ import shunting.models.Schedule;
 import shunting.models.ShuntingYard;
 import shunting.algorithms.CGParkingAlgorithm;
 
+
 public class Procedure {
 
 	private ShuntingYard shuntingyard;
@@ -27,6 +28,7 @@ public class Procedure {
 	HashMap<MatchBlock, Integer> tardiness = new HashMap<MatchBlock, Integer>();
 	public int numberOfReruns = 1;
 	public int z = 10;
+	public int counterParkingBlocks =0;
 
 	public Procedure(Schedule schedule, ShuntingYard shuntingyard, int horizon){
 		this.schedule = schedule;
@@ -135,24 +137,34 @@ public class Procedure {
 			if(i.getStartPlatform()-i.getArrivalTime() >z) 
 			{ MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getArrivalTime(), i.getStartPlatform(),3,2);
 			mbParking.add(m);
+			counterParkingBlocks++;
 			}
 
 			if(i.getJob().getWashTime()!=0 && i.getStartWasher()-i.getStartPlatform()>z) {
 				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndPlatform(), i.getStartWasher(),3,2);
 				mbParking.add(m);
+				counterParkingBlocks++;
 			}
 
 			if(i.getJob().getWashingTime()==0 && i.getDepartureTime()-i.getEndPlatform()>z) {
 				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndPlatform(), i.getDepartureTime(),3,2);
 				mbParking.add(m);
+				counterParkingBlocks++;
 			}
 
 			if(i.getJob().getWashingTime()!=0 && i.getDepartureTime()-i.getEndWasher() > z) {
 				MatchBlock m = new MatchBlock (i.getJob().getMatchBlock().getPart1(),i.getJob().getMatchBlock().getPart2(),i.getEndWasher(), i.getDepartureTime(),3,2);
 				mbParking.add(m);
+				counterParkingBlocks++;
 			}
 
 		}
 		return mbParking;
 	}
-}
+	
+	public int getNumberParkingBlocks() {
+		return counterParkingBlocks; 
+	}
+	
+	
+	}
