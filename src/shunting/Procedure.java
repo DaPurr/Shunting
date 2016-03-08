@@ -84,6 +84,7 @@ public class Procedure {
 						System.out.println("Parking is done");
 						if(nemParking.isFeasible()){
 							System.out.println("Parking is feasible");
+							tempFeas = true;
 							break; }
 						else { 
 							numberOfReruns++;
@@ -95,8 +96,6 @@ public class Procedure {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-
-					tempFeas = true;
 				}
 
 				else { 
