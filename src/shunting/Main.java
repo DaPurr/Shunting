@@ -10,9 +10,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		int horizon = 1440;
-		int maxNrTrainUnits = 101;
-		int numberOfSeeds = 100;
-
+		int maxNrTrainUnits = 30;
+		int numberOfSeeds = 2;
+		int trainStepSize = 5;
 
 		List<Schedule> schedules=new ArrayList<>();
 		List<Double> fractions=new ArrayList<>();
@@ -33,14 +33,20 @@ public class Main {
 		List<Double> averageNumberNeedCleaning = new ArrayList<>();
 		List<Double> averageNumberNeedWashing = new ArrayList<>();
 		List<Double> averageNumberNeedRepair = new ArrayList<>();
-		/*
-		for (int trains=29; trains<maxNrTrainUnits; trains=trains+1){
+		List<Double> percentages = new ArrayList<>();
+		List<Double> averageRunningTime = new ArrayList<>();
+		List<Integer> largeCompTime = new ArrayList<>();
+
+		for (int trains=29; trains<maxNrTrainUnits; trains=trains+trainStepSize){
+			System.out.println("the Number of trains" +trains);
+			int compTimeCounter =0;
 			System.out.println("number of trains is:" + trains);
 			int countMatch = 0;
 			nrTrains.add(trains);
-
+			double tempTime = 0;
 			for (int seed=0; seed<numberOfSeeds; seed++){
-
+				System.out.println("seed" + seed);
+				long startTime = System.nanoTime();
 				Random rn = new Random(seed);
 				Schedule test = Schedule.randomSchedule(trains, horizon, rn);
 				Schedule schedule=test;
@@ -68,6 +74,11 @@ public class Main {
 				//System.out.println("Number of trains that need repair is " + repair);
 				//System.out.println("Number of trains that need inspection is " + inspection);
 
+				long endTime = System.nanoTime();
+				long duration = endTime - startTime;
+				double runningTime = duration * 1e-9;
+				if(runningTime>300) { compTimeCounter++;}
+				tempTime = tempTime + runningTime;
 			}
 			int sumcleaning=0;
 			int sumwashing=0;
@@ -99,19 +110,29 @@ public class Main {
 			double frac = (double) (count+countMatch)/(feasible.size());
 			//System.out.println("Fraction of feasible solutions using different booleans: " + frac);
 			fractions.add(frac);
+			//percentages.add(frac);
+			averageRunningTime.add(tempTime);
+			largeCompTime.add(compTimeCounter);
 		}
 		for (int i=0;i<fractions.size();i++){
 			System.out.println("With "+ nrTrains.get(i) + " trains the fraction of feasible solutions is "+ fractions.get(i));
 		}
+		List<Double> correctedAverageRunningTime = new ArrayList<Double>();
+		for(int i = 0; i < averageRunningTime.size(); i++)
+		{
+			correctedAverageRunningTime.add(averageRunningTime.get(i)/numberOfSeeds);
+		}
+
 
 		System.out.println("Average number need inspection "+averageNumberNeedInspection.toString());
 		System.out.println("Average number need cleaning "+ averageNumberNeedCleaning.toString());
 		System.out.println("Average number need washing "+averageNumberNeedWashing.toString());
 		System.out.println("Average number need repair "+averageNumberNeedRepair.toString());
-	*/
+		System.out.println("Fraction of instances solved " + fractions.toString());
+		System.out.println("Average running time" + correctedAverageRunningTime.toString());
+		System.out.println("The number of instances having computation times > 5 mins "+ largeCompTime.toString());
 
-
-		
+		/*	
 
 			File file = new File("data/schedule_kleine_binckhorst_real_nomark.xml");
 			int sumcleaning=0;
@@ -187,7 +208,7 @@ public class Main {
 				sumNumberOfReruns = sumNumberOfReruns+numberOfReruns.get(i);
 				totalRunningTime = totalRunningTime+runningTimes.get(i);
 				sumParkingBlocks = numberOfBlocksParking.get(i)+sumParkingBlocks;
-				
+
 
 
 				if(minCleaning>countCleaning.get(i)) { minCleaning = countCleaning.get(i);}
@@ -235,10 +256,10 @@ public class Main {
 			double frac = (double) count/(feasible.size()-countMatch);
 			System.out.println("Fraction of feasible solutions using different booleans: " + frac);
 			System.out.println(countMatch);
-		 
 
+		 */
 		//simple check IMPORTANT: it does not lead to feasible/non-feasible outcome
-	
+
 		/*
 		for (int trains=98; trains<maxNrTrainUnits; trains=trains+1){
 			System.out.println("number of trains is:" + trains);
@@ -281,13 +302,13 @@ public class Main {
 		System.out.println("Average number need washing "+averageNumberNeedWashing.toString());
 		System.out.println("Average number need repair "+averageNumberNeedRepair.toString());
 
-*/
+		 */
 
 
 
 
 	}
-	
+
 	private static double mean(Collection<Double> collection) {
 		double sum = 0.0;
 		for (double d : collection) {
