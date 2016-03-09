@@ -1,9 +1,6 @@
 package shunting;
 
-import java.util.HashMap;
-
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import ilog.concert.IloException;
 import shunting.algorithms.CPLEXMatchAlgorithm;
@@ -28,7 +25,9 @@ public class Procedure {
 	HashMap<MatchBlock, Integer> tardiness = new HashMap<MatchBlock, Integer>();
 	public int numberOfReruns = 1;
 	public int z = 10;
-	public int counterParkingBlocks =0;
+	public int counterParkingBlocks = 0;
+	
+	private double parkingDuration = Double.POSITIVE_INFINITY;
 
 	public Procedure(Schedule schedule, ShuntingYard shuntingyard, int horizon){
 		this.schedule = schedule;
@@ -82,7 +81,11 @@ public class Procedure {
 					Set<MatchBlock> mbParking = createMatchBlocksForParking(activities);
 					try {
 						CGParkingAlgorithm nemParking  = new CGParkingAlgorithm(mbParking, shuntingyard);
+						long parkingStart = System.nanoTime();
 						nemParking.solve();
+						long parkingEnd = System.nanoTime();
+						long duration = parkingEnd - parkingStart;
+						parkingDuration = duration*1e-9;
 						System.out.println("Parking is done");
 						if(nemParking.isFeasible()){
 							System.out.println("Parking is feasible");
@@ -112,6 +115,9 @@ public class Procedure {
 		return tempFeas;
 	}
 
+	public double parkingDuration() {
+		return parkingDuration;
+	}
 
 	public int getCounterMatching(){
 		return counterMatching;

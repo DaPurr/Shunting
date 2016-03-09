@@ -32,11 +32,11 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 	public Set<ShuntTrack> solve() {
 
 		try {
-			long start = System.nanoTime();
+//			long start = System.nanoTime();
 			runSolver();
-			long end = System.nanoTime();
-			long duration = end-start;
-			System.out.println("Computation time (Parking): " + duration*1e-9 + " s");
+//			long end = System.nanoTime();
+//			long duration = end-start;
+//			System.out.println("Computation time (Parking): " + duration*1e-9 + " s");
 		} catch (IloException e) {
 			e.printStackTrace();
 		}

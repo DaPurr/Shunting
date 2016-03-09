@@ -11,7 +11,7 @@ public class Main {
 	public static void main(String[] args) {
 		int horizon = 1440;
 		int maxNrTrainUnits = 101;
-		int numberOfSeeds = 10;
+		int numberOfSeeds = 100;
 
 
 		List<Schedule> schedules=new ArrayList<>();
@@ -26,8 +26,7 @@ public class Main {
 		List <Integer> numberOfReruns = new ArrayList<>();
 		List<Double> runningTimes = new ArrayList<>();
 		List<Integer> numberOfBlocksParking = new ArrayList<>();
-
-
+		List<Double> parkingTimes = new ArrayList<>();
 
 
 		List<Double> averageNumberNeedInspection = new ArrayList<>();
@@ -152,8 +151,9 @@ public class Main {
 				double runningTime = duration * 1e-9;
 				runningTimes.add(runningTime);
 
-
-
+				double parkingDuration = proc.parkingDuration();
+				if (parkingDuration != Double.POSITIVE_INFINITY)
+					parkingTimes.add(parkingDuration);
 
 				//System.out.println("Number of trains that need cleaning is " + cleaning);
 				//System.out.println("Number of trains that need washing is " + washing);
@@ -225,8 +225,9 @@ public class Main {
 			System.out.println("The solution is obtained with "+avgNumberOfReruns+" number of runs, max is " +maxNumberOfReruns+" min is "+minNumberOfReruns);
 			System.out.println("The average running time of scheduling is "+avRunningTime+" s is "+minRunningTime+" max is "+maxRunningTime);
 			System.out.println("The average parking blocks: "+avNumberParkingBlocks+" min: "+minParkingBlocks+" max:"+maxParkingBlocks);
+			System.out.println("The average parking computation time is: " + mean(parkingTimes));
 			int count = 0;
-			for(Boolean temp : feasible){
+			for (boolean temp : feasible){
 				if(temp)
 					count++;
 			}
@@ -286,8 +287,14 @@ public class Main {
 
 
 	}
-
-
+	
+	private static double mean(Collection<Double> collection) {
+		double sum = 0.0;
+		for (double d : collection) {
+			sum += d;
+		}
+		return sum/collection.size();
+	}
 
 	private static int countCleaning(Schedule schedule) {
 		int counterCleaning = 0;
