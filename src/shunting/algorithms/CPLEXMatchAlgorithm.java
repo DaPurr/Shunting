@@ -92,7 +92,7 @@ public class CPLEXMatchAlgorithm implements MatchAlgorithm {
 //						paramW.put(matchBlock, (double)(0)); 
 
 						//version b)
-//						paramW.put(matchBlock, (double)Math.pow((timeA - timeD),2)); 
+//						paramW.put(matchBlock, (double)Math.pow((timeD - timeA),2)); 
 
 						//version c)
 						if(timeD-timeA >= 2*60 && timeD-timeA <= 10*60)
