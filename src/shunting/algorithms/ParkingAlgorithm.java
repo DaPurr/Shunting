@@ -4,7 +4,7 @@ import java.util.Set;
 
 import shunting.models.ShuntTrack;
 
-public interface ParkingAlgorithm {
+public interface ParkingAlgorithm extends Runnable {
 
 	public Set<ShuntTrack> solve();
 }

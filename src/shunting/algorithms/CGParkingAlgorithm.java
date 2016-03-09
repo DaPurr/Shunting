@@ -7,7 +7,7 @@ import ilog.cplex.*;
 import ilog.concert.*;
 
 public class CGParkingAlgorithm implements ParkingAlgorithm {
-
+	
 	private final int D_PARK = 100000; // penalty for not parking a block
 
 	private Set<MatchBlock> matches;
@@ -58,6 +58,8 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 
 		// perform column generation
 		outer: while (true) {
+			if (Thread.currentThread().isInterrupted())
+				return;
 			master.solve();
 
 			// display solution
@@ -84,6 +86,8 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			}
 			//System.out.println("------------------------------------");
 
+			if (Thread.currentThread().isInterrupted())
+				return;
 			candidates = pricingProblem.solve();
 			if (candidates == null) {
 				System.out
@@ -424,6 +428,11 @@ public class CGParkingAlgorithm implements ParkingAlgorithm {
 			return arg0.getArrivalTime() - arg1.getArrivalTime();
 		}
 
+	}
+
+	@Override
+	public void run() {
+		solve();
 	}
 
 }
