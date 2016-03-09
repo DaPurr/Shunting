@@ -10,9 +10,9 @@ public class Main {
 
 	public static void main(String[] args) {
 		int horizon = 1440;
-		int maxNrTrainUnits = 30;
-		int numberOfSeeds = 2;
-		int trainStepSize = 5;
+		int maxNrTrainUnits = 33;
+		int numberOfSeeds = 1;
+		int trainStepSize = 1;
 
 		List<Schedule> schedules=new ArrayList<>();
 		List<Double> fractions=new ArrayList<>();
@@ -124,10 +124,10 @@ public class Main {
 		}
 
 
-		System.out.println("Average number need inspection "+averageNumberNeedInspection.toString());
-		System.out.println("Average number need cleaning "+ averageNumberNeedCleaning.toString());
-		System.out.println("Average number need washing "+averageNumberNeedWashing.toString());
-		System.out.println("Average number need repair "+averageNumberNeedRepair.toString());
+		//System.out.println("Average number need inspection "+averageNumberNeedInspection.toString());
+		//System.out.println("Average number need cleaning "+ averageNumberNeedCleaning.toString());
+		//System.out.println("Average number need washing "+averageNumberNeedWashing.toString());
+		//System.out.println("Average number need repair "+averageNumberNeedRepair.toString());
 		System.out.println("Fraction of instances solved " + fractions.toString());
 		System.out.println("Average running time" + correctedAverageRunningTime.toString());
 		System.out.println("The number of instances having computation times > 5 mins "+ largeCompTime.toString());
