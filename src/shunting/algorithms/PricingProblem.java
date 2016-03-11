@@ -1,6 +1,11 @@
 package shunting.algorithms;
 
 import java.util.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import org.jgrapht.graph.DefaultDirectedWeightedGraph;
 import org.jgrapht.graph.DefaultWeightedEdge;
@@ -203,6 +208,31 @@ public class PricingProblem {
 	public Set<TrackAssignment> solve() {
 
 		Set<TrackAssignment> assignments = new HashSet<>();
+		
+//		int threads = Runtime.getRuntime().availableProcessors();
+//		ExecutorService service = Executors.newFixedThreadPool(threads);
+//		Set<Future<TrackAssignment>> futures = new HashSet<>();
+//		for (ShuntTrack track : networks.keySet()) {
+//			Callable<TrackAssignment> callable = new Callable<TrackAssignment>() {
+//				@Override
+//				public TrackAssignment call() throws Exception {
+//					Path p = doRCSPP(networks.get(track));
+//					TrackAssignment ta = new TrackAssignment(track, p);
+//					return ta;
+//				}
+//				
+//			};
+//			futures.add(service.submit(callable));
+//		}
+//		service.shutdown();
+//		
+//		try {
+//			for (Future<TrackAssignment> future : futures) {
+//				assignments.add(future.get());
+//			}
+//		} catch (InterruptedException | ExecutionException  e) {
+//			e.printStackTrace();
+//		}
 
 		// solve RCSPP for each network
 		for (ShuntTrack track : networks.keySet()) {

@@ -1,7 +1,15 @@
 package shunting;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.*;
+
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 
 import shunting.data.ScheduleReader;
 import shunting.models.*;
@@ -10,15 +18,14 @@ public class Main {
 
 	public static void main(String[] args) {
 		int horizon = 1440;
-		int maxNrTrainUnits = 33;
+		int maxNrTrainUnits = 30;
 		int numberOfSeeds = 1;
-		int trainStepSize = 1;
+		int trainStepSize = 5;
 
 		List<Schedule> schedules=new ArrayList<>();
 		List<Double> fractions=new ArrayList<>();
 		List<Integer> nrTrains=new ArrayList<>();
 
-		List<Boolean> feasible=new ArrayList<>();
 		List<Integer> countCleaning=new ArrayList<>();
 		List<Integer> countWashing=new ArrayList<>();
 		List<Integer> countRepair=new ArrayList<>();
@@ -28,6 +35,7 @@ public class Main {
 		List<Integer> numberOfBlocksParking = new ArrayList<>();
 		List<Double> parkingTimes = new ArrayList<>();
 
+		Map<Integer, Integer> paretoFrontier = new HashMap<>();
 
 		List<Double> averageNumberNeedInspection = new ArrayList<>();
 		List<Double> averageNumberNeedCleaning = new ArrayList<>();
@@ -36,18 +44,20 @@ public class Main {
 		List<Double> percentages = new ArrayList<>();
 		List<Double> averageRunningTime = new ArrayList<>();
 		List<Integer> largeCompTime = new ArrayList<>();
+		
+		long beginTime = System.nanoTime();
 
 		for (int trains=29; trains<maxNrTrainUnits; trains=trains+trainStepSize){
-			System.out.println("the Number of trains" +trains);
 			int compTimeCounter =0;
-			System.out.println("number of trains is:" + trains);
+			System.out.println("Number of trains is: " + trains);
 			int countMatch = 0;
 			nrTrains.add(trains);
 			double tempTime = 0;
+			List<Boolean> feasible = new ArrayList<>();
 			for (int seed=0; seed<numberOfSeeds; seed++){
 				System.out.println("seed" + seed);
-				long startTime = System.nanoTime();
 				Random rn = new Random(seed);
+				long startTime = System.nanoTime();
 				Schedule test = Schedule.randomSchedule(trains, horizon, rn);
 				Schedule schedule=test;
 				schedules.add(schedule);
@@ -56,7 +66,7 @@ public class Main {
 
 				ShuntingYard kb =  initialisation.initialisation(horizon);
 				Procedure proc = new Procedure(schedule, kb, horizon);
-				Boolean procedureFeasible = proc.solve();
+				boolean procedureFeasible = proc.solve();
 				feasible.add(procedureFeasible);
 				countMatch = countMatch + proc.getCounterMatching();
 
@@ -77,8 +87,9 @@ public class Main {
 				long endTime = System.nanoTime();
 				long duration = endTime - startTime;
 				double runningTime = duration * 1e-9;
-				if(runningTime>300) { compTimeCounter++;}
-				tempTime = tempTime + runningTime;
+				if(runningTime > 300)
+					compTimeCounter++;
+				tempTime += runningTime;
 			}
 			int sumcleaning=0;
 			int sumwashing=0;
@@ -104,8 +115,9 @@ public class Main {
 			//System.out.println("Average number of trains that need cleaning: "+avgcleaning+ ", washing: "+avgwashing+ ", repair: "+avgrepair+", inspection: "+avginspect);
 
 			int count = 0;
-			for(Boolean temp : feasible){
-				if(temp){ count++;}
+			for(boolean temp : feasible){
+				if(temp)
+					count++;
 			}
 			double frac = (double) (count+countMatch)/(feasible.size());
 			//System.out.println("Fraction of feasible solutions using different booleans: " + frac);
@@ -113,14 +125,48 @@ public class Main {
 			//percentages.add(frac);
 			averageRunningTime.add(tempTime);
 			largeCompTime.add(compTimeCounter);
+			
+			File file = new File("log.txt");
+			try {
+				BufferedWriter bw = new BufferedWriter(new FileWriter(file, true));
+				bw.write(trains + "," + frac);
+				bw.newLine();
+				bw.flush();
+				bw.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+//			if (count == 0) {
+//				System.out.println("Terminating because no feasible solution was found for " + trains + " trains.");
+//				break;
+//			}
+			
 		}
 		for (int i=0;i<fractions.size();i++){
 			System.out.println("With "+ nrTrains.get(i) + " trains the fraction of feasible solutions is "+ fractions.get(i));
+		}
+		for (int n : paretoFrontier.keySet()) {
+			System.out.println("Number of trains: " + n + ", frac=" + paretoFrontier.get(n));
 		}
 		List<Double> correctedAverageRunningTime = new ArrayList<Double>();
 		for(int i = 0; i < averageRunningTime.size(); i++)
 		{
 			correctedAverageRunningTime.add(averageRunningTime.get(i)/numberOfSeeds);
+		}
+		
+		File file = new File("running_times.txt");
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			for (int i = 0; i < correctedAverageRunningTime.size(); i++) {
+				double runTime = correctedAverageRunningTime.get(i);
+				bw.write(nrTrains.get(i) + "," + runTime);
+				bw.newLine();
+			}
+			bw.flush();
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
 
 
@@ -131,6 +177,10 @@ public class Main {
 		System.out.println("Fraction of instances solved " + fractions.toString());
 		System.out.println("Average running time" + correctedAverageRunningTime.toString());
 		System.out.println("The number of instances having computation times > 5 mins "+ largeCompTime.toString());
+		
+		long endTime = System.nanoTime();
+		long duration = endTime - beginTime;
+		System.out.println("Total run time: " + (duration*1e-9) + " s");
 
 		/*	
 

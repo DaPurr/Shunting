@@ -443,6 +443,9 @@ public class SchedulingMaintenance implements MaintenanceAlgorithm {
 
 		while(!jobsToBeDone.isEmpty())
 		{
+			if (time > 1440)
+				return null;
+			
 			nextEvent = timeRoutine();
 			if(nextEvent[0]==1)
 			{ platformArrival();

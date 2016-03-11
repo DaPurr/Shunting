@@ -28,7 +28,7 @@ public class Procedure {
 
 	private double parkingDuration = Double.POSITIVE_INFINITY;
 
-	private final int TIME_LIMIT = 5000; // time limit in ms
+	private final int TIME_LIMIT = 5*60*1000; // time limit in ms
 
 	public Procedure(Schedule schedule, ShuntingYard shuntingyard, int horizon) {
 		this.schedule = schedule;
@@ -41,7 +41,7 @@ public class Procedure {
 	public boolean solve() {
 
 		// Solve Matching Algorithm
-		int counter = 1;
+		int counter = 0;
 		counterMatching = 0;
 		boolean tempFeas = false;
 		MatchAlgorithm cm = new CPLEXMatchAlgorithm(schedule);
@@ -64,18 +64,22 @@ public class Procedure {
 				// Solve Maintenance Scheduling
 				MaintenanceAlgorithm ma = new SchedulingMaintenance(mb, shuntingyard, matchBlockTardy, tardiness);
 				Set<MaintenanceActivity> activities = ma.solve();
-				FeasibilityCheckScheduling feasibilityCheck = new FeasibilityCheckScheduling(activities);
-				/*
-				 * for (MaintenanceActivity a : activities) {
-				 * System.out.println(a.getJob() + " , " + a.getStartPlatform()
-				 * + " , " + a.getStartWasher() + " , Platform: " +
-				 * a.getPlatform() + " , Washer: " + a.getWasher() + " , " +
-				 * a.getEndTime()); }
-				 */
-				boolean feasible = feasibilityCheck.getFeasible();
-				// We check if Maintenance gives feasible schedule
-				// If so, go to parking
-				// If not, go to next solution in solutionpool of matching
+				boolean feasible = false;
+				if (activities != null) {
+
+					FeasibilityCheckScheduling feasibilityCheck = new FeasibilityCheckScheduling(activities);
+					/*
+					 * for (MaintenanceActivity a : activities) {
+					 * System.out.println(a.getJob() + " , " +
+					 * a.getStartPlatform() + " , " + a.getStartWasher() +
+					 * " , Platform: " + a.getPlatform() + " , Washer: " +
+					 * a.getWasher() + " , " + a.getEndTime()); }
+					 */
+					feasible = feasibilityCheck.getFeasible();
+					// We check if Maintenance gives feasible schedule
+					// If so, go to parking
+					// If not, go to next solution in solutionpool of matching
+				}
 				if (feasible) {
 					System.out.println("Scheduling Maintenance is feasible");
 
@@ -106,10 +110,21 @@ public class Procedure {
 						long parkingEnd = System.nanoTime();
 						long duration = parkingEnd - parkingStart;
 						parkingDuration = duration * 1e-9;
+						
+						// wait until thread is terminated
+						while (t.isAlive()) {
+							try {
+								Thread.sleep(500);
+							} catch (InterruptedException e) {
+								e.printStackTrace();
+							}
+						}
+						System.out.println("Thread is closed.");
+						
 						System.out.println("Parking is done");
 						if (terminated) {
 							System.out.println("Timed out after " + parkingDuration + " s, parking is infeasible.");
-							tempFeas = true;
+							tempFeas = false;
 							break;
 						} else {
 							if (nemParking.isFeasible()) {
@@ -123,12 +138,10 @@ public class Procedure {
 						}
 
 					} catch (IloException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				} else {
-					// System.out.println("The scheduling of activities is not
-					// feasible in round "+counter);
+					 System.out.println("The scheduling of activities is not feasible in round "+counter);
 					numberOfReruns++;
 					shuntingyard = initialisation.initialisation(horizon);
 				}
